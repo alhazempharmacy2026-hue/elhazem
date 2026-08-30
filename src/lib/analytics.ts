@@ -27,10 +27,17 @@ export interface Aggregate {
   totalReturnsValue: number
   totalReturnsCount: number
   totalNewCodes: number
+  totalUniqueCustomers: number
+  totalInvoicesWithCode: number
+  totalInvoicesWithoutCode: number
+  totalPharmacyPurchaseInvoices: number
+  totalWeakDiscountItems: number
+  totalPharmacyPurchasePublicPrice: number
   avgInvoiceValue: number
   profitPercent: number
   deliveryRatio: number
   debtRatio: number // debts as a share of total sales
+  codeRegistrationRatio: number // invoices logged with a customer code, as a share of total invoices
 }
 
 export function aggregate(records: DailyRecord[]): Aggregate {
@@ -44,6 +51,13 @@ export function aggregate(records: DailyRecord[]): Aggregate {
   const totalReturnsValue = sum(records, 'returnsValue')
   const totalReturnsCount = sum(records, 'returnsCount')
   const totalNewCodes = sum(records, 'newCodes')
+  const totalUniqueCustomers = sum(records, 'uniqueCustomers')
+  const totalInvoicesWithCode = sum(records, 'invoicesWithCode')
+  const totalInvoicesWithoutCode = sum(records, 'invoicesWithoutCode')
+  const totalPharmacyPurchaseInvoices = sum(records, 'pharmacyPurchaseInvoices')
+  const totalWeakDiscountItems = sum(records, 'weakDiscountItems')
+  const totalPharmacyPurchasePublicPrice = sum(records, 'pharmacyPurchasePublicPrice')
+  const codedInvoiceTotal = totalInvoicesWithCode + totalInvoicesWithoutCode
 
   return {
     days: records.length,
@@ -57,10 +71,17 @@ export function aggregate(records: DailyRecord[]): Aggregate {
     totalReturnsValue,
     totalReturnsCount,
     totalNewCodes,
+    totalUniqueCustomers,
+    totalInvoicesWithCode,
+    totalInvoicesWithoutCode,
+    totalPharmacyPurchaseInvoices,
+    totalWeakDiscountItems,
+    totalPharmacyPurchasePublicPrice,
     avgInvoiceValue: totalInvoices ? totalSales / totalInvoices : 0,
     profitPercent: totalSales ? totalProfit / totalSales : 0,
     deliveryRatio: totalInvoices ? totalDeliveryCount / totalInvoices : 0,
     debtRatio: totalSales ? totalDebts / totalSales : 0,
+    codeRegistrationRatio: codedInvoiceTotal ? totalInvoicesWithCode / codedInvoiceTotal : 0,
   }
 }
 

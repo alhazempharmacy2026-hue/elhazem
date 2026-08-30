@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
 import type { DailyRecord } from '../types'
@@ -18,6 +18,7 @@ interface MetricRow {
   b: number
   format: 'currency' | 'number' | 'percent'
   goodDirection: 'up' | 'down'
+  section: string
 }
 
 export default function ComparisonPanel({ records }: { records: DailyRecord[] }) {
@@ -38,14 +39,24 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
   const labelB = `الفترة ب (${formatDate(rangeB.start)} - ${formatDate(rangeB.end)})`
 
   const rows: MetricRow[] = [
-    { label: 'إجمالي المبيعات', a: aggA.totalSales, b: aggB.totalSales, format: 'currency', goodDirection: 'up' },
-    { label: 'صافي الربح', a: aggA.totalProfit, b: aggB.totalProfit, format: 'currency', goodDirection: 'up' },
-    { label: 'إجمالي الديون (آجل + معلق)', a: aggA.totalDebts, b: aggB.totalDebts, format: 'currency', goodDirection: 'down' },
-    { label: 'عدد الفواتير', a: aggA.totalInvoices, b: aggB.totalInvoices, format: 'number', goodDirection: 'up' },
-    { label: 'متوسط الفاتورة', a: aggA.avgInvoiceValue, b: aggB.avgInvoiceValue, format: 'currency', goodDirection: 'up' },
-    { label: 'نسبة الربح', a: aggA.profitPercent, b: aggB.profitPercent, format: 'percent', goodDirection: 'up' },
-    { label: 'نسبة الدليفري', a: aggA.deliveryRatio, b: aggB.deliveryRatio, format: 'percent', goodDirection: 'up' },
-    { label: 'قيمة المرتجعات', a: aggA.totalReturnsValue, b: aggB.totalReturnsValue, format: 'currency', goodDirection: 'down' },
+    { section: 'المبيعات والربح', label: 'إجمالي المبيعات', a: aggA.totalSales, b: aggB.totalSales, format: 'currency', goodDirection: 'up' },
+    { section: 'المبيعات والربح', label: 'صافي الربح', a: aggA.totalProfit, b: aggB.totalProfit, format: 'currency', goodDirection: 'up' },
+    { section: 'المبيعات والربح', label: 'إجمالي الديون (آجل + معلق)', a: aggA.totalDebts, b: aggB.totalDebts, format: 'currency', goodDirection: 'down' },
+    { section: 'المبيعات والربح', label: 'عدد الفواتير', a: aggA.totalInvoices, b: aggB.totalInvoices, format: 'number', goodDirection: 'up' },
+    { section: 'المبيعات والربح', label: 'متوسط الفاتورة', a: aggA.avgInvoiceValue, b: aggB.avgInvoiceValue, format: 'currency', goodDirection: 'up' },
+    { section: 'المبيعات والربح', label: 'نسبة الربح', a: aggA.profitPercent, b: aggB.profitPercent, format: 'percent', goodDirection: 'up' },
+    { section: 'المبيعات والربح', label: 'نسبة الدليفري', a: aggA.deliveryRatio, b: aggB.deliveryRatio, format: 'percent', goodDirection: 'up' },
+    { section: 'المبيعات والربح', label: 'قيمة المرتجعات', a: aggA.totalReturnsValue, b: aggB.totalReturnsValue, format: 'currency', goodDirection: 'down' },
+
+    { section: 'تسجيل العملاء بالكود (أداء الصيادلة)', label: 'عدد الفواتير المسجلة بكود', a: aggA.totalInvoicesWithCode, b: aggB.totalInvoicesWithCode, format: 'number', goodDirection: 'up' },
+    { section: 'تسجيل العملاء بالكود (أداء الصيادلة)', label: 'عدد الفواتير بدون كود', a: aggA.totalInvoicesWithoutCode, b: aggB.totalInvoicesWithoutCode, format: 'number', goodDirection: 'down' },
+    { section: 'تسجيل العملاء بالكود (أداء الصيادلة)', label: 'نسبة التسجيل بكود', a: aggA.codeRegistrationRatio, b: aggB.codeRegistrationRatio, format: 'percent', goodDirection: 'up' },
+    { section: 'تسجيل العملاء بالكود (أداء الصيادلة)', label: 'عدد الأكواد الجديدة', a: aggA.totalNewCodes, b: aggB.totalNewCodes, format: 'number', goodDirection: 'up' },
+    { section: 'تسجيل العملاء بالكود (أداء الصيادلة)', label: 'عدد العملاء المختلفين', a: aggA.totalUniqueCustomers, b: aggB.totalUniqueCustomers, format: 'number', goodDirection: 'up' },
+
+    { section: 'المشتريات من صيدليات أخرى', label: 'عدد فواتير الصيدليات', a: aggA.totalPharmacyPurchaseInvoices, b: aggB.totalPharmacyPurchaseInvoices, format: 'number', goodDirection: 'down' },
+    { section: 'المشتريات من صيدليات أخرى', label: 'عدد الأصناف بخصم ضعيف', a: aggA.totalWeakDiscountItems, b: aggB.totalWeakDiscountItems, format: 'number', goodDirection: 'down' },
+    { section: 'المشتريات من صيدليات أخرى', label: 'سعر جمهور الأصناف المشتراة', a: aggA.totalPharmacyPurchasePublicPrice, b: aggB.totalPharmacyPurchasePublicPrice, format: 'currency', goodDirection: 'down' },
   ]
 
   const chartData = [
@@ -120,7 +131,7 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="flex flex-col gap-6">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -136,26 +147,36 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
+              {rows.map((row, i) => {
                 const delta = row.b === 0 ? (row.a === 0 ? 0 : 1) : (row.a - row.b) / Math.abs(row.b)
                 const isFlat = Math.abs(delta) < 0.001
                 const isGood = isFlat ? null : (delta > 0) === (row.goodDirection === 'up')
+                const showSectionHeader = i === 0 || rows[i - 1].section !== row.section
                 return (
-                  <tr key={row.label} className="border-b border-[var(--border)] last:border-0">
-                    <td className="py-2.5 font-medium text-[var(--text)]">{row.label}</td>
-                    <td className="py-2.5">{formatValue(row.a, row.format)}</td>
-                    <td className="py-2.5 text-[var(--text-muted)]">{formatValue(row.b, row.format)}</td>
-                    <td className="py-2.5">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          isFlat ? 'bg-slate-100 text-slate-600' : isGood ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-                        }`}
-                      >
-                        {isFlat ? <Minus size={12} /> : delta > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-                        {formatPercent(Math.abs(delta))}
-                      </span>
-                    </td>
-                  </tr>
+                  <Fragment key={row.label}>
+                    {showSectionHeader && (
+                      <tr>
+                        <td colSpan={4} className="pt-4 pb-1 text-xs font-bold text-[var(--brand-dark)] first:pt-1">
+                          {row.section}
+                        </td>
+                      </tr>
+                    )}
+                    <tr className="border-b border-[var(--border)] last:border-0">
+                      <td className="py-2.5 font-medium text-[var(--text)]">{row.label}</td>
+                      <td className="py-2.5">{formatValue(row.a, row.format)}</td>
+                      <td className="py-2.5 text-[var(--text-muted)]">{formatValue(row.b, row.format)}</td>
+                      <td className="py-2.5">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            isFlat ? 'bg-slate-100 text-slate-600' : isGood ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                          }`}
+                        >
+                          {isFlat ? <Minus size={12} /> : delta > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                          {formatPercent(Math.abs(delta))}
+                        </span>
+                      </td>
+                    </tr>
+                  </Fragment>
                 )
               })}
             </tbody>
