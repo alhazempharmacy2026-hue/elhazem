@@ -1,24 +1,22 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
-import Medicines from './pages/Medicines'
-import Sales from './pages/Sales'
-import { PharmacyContext, usePharmacyStore } from './lib/storage'
+import DailyData from './pages/DailyData'
+import { AppContext, useAppStore } from './lib/storage'
 
 export default function App() {
-  const store = usePharmacyStore()
+  const store = useAppStore()
 
   return (
-    <PharmacyContext.Provider value={store}>
+    <AppContext.Provider value={store}>
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Dashboard />} />
-            <Route path="medicines" element={<Medicines />} />
-            <Route path="sales" element={<Sales />} />
+            <Route path="data" element={<DailyData />} />
           </Route>
         </Routes>
       </HashRouter>
-    </PharmacyContext.Provider>
+    </AppContext.Provider>
   )
 }

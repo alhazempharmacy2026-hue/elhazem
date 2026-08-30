@@ -14,11 +14,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { DollarSign, Package, TrendingUp, AlertTriangle, Receipt, Boxes } from 'lucide-react'
-import { usePharmacy } from '../lib/storage'
-import { buildDashboardStats } from '../lib/analytics'
-import { formatCurrency, daysUntil } from '../lib/format'
+import { DollarSign, TrendingUp, AlertCircle, Receipt, Truck, RotateCcw } from 'lucide-react'
+import { useAppData } from '../lib/storage'
+import { aggregate, buildTrend, invoiceBucketTotals, paymentBreakdown, filterByRange, isoDaysAgo } from '../lib/analytics'
+import { formatCurrency, formatPercent, formatNumber } from '../lib/format'
 import StatCard from '../components/StatCard'
+import ComparisonPanel from '../components/ComparisonPanel'
 
 const CATEGORY_COLORS = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948']
 const INK_MUTED = '#898781'
@@ -29,19 +30,29 @@ const RANGE_OPTIONS = [
   { value: 7, label: '٧ أيام' },
   { value: 14, label: '١٤ يوم' },
   { value: 30, label: '٣٠ يوم' },
+  { value: 9999, label: 'الكل' },
 ]
 
 export default function Dashboard() {
-  const { data } = usePharmacy()
+  const { data } = useAppData()
   const [range, setRange] = useState(30)
-  const stats = useMemo(() => buildDashboardStats(data, range), [data, range])
+
+  const scoped = useMemo(() => {
+    if (range >= 9999) return data.records
+    return filterByRange(data.records, isoDaysAgo(range), isoDaysAgo(-1))
+  }, [data.records, range])
+
+  const stats = useMemo(() => aggregate(scoped), [scoped])
+  const trend = useMemo(() => buildTrend(scoped), [scoped])
+  const buckets = useMemo(() => invoiceBucketTotals(scoped), [scoped])
+  const payments = useMemo(() => paymentBreakdown(scoped), [scoped])
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-[var(--text)]">لوحة التحكم</h1>
-          <p className="text-sm text-[var(--text-muted)]">نظرة تحليلية على أداء الصيدلية</p>
+          <p className="text-sm text-[var(--text-muted)]">تحليل المبيعات والديون من بيانات المتابعة اليومية</p>
         </div>
         <div className="flex gap-1 rounded-lg border border-[var(--border)] bg-white p-1">
           {RANGE_OPTIONS.map((opt) => (
@@ -58,167 +69,142 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="إجمالي المبيعات" value={formatCurrency(stats.totalRevenue)} icon={DollarSign} tone="brand" />
-        <StatCard label="صافي الربح" value={formatCurrency(stats.totalProfit)} icon={TrendingUp} tone="brand" />
-        <StatCard label="عدد الفواتير" value={stats.totalTransactions.toLocaleString('ar-EG')} icon={Receipt} tone="neutral" />
-        <StatCard label="متوسط الفاتورة" value={formatCurrency(stats.avgTicket)} icon={Receipt} tone="neutral" />
-        <StatCard
-          label="مخزون منخفض"
-          value={stats.lowStock.length.toLocaleString('ar-EG')}
-          icon={Package}
-          tone={stats.lowStock.length > 0 ? 'warning' : 'neutral'}
-        />
-        <StatCard
-          label="قرب انتهاء الصلاحية"
-          value={stats.expiringSoon.length.toLocaleString('ar-EG')}
-          icon={AlertTriangle}
-          tone={stats.expiringSoon.length > 0 ? 'danger' : 'neutral'}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm lg:col-span-2">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-[var(--text)]">اتجاه المبيعات والأرباح</h2>
-          </div>
-          <div dir="ltr">
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={stats.trend} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2a78d6" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#2a78d6" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="profitFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#1baf7a" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#1baf7a" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke={GRIDLINE} vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={{ stroke: GRIDLINE }} tickLine={false} minTickGap={24} />
-              <YAxis tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={false} tickLine={false} width={70} tickFormatter={(v) => v.toLocaleString('ar-EG')} />
-              <Tooltip
-                formatter={(value, name) => [formatCurrency(Number(value)), String(name)]}
-                contentStyle={{ borderRadius: 12, border: '1px solid #e6e9f0', fontSize: 12, fontFamily: 'Cairo' }}
-              />
-              <Legend
-                verticalAlign="top"
-                align="right"
-                height={28}
-                formatter={(value) => <span style={{ color: INK_SECONDARY, fontSize: 12 }}>{value}</span>}
-              />
-              <Area type="monotone" dataKey="revenue" name="المبيعات" stroke="#2a78d6" strokeWidth={2} fill="url(#revenueFill)" />
-              <Area type="monotone" dataKey="profit" name="الربح" stroke="#1baf7a" strokeWidth={2} fill="url(#profitFill)" />
-            </AreaChart>
-          </ResponsiveContainer>
-          </div>
+      {data.records.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white p-10 text-center text-sm text-[var(--text-muted)]">
+          لا توجد بيانات بعد — روح لصفحة "البيانات اليومية" واستورد ملف CSV أو أضف يوم يدويًا
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+            <StatCard label="إجمالي المبيعات" value={formatCurrency(stats.totalSales)} icon={DollarSign} tone="brand" />
+            <StatCard label="صافي الربح" value={formatCurrency(stats.totalProfit)} icon={TrendingUp} tone="brand" hint={formatPercent(stats.profitPercent) + ' نسبة الربح'} />
+            <StatCard
+              label="إجمالي الديون"
+              value={formatCurrency(stats.totalDebts)}
+              icon={AlertCircle}
+              tone={stats.totalDebts > 0 ? 'danger' : 'neutral'}
+              hint="آجل + معلق"
+            />
+            <StatCard label="عدد الفواتير" value={formatNumber(stats.totalInvoices)} icon={Receipt} tone="neutral" hint={formatCurrency(stats.avgInvoiceValue) + ' متوسط الفاتورة'} />
+            <StatCard label="نسبة الدليفري" value={formatPercent(stats.deliveryRatio)} icon={Truck} tone="neutral" />
+            <StatCard label="قيمة المرتجعات" value={formatCurrency(stats.totalReturnsValue)} icon={RotateCcw} tone={stats.totalReturnsValue > 0 ? 'warning' : 'neutral'} />
+          </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-bold text-[var(--text)]">المبيعات حسب الفئة</h2>
-          {stats.categoryBreakdown.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm lg:col-span-2">
+              <h2 className="mb-3 text-sm font-bold text-[var(--text)]">اتجاه المبيعات والأرباح</h2>
               <div dir="ltr">
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={stats.categoryBreakdown}
-                      dataKey="revenue"
-                      nameKey="category"
-                      innerRadius={55}
-                      outerRadius={85}
-                      paddingAngle={2}
-                      stroke="#fff"
-                      strokeWidth={2}
-                    >
-                      {stats.categoryBreakdown.map((_, i) => (
-                        <Cell key={i} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(Number(value))} contentStyle={{ borderRadius: 12, fontSize: 12, fontFamily: 'Cairo' }} />
-                  </PieChart>
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart data={trend} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="salesFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#2a78d6" stopOpacity={0.25} />
+                        <stop offset="100%" stopColor="#2a78d6" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="profitFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#1baf7a" stopOpacity={0.25} />
+                        <stop offset="100%" stopColor="#1baf7a" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke={GRIDLINE} vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={{ stroke: GRIDLINE }} tickLine={false} minTickGap={24} />
+                    <YAxis tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={false} tickLine={false} width={70} tickFormatter={(v) => formatNumber(v)} />
+                    <Tooltip
+                      formatter={(value, name) => [formatCurrency(Number(value)), String(name)]}
+                      contentStyle={{ borderRadius: 12, border: '1px solid #e6e9f0', fontSize: 12, fontFamily: 'Cairo' }}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      align="right"
+                      height={28}
+                      formatter={(value) => <span style={{ color: INK_SECONDARY, fontSize: 12 }}>{value}</span>}
+                    />
+                    <Area type="monotone" dataKey="sales" name="المبيعات" stroke="#2a78d6" strokeWidth={2} fill="url(#salesFill)" />
+                    <Area type="monotone" dataKey="profit" name="الربح" stroke="#1baf7a" strokeWidth={2} fill="url(#profitFill)" />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-2 flex flex-col gap-1.5">
-                {stats.categoryBreakdown.slice(0, 5).map((c, i) => (
-                  <div key={c.category} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
-                      <span className="text-[var(--text)]">{c.category}</span>
-                    </div>
-                    <span className="font-medium text-[var(--text-muted)]">{formatCurrency(c.revenue)}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm lg:col-span-1">
-          <h2 className="mb-3 text-sm font-bold text-[var(--text)]">الأكثر مبيعًا</h2>
-          {stats.topItems.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div dir="ltr">
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={stats.topItems} layout="vertical" margin={{ left: 8, right: 16 }}>
-                  <CartesianGrid stroke={GRIDLINE} horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 11, fill: INK_SECONDARY }} axisLine={false} tickLine={false} />
-                  <Tooltip formatter={(value) => [`${Number(value).toLocaleString('ar-EG')} وحدة`, 'الكمية']} contentStyle={{ borderRadius: 12, fontSize: 12, fontFamily: 'Cairo' }} />
-                  <Bar dataKey="qty" fill="#2a78d6" radius={[0, 4, 4, 0]} barSize={16} />
-                </BarChart>
-              </ResponsiveContainer>
             </div>
-          )}
-        </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--text)]">
-            <Boxes size={16} className="text-amber-600" />
-            مخزون منخفض
-          </h2>
-          {stats.lowStock.length === 0 ? (
-            <EmptyState text="لا يوجد نقص في المخزون" />
-          ) : (
-            <ul className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-              {stats.lowStock.slice(0, 8).map((m) => (
-                <li key={m.id} className="flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-xs">
-                  <span className="font-medium text-[var(--text)]">{m.name}</span>
-                  <span className="font-bold text-amber-700">{m.stock} {m.unit}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+            <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-bold text-[var(--text)]">توزيع طرق الدفع</h2>
+              {payments.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <>
+                  <div dir="ltr">
+                    <ResponsiveContainer width="100%" height={180}>
+                      <PieChart>
+                        <Pie data={payments} dataKey="value" nameKey="method" innerRadius={50} outerRadius={80} paddingAngle={2} stroke="#fff" strokeWidth={2}>
+                          {payments.map((_, i) => (
+                            <Cell key={i} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => formatCurrency(Number(value))} contentStyle={{ borderRadius: 12, fontSize: 12, fontFamily: 'Cairo' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {payments.map((p, i) => (
+                      <div key={p.method} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
+                          <span className="text-[var(--text)]">{p.method}</span>
+                        </div>
+                        <span className="font-medium text-[var(--text-muted)]">{formatCurrency(p.value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--text)]">
-            <AlertTriangle size={16} className="text-red-600" />
-            قرب انتهاء الصلاحية
-          </h2>
-          {stats.expiringSoon.length === 0 ? (
-            <EmptyState text="لا يوجد أدوية قريبة من الانتهاء" />
-          ) : (
-            <ul className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-              {stats.expiringSoon.slice(0, 8).map((m) => {
-                const d = daysUntil(m.expiryDate)
-                return (
-                  <li key={m.id} className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2 text-xs">
-                    <span className="font-medium text-[var(--text)]">{m.name}</span>
-                    <span className="font-bold text-red-700">{d <= 0 ? 'منتهي' : `${d} يوم`}</span>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </div>
-      </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm lg:col-span-2">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--text)]">
+                <AlertCircle size={16} className="text-red-600" />
+                اتجاه الديون (آجل + معلق)
+              </h2>
+              <div dir="ltr">
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={trend} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid stroke={GRIDLINE} vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={{ stroke: GRIDLINE }} tickLine={false} minTickGap={24} />
+                    <YAxis tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={false} tickLine={false} width={70} tickFormatter={(v) => formatNumber(v)} />
+                    <Tooltip formatter={(value, name) => [formatCurrency(Number(value)), String(name)]} contentStyle={{ borderRadius: 12, fontSize: 12, fontFamily: 'Cairo' }} />
+                    <Legend
+                      verticalAlign="top"
+                      align="right"
+                      height={28}
+                      formatter={(value) => <span style={{ color: INK_SECONDARY, fontSize: 12 }}>{value}</span>}
+                    />
+                    <Bar dataKey="credit" name="آجل" stackId="debts" fill="#eda100" radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="pending" name="معلق" stackId="debts" fill="#e34948" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-bold text-[var(--text)]">توزيع قيمة الفواتير</h2>
+              <div dir="ltr">
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={buckets} layout="vertical" margin={{ left: 8, right: 16 }}>
+                    <CartesianGrid stroke={GRIDLINE} horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="bucket" width={90} tick={{ fontSize: 11, fill: INK_SECONDARY }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(value) => [`${formatNumber(Number(value))} فاتورة`, 'العدد']} contentStyle={{ borderRadius: 12, fontSize: 12, fontFamily: 'Cairo' }} />
+                    <Bar dataKey="value" fill="#2a78d6" radius={[0, 4, 4, 0]} barSize={16} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <ComparisonPanel records={data.records} />
+        </>
+      )}
     </div>
   )
 }

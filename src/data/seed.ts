@@ -1,90 +1,72 @@
-import type { Medicine, Sale, SaleItem, PharmacyData } from '../types'
+import type { DailyRecord } from '../types'
 
-function uid(prefix: string, i: number) {
-  return `${prefix}-${i}-${Math.random().toString(36).slice(2, 8)}`
-}
-
-function isoDaysFromNow(days: number) {
+function isoDaysAgo(days: number): string {
   const d = new Date()
-  d.setDate(d.getDate() + days)
+  d.setDate(d.getDate() - days)
   return d.toISOString().slice(0, 10)
 }
 
-const medicineNames: { name: string; category: string }[] = [
-  { name: 'بانادول أقراص', category: 'مسكنات' },
-  { name: 'بروفين 400', category: 'مسكنات' },
-  { name: 'أوجمنتين 1g', category: 'مضادات حيوية' },
-  { name: 'زيثروماكس', category: 'مضادات حيوية' },
-  { name: 'فيتامين سي 1000', category: 'فيتامينات' },
-  { name: 'زنك بلس', category: 'فيتامينات' },
-  { name: 'كونجستال', category: 'أدوية باردة' },
-  { name: 'رينولايف بخاخ', category: 'أدوية باردة' },
-  { name: 'كريم فيوسيدين', category: 'مستحضرات جلدية' },
-  { name: 'كريم دايبر راش', category: 'رعاية أطفال' },
-  { name: 'جلوكوفاج 500', category: 'أدوية مزمنة' },
-  { name: 'كونكور 5', category: 'أدوية مزمنة' },
-  { name: 'نيكسيوم 40', category: 'أدوية مزمنة' },
-  { name: 'انفلاجين شراب أطفال', category: 'رعاية أطفال' },
-  { name: 'فيروجلوبين شراب', category: 'فيتامينات' },
-  { name: 'أموكسيل 500', category: 'مضادات حيوية' },
-  { name: 'كتافلام أقراص', category: 'مسكنات' },
-  { name: 'ديفلوكان كبسول', category: 'مضادات حيوية' },
-  { name: 'أوميجا 3', category: 'فيتامينات' },
-  { name: 'سيتال شراب أطفال', category: 'رعاية أطفال' },
-]
+function rand(min: number, max: number) {
+  return Math.round(min + Math.random() * (max - min))
+}
 
-const suppliers = ['شركة النيل للأدوية', 'مصر للمستودعات الطبية', 'دلتا فارما', 'المتحدة للتوزيع الدوائي']
+export function seedDailyRecords(days = 30): DailyRecord[] {
+  const records: DailyRecord[] = []
+  for (let i = days - 1; i >= 0; i--) {
+    const invoiceCount = rand(100, 180)
+    const deliveryCount = Math.round(invoiceCount * (0.35 + Math.random() * 0.25))
+    const creditCount = rand(2, 8)
+    const creditValue = creditCount * rand(150, 350)
+    const pendingCount = rand(0, 4)
+    const pendingValue = pendingCount * rand(150, 500)
+    const cashPayCount = Math.round(invoiceCount * 0.7)
+    const nonCashCount = invoiceCount - cashPayCount - creditCount - pendingCount
+    const cashValue = rand(15000, 26000)
+    const nonCashValue = rand(6000, 16000)
+    const totalSales = cashValue + nonCashValue + creditValue + pendingValue
+    const netProfit = Math.round(totalSales * (0.15 + Math.random() * 0.08))
+    const withCode = Math.round(invoiceCount * 0.6)
+    const withoutCode = invoiceCount - withCode
 
-export function seedPharmacyData(): PharmacyData {
-  const medicines: Medicine[] = medicineNames.map((m, i) => {
-    const costPrice = Number((5 + Math.random() * 80).toFixed(2))
-    const sellPrice = Number((costPrice * (1.15 + Math.random() * 0.35)).toFixed(2))
-    // a few items intentionally low stock or near expiry for realistic alerts
-    const lowStockCase = i % 6 === 0
-    const nearExpiryCase = i % 7 === 0
-    return {
-      id: uid('med', i),
-      name: m.name,
-      category: m.category,
-      unit: 'علبة',
-      stock: lowStockCase ? Math.floor(Math.random() * 5) : Math.floor(10 + Math.random() * 150),
-      minStock: 15,
-      costPrice,
-      sellPrice,
-      expiryDate: nearExpiryCase ? isoDaysFromNow(Math.floor(Math.random() * 25) + 1) : isoDaysFromNow(Math.floor(180 + Math.random() * 500)),
-      supplier: suppliers[i % suppliers.length],
-    }
-  })
-
-  const sales: Sale[] = []
-  const days = 30
-  for (let d = days; d >= 0; d--) {
-    const date = new Date()
-    date.setDate(date.getDate() - d)
-    const salesPerDay = 3 + Math.floor(Math.random() * 8)
-    for (let s = 0; s < salesPerDay; s++) {
-      const itemCount = 1 + Math.floor(Math.random() * 3)
-      const items: SaleItem[] = []
-      const used = new Set<number>()
-      for (let it = 0; it < itemCount; it++) {
-        let idx = Math.floor(Math.random() * medicines.length)
-        if (used.has(idx)) continue
-        used.add(idx)
-        const med = medicines[idx]
-        const qty = 1 + Math.floor(Math.random() * 3)
-        items.push({ medicineId: med.id, name: med.name, qty, unitPrice: med.sellPrice, unitCost: med.costPrice })
-      }
-      if (items.length === 0) continue
-      const total = Number(items.reduce((sum, it) => sum + it.qty * it.unitPrice, 0).toFixed(2))
-      date.setHours(9 + Math.floor(Math.random() * 12), Math.floor(Math.random() * 60))
-      sales.push({
-        id: uid('sale', sales.length),
-        date: date.toISOString(),
-        items,
-        total,
-      })
-    }
+    records.push({
+      id: `rec-${isoDaysAgo(i)}`,
+      date: isoDaysAgo(i),
+      invoiceCount,
+      deliveryCount,
+      cashCount: cashPayCount - rand(0, 15),
+      cashPayCount,
+      cashValue,
+      nonCashCount: Math.max(0, nonCashCount),
+      nonCashValue,
+      creditCount,
+      creditValue,
+      pendingCount,
+      pendingValue,
+      totalSales,
+      avgInvoice: Number((totalSales / (withCode + withoutCode)).toFixed(2)),
+      invoicesWithCode: withCode,
+      invoicesWithoutCode: withoutCode,
+      newCodes: rand(1, 12),
+      invoicesOver1000: rand(2, 9),
+      invoices500to1000: rand(8, 25),
+      invoices300to500: rand(15, 40),
+      invoices200to300: rand(10, 55),
+      invoices100to200: rand(25, 90),
+      invoicesUnder100: rand(40, 90),
+      netProfit,
+      peakHour: ['6:00 - 8:00 م', '9pm : 10 pm', '7:00 - 9:00 م', '5pm : 7pm'][rand(0, 3)],
+      uniqueCustomers: rand(70, 260),
+      pharmacyPurchaseInvoices: rand(0, 6),
+      weakDiscountItems: rand(5, 35),
+      pharmacyPurchasePublicPrice: rand(2000, 12000),
+      profitPercent: Number((netProfit / totalSales).toFixed(4)),
+      deliveryRatio: Number((deliveryCount / invoiceCount).toFixed(4)),
+      avgProfitPerInvoice: Number((netProfit / invoiceCount).toFixed(2)),
+      slimmingInjections: rand(0, 4),
+      inbodySessions: rand(0, 2),
+      returnsCount: rand(0, 5),
+      returnsValue: rand(0, 1200),
+    })
   }
-
-  return { medicines, sales }
+  return records
 }

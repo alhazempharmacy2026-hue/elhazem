@@ -1,15 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Pill, ShoppingCart, RefreshCcw } from 'lucide-react'
-import { usePharmacy } from '../lib/storage'
+import { LayoutDashboard, Table2, RefreshCcw } from 'lucide-react'
+import { useAppData } from '../lib/storage'
 
 const navItems = [
   { to: '/', label: 'لوحة التحكم', icon: LayoutDashboard, end: true },
-  { to: '/medicines', label: 'الأدوية والمخزون', icon: Pill, end: false },
-  { to: '/sales', label: 'المبيعات', icon: ShoppingCart, end: false },
+  { to: '/data', label: 'البيانات اليومية', icon: Table2, end: false },
 ]
 
 export default function Layout() {
-  const { resetDemoData } = usePharmacy()
+  const { resetDemoData } = useAppData()
 
   return (
     <div className="flex min-h-screen">

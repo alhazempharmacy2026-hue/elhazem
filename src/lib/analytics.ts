@@ -1,104 +1,119 @@
-import type { PharmacyData } from '../types'
-import { daysUntil } from './format'
+import type { DailyRecord } from '../types'
+import { formatDate } from './format'
 
-export interface DailyPoint {
-  date: string
-  label: string
-  revenue: number
-  profit: number
+function sum(records: DailyRecord[], key: keyof DailyRecord): number {
+  return records.reduce((total, r) => total + (Number(r[key]) || 0), 0)
 }
 
-export interface CategorySlice {
-  category: string
-  revenue: number
+function effectiveSales(r: DailyRecord): number {
+  if (r.totalSales !== undefined) return r.totalSales
+  return (r.cashValue ?? 0) + (r.nonCashValue ?? 0) + (r.creditValue ?? 0) + (r.pendingValue ?? 0)
 }
 
-export interface TopItem {
-  name: string
-  qty: number
-  revenue: number
+function effectiveInvoiceCount(r: DailyRecord): number {
+  if (r.invoiceCount !== undefined) return r.invoiceCount
+  return (r.invoicesWithCode ?? 0) + (r.invoicesWithoutCode ?? 0)
 }
 
-export function buildDashboardStats(data: PharmacyData, rangeDays = 30) {
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - rangeDays)
-  const inRange = data.sales.filter((s) => new Date(s.date) >= cutoff)
+export interface Aggregate {
+  days: number
+  totalSales: number
+  totalProfit: number
+  totalCreditValue: number
+  totalPendingValue: number
+  totalDebts: number
+  totalInvoices: number
+  totalDeliveryCount: number
+  totalReturnsValue: number
+  totalReturnsCount: number
+  totalNewCodes: number
+  avgInvoiceValue: number
+  profitPercent: number
+  deliveryRatio: number
+  debtRatio: number // debts as a share of total sales
+}
 
-  const totalRevenue = inRange.reduce((sum, s) => sum + s.total, 0)
-  const totalProfit = inRange.reduce(
-    (sum, s) => sum + s.items.reduce((isum, it) => isum + (it.unitPrice - it.unitCost) * it.qty, 0),
-    0,
-  )
-  const totalTransactions = inRange.length
-  const totalUnitsSold = inRange.reduce((sum, s) => sum + s.items.reduce((isum, it) => isum + it.qty, 0), 0)
-  const avgTicket = totalTransactions ? totalRevenue / totalTransactions : 0
-
-  const lowStock = data.medicines.filter((m) => m.stock <= m.minStock).sort((a, b) => a.stock - b.stock)
-  const expiringSoon = data.medicines
-    .filter((m) => daysUntil(m.expiryDate) <= 30)
-    .sort((a, b) => daysUntil(a.expiryDate) - daysUntil(b.expiryDate))
-
-  // daily trend
-  const dayMap = new Map<string, DailyPoint>()
-  for (let i = rangeDays; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    const key = d.toISOString().slice(0, 10)
-    dayMap.set(key, {
-      date: key,
-      label: d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }),
-      revenue: 0,
-      profit: 0,
-    })
-  }
-  for (const s of inRange) {
-    const key = s.date.slice(0, 10)
-    const point = dayMap.get(key)
-    if (!point) continue
-    point.revenue += s.total
-    point.profit += s.items.reduce((isum, it) => isum + (it.unitPrice - it.unitCost) * it.qty, 0)
-  }
-  const trend = Array.from(dayMap.values())
-
-  // category breakdown
-  const categoryMap = new Map<string, number>()
-  const medById = new Map(data.medicines.map((m) => [m.id, m]))
-  for (const s of inRange) {
-    for (const it of s.items) {
-      const med = medById.get(it.medicineId)
-      const category = med?.category ?? 'أخرى'
-      categoryMap.set(category, (categoryMap.get(category) ?? 0) + it.qty * it.unitPrice)
-    }
-  }
-  const categoryBreakdown: CategorySlice[] = Array.from(categoryMap.entries())
-    .map(([category, revenue]) => ({ category, revenue }))
-    .sort((a, b) => b.revenue - a.revenue)
-
-  // top selling items
-  const itemMap = new Map<string, TopItem>()
-  for (const s of inRange) {
-    for (const it of s.items) {
-      const existing = itemMap.get(it.medicineId) ?? { name: it.name, qty: 0, revenue: 0 }
-      existing.qty += it.qty
-      existing.revenue += it.qty * it.unitPrice
-      itemMap.set(it.medicineId, existing)
-    }
-  }
-  const topItems = Array.from(itemMap.values())
-    .sort((a, b) => b.qty - a.qty)
-    .slice(0, 6)
+export function aggregate(records: DailyRecord[]): Aggregate {
+  const totalSales = records.reduce((t, r) => t + effectiveSales(r), 0)
+  const totalProfit = sum(records, 'netProfit')
+  const totalCreditValue = sum(records, 'creditValue')
+  const totalPendingValue = sum(records, 'pendingValue')
+  const totalDebts = totalCreditValue + totalPendingValue
+  const totalInvoices = records.reduce((t, r) => t + effectiveInvoiceCount(r), 0)
+  const totalDeliveryCount = sum(records, 'deliveryCount')
+  const totalReturnsValue = sum(records, 'returnsValue')
+  const totalReturnsCount = sum(records, 'returnsCount')
+  const totalNewCodes = sum(records, 'newCodes')
 
   return {
-    totalRevenue,
+    days: records.length,
+    totalSales,
     totalProfit,
-    totalTransactions,
-    totalUnitsSold,
-    avgTicket,
-    lowStock,
-    expiringSoon,
-    trend,
-    categoryBreakdown,
-    topItems,
-    inventoryValue: data.medicines.reduce((sum, m) => sum + m.stock * m.costPrice, 0),
+    totalCreditValue,
+    totalPendingValue,
+    totalDebts,
+    totalInvoices,
+    totalDeliveryCount,
+    totalReturnsValue,
+    totalReturnsCount,
+    totalNewCodes,
+    avgInvoiceValue: totalInvoices ? totalSales / totalInvoices : 0,
+    profitPercent: totalSales ? totalProfit / totalSales : 0,
+    deliveryRatio: totalInvoices ? totalDeliveryCount / totalInvoices : 0,
+    debtRatio: totalSales ? totalDebts / totalSales : 0,
   }
+}
+
+export interface TrendPoint {
+  date: string
+  label: string
+  sales: number
+  profit: number
+  credit: number
+  pending: number
+  debts: number
+}
+
+export function buildTrend(records: DailyRecord[]): TrendPoint[] {
+  return [...records]
+    .sort((a, b) => (a.date < b.date ? -1 : 1))
+    .map((r) => ({
+      date: r.date,
+      label: formatDate(r.date),
+      sales: effectiveSales(r),
+      profit: r.netProfit ?? 0,
+      credit: r.creditValue ?? 0,
+      pending: r.pendingValue ?? 0,
+      debts: (r.creditValue ?? 0) + (r.pendingValue ?? 0),
+    }))
+}
+
+export function invoiceBucketTotals(records: DailyRecord[]) {
+  return [
+    { bucket: 'أقل من 100', value: sum(records, 'invoicesUnder100') },
+    { bucket: '100-200', value: sum(records, 'invoices100to200') },
+    { bucket: '200-300', value: sum(records, 'invoices200to300') },
+    { bucket: '300-500', value: sum(records, 'invoices300to500') },
+    { bucket: '500-1000', value: sum(records, 'invoices500to1000') },
+    { bucket: 'أكثر من 1000', value: sum(records, 'invoicesOver1000') },
+  ]
+}
+
+export function paymentBreakdown(records: DailyRecord[]) {
+  return [
+    { method: 'نقدي', value: sum(records, 'cashValue') },
+    { method: 'غير نقدي', value: sum(records, 'nonCashValue') },
+    { method: 'آجل (دين)', value: sum(records, 'creditValue') },
+    { method: 'معلق', value: sum(records, 'pendingValue') },
+  ].filter((p) => p.value > 0)
+}
+
+export function filterByRange(records: DailyRecord[], startISO: string, endISO: string): DailyRecord[] {
+  return records.filter((r) => r.date >= startISO && r.date <= endISO)
+}
+
+export function isoDaysAgo(days: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - days)
+  return d.toISOString().slice(0, 10)
 }

@@ -1,17 +1,21 @@
 export function formatCurrency(value: number): string {
-  return `${value.toLocaleString('ar-EG', { maximumFractionDigits: 2 })} ج.م`
+  return `${value.toLocaleString('ar-EG', { maximumFractionDigits: 0 })} ج.م`
+}
+
+export function formatNumber(value: number): string {
+  return value.toLocaleString('ar-EG', { maximumFractionDigits: 1 })
+}
+
+export function formatPercent(value: number): string {
+  // accepts either a fraction (0.18) or an already-scaled percentage (18)
+  const pct = value <= 1 ? value * 100 : value
+  return `${pct.toLocaleString('ar-EG', { maximumFractionDigits: 1 })}%`
 }
 
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })
 }
 
-export function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-}
-
-export function daysUntil(iso: string): number {
-  const target = new Date(iso).setHours(0, 0, 0, 0)
-  const today = new Date().setHours(0, 0, 0, 0)
-  return Math.round((target - today) / (1000 * 60 * 60 * 24))
+export function formatDateFull(iso: string): string {
+  return new Date(iso).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })
 }
