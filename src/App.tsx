@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { HashRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Medicines from './pages/Medicines'
@@ -10,7 +10,7 @@ export default function App() {
 
   return (
     <PharmacyContext.Provider value={store}>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Dashboard />} />
@@ -18,7 +18,7 @@ export default function App() {
             <Route path="sales" element={<Sales />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </PharmacyContext.Provider>
   )
 }
