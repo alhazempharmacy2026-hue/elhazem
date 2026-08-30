@@ -19,9 +19,6 @@ export interface Aggregate {
   days: number
   totalSales: number
   totalProfit: number
-  totalCreditValue: number
-  totalPendingValue: number
-  totalDebts: number
   totalInvoices: number
   totalDeliveryCount: number
   totalReturnsValue: number
@@ -30,22 +27,17 @@ export interface Aggregate {
   totalUniqueCustomers: number
   totalInvoicesWithCode: number
   totalInvoicesWithoutCode: number
-  totalPharmacyPurchaseInvoices: number
   totalWeakDiscountItems: number
   totalPharmacyPurchasePublicPrice: number
   avgInvoiceValue: number
   profitPercent: number
   deliveryRatio: number
-  debtRatio: number // debts as a share of total sales
   codeRegistrationRatio: number // invoices logged with a customer code, as a share of total invoices
 }
 
 export function aggregate(records: DailyRecord[]): Aggregate {
   const totalSales = records.reduce((t, r) => t + effectiveSales(r), 0)
   const totalProfit = sum(records, 'netProfit')
-  const totalCreditValue = sum(records, 'creditValue')
-  const totalPendingValue = sum(records, 'pendingValue')
-  const totalDebts = totalCreditValue + totalPendingValue
   const totalInvoices = records.reduce((t, r) => t + effectiveInvoiceCount(r), 0)
   const totalDeliveryCount = sum(records, 'deliveryCount')
   const totalReturnsValue = sum(records, 'returnsValue')
@@ -54,7 +46,6 @@ export function aggregate(records: DailyRecord[]): Aggregate {
   const totalUniqueCustomers = sum(records, 'uniqueCustomers')
   const totalInvoicesWithCode = sum(records, 'invoicesWithCode')
   const totalInvoicesWithoutCode = sum(records, 'invoicesWithoutCode')
-  const totalPharmacyPurchaseInvoices = sum(records, 'pharmacyPurchaseInvoices')
   const totalWeakDiscountItems = sum(records, 'weakDiscountItems')
   const totalPharmacyPurchasePublicPrice = sum(records, 'pharmacyPurchasePublicPrice')
   const codedInvoiceTotal = totalInvoicesWithCode + totalInvoicesWithoutCode
@@ -63,9 +54,6 @@ export function aggregate(records: DailyRecord[]): Aggregate {
     days: records.length,
     totalSales,
     totalProfit,
-    totalCreditValue,
-    totalPendingValue,
-    totalDebts,
     totalInvoices,
     totalDeliveryCount,
     totalReturnsValue,
@@ -74,13 +62,11 @@ export function aggregate(records: DailyRecord[]): Aggregate {
     totalUniqueCustomers,
     totalInvoicesWithCode,
     totalInvoicesWithoutCode,
-    totalPharmacyPurchaseInvoices,
     totalWeakDiscountItems,
     totalPharmacyPurchasePublicPrice,
     avgInvoiceValue: totalInvoices ? totalSales / totalInvoices : 0,
     profitPercent: totalSales ? totalProfit / totalSales : 0,
     deliveryRatio: totalInvoices ? totalDeliveryCount / totalInvoices : 0,
-    debtRatio: totalSales ? totalDebts / totalSales : 0,
     codeRegistrationRatio: codedInvoiceTotal ? totalInvoicesWithCode / codedInvoiceTotal : 0,
   }
 }
@@ -90,9 +76,8 @@ export interface TrendPoint {
   label: string
   sales: number
   profit: number
-  credit: number
-  pending: number
-  debts: number
+  invoicesWithCode: number
+  invoicesWithoutCode: number
 }
 
 export function buildTrend(records: DailyRecord[]): TrendPoint[] {
@@ -103,9 +88,8 @@ export function buildTrend(records: DailyRecord[]): TrendPoint[] {
       label: formatDate(r.date),
       sales: effectiveSales(r),
       profit: r.netProfit ?? 0,
-      credit: r.creditValue ?? 0,
-      pending: r.pendingValue ?? 0,
-      debts: (r.creditValue ?? 0) + (r.pendingValue ?? 0),
+      invoicesWithCode: r.invoicesWithCode ?? 0,
+      invoicesWithoutCode: r.invoicesWithoutCode ?? 0,
     }))
 }
 
@@ -124,7 +108,7 @@ export function paymentBreakdown(records: DailyRecord[]) {
   return [
     { method: 'نقدي', value: sum(records, 'cashValue') },
     { method: 'غير نقدي', value: sum(records, 'nonCashValue') },
-    { method: 'آجل (دين)', value: sum(records, 'creditValue') },
+    { method: 'آجل', value: sum(records, 'creditValue') },
     { method: 'معلق', value: sum(records, 'pendingValue') },
   ].filter((p) => p.value > 0)
 }

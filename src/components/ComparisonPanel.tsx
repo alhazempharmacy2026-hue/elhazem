@@ -41,7 +41,6 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
   const rows: MetricRow[] = [
     { section: 'المبيعات والربح', label: 'إجمالي المبيعات', a: aggA.totalSales, b: aggB.totalSales, format: 'currency', goodDirection: 'up' },
     { section: 'المبيعات والربح', label: 'صافي الربح', a: aggA.totalProfit, b: aggB.totalProfit, format: 'currency', goodDirection: 'up' },
-    { section: 'المبيعات والربح', label: 'إجمالي الديون (آجل + معلق)', a: aggA.totalDebts, b: aggB.totalDebts, format: 'currency', goodDirection: 'down' },
     { section: 'المبيعات والربح', label: 'عدد الفواتير', a: aggA.totalInvoices, b: aggB.totalInvoices, format: 'number', goodDirection: 'up' },
     { section: 'المبيعات والربح', label: 'متوسط الفاتورة', a: aggA.avgInvoiceValue, b: aggB.avgInvoiceValue, format: 'currency', goodDirection: 'up' },
     { section: 'المبيعات والربح', label: 'نسبة الربح', a: aggA.profitPercent, b: aggB.profitPercent, format: 'percent', goodDirection: 'up' },
@@ -54,7 +53,6 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
     { section: 'تسجيل العملاء بالكود (أداء الصيادلة)', label: 'عدد الأكواد الجديدة', a: aggA.totalNewCodes, b: aggB.totalNewCodes, format: 'number', goodDirection: 'up' },
     { section: 'تسجيل العملاء بالكود (أداء الصيادلة)', label: 'عدد العملاء المختلفين', a: aggA.totalUniqueCustomers, b: aggB.totalUniqueCustomers, format: 'number', goodDirection: 'up' },
 
-    { section: 'المشتريات من صيدليات أخرى', label: 'عدد فواتير الصيدليات', a: aggA.totalPharmacyPurchaseInvoices, b: aggB.totalPharmacyPurchaseInvoices, format: 'number', goodDirection: 'down' },
     { section: 'المشتريات من صيدليات أخرى', label: 'عدد الأصناف بخصم ضعيف', a: aggA.totalWeakDiscountItems, b: aggB.totalWeakDiscountItems, format: 'number', goodDirection: 'down' },
     { section: 'المشتريات من صيدليات أخرى', label: 'سعر جمهور الأصناف المشتراة', a: aggA.totalPharmacyPurchasePublicPrice, b: aggB.totalPharmacyPurchasePublicPrice, format: 'currency', goodDirection: 'down' },
   ]
@@ -62,7 +60,6 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
   const chartData = [
     { metric: 'المبيعات', الفترة_أ: aggA.totalSales, الفترة_ب: aggB.totalSales },
     { metric: 'الربح', الفترة_أ: aggA.totalProfit, الفترة_ب: aggB.totalProfit },
-    { metric: 'الديون', الفترة_أ: aggA.totalDebts, الفترة_ب: aggB.totalDebts },
   ]
 
   function formatValue(v: number, format: MetricRow['format']) {

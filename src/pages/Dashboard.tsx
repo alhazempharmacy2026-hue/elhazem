@@ -14,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { DollarSign, TrendingUp, AlertCircle, Receipt, Truck, RotateCcw } from 'lucide-react'
+import { DollarSign, TrendingUp, UserCheck, Receipt, Truck, RotateCcw } from 'lucide-react'
 import { useAppData } from '../lib/storage'
 import { aggregate, buildTrend, invoiceBucketTotals, paymentBreakdown, filterByRange, isoDaysAgo } from '../lib/analytics'
 import { formatCurrency, formatPercent, formatNumber } from '../lib/format'
@@ -52,7 +52,7 @@ export default function Dashboard() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-[var(--text)]">لوحة التحكم</h1>
-          <p className="text-sm text-[var(--text-muted)]">تحليل المبيعات والديون من بيانات المتابعة اليومية</p>
+          <p className="text-sm text-[var(--text-muted)]">تحليل المبيعات وأداء الصيدلية من بيانات المتابعة اليومية</p>
         </div>
         <div className="flex gap-1 rounded-lg border border-[var(--border)] bg-white p-1">
           {RANGE_OPTIONS.map((opt) => (
@@ -78,13 +78,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             <StatCard label="إجمالي المبيعات" value={formatCurrency(stats.totalSales)} icon={DollarSign} tone="brand" />
             <StatCard label="صافي الربح" value={formatCurrency(stats.totalProfit)} icon={TrendingUp} tone="brand" hint={formatPercent(stats.profitPercent) + ' نسبة الربح'} />
-            <StatCard
-              label="إجمالي الديون"
-              value={formatCurrency(stats.totalDebts)}
-              icon={AlertCircle}
-              tone={stats.totalDebts > 0 ? 'danger' : 'neutral'}
-              hint="آجل + معلق"
-            />
+            <StatCard label="نسبة التسجيل بكود" value={formatPercent(stats.codeRegistrationRatio)} icon={UserCheck} tone="neutral" hint="أداء الصيادلة في تسجيل العملاء" />
             <StatCard label="عدد الفواتير" value={formatNumber(stats.totalInvoices)} icon={Receipt} tone="neutral" hint={formatCurrency(stats.avgInvoiceValue) + ' متوسط الفاتورة'} />
             <StatCard label="نسبة الدليفري" value={formatPercent(stats.deliveryRatio)} icon={Truck} tone="neutral" />
             <StatCard label="قيمة المرتجعات" value={formatCurrency(stats.totalReturnsValue)} icon={RotateCcw} tone={stats.totalReturnsValue > 0 ? 'warning' : 'neutral'} />
@@ -163,8 +157,8 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm lg:col-span-2">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--text)]">
-                <AlertCircle size={16} className="text-red-600" />
-                اتجاه الديون (آجل + معلق)
+                <UserCheck size={16} className="text-[var(--brand-dark)]" />
+                تسجيل الفواتير بالكود (أداء الصيادلة)
               </h2>
               <div dir="ltr">
                 <ResponsiveContainer width="100%" height={220}>
@@ -172,15 +166,15 @@ export default function Dashboard() {
                     <CartesianGrid stroke={GRIDLINE} vertical={false} />
                     <XAxis dataKey="label" tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={{ stroke: GRIDLINE }} tickLine={false} minTickGap={24} />
                     <YAxis tick={{ fontSize: 11, fill: INK_MUTED }} axisLine={false} tickLine={false} width={70} tickFormatter={(v) => formatNumber(v)} />
-                    <Tooltip formatter={(value, name) => [formatCurrency(Number(value)), String(name)]} contentStyle={{ borderRadius: 12, fontSize: 12, fontFamily: 'Cairo' }} />
+                    <Tooltip formatter={(value, name) => [`${formatNumber(Number(value))} فاتورة`, String(name)]} contentStyle={{ borderRadius: 12, fontSize: 12, fontFamily: 'Cairo' }} />
                     <Legend
                       verticalAlign="top"
                       align="right"
                       height={28}
                       formatter={(value) => <span style={{ color: INK_SECONDARY, fontSize: 12 }}>{value}</span>}
                     />
-                    <Bar dataKey="credit" name="آجل" stackId="debts" fill="#eda100" radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="pending" name="معلق" stackId="debts" fill="#e34948" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="invoicesWithCode" name="بكود" stackId="invoices" fill="#1baf7a" radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="invoicesWithoutCode" name="بدون كود" stackId="invoices" fill="#eda100" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
