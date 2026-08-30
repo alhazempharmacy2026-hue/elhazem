@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
 import type { DailyRecord } from '../types'
 import { aggregate, filterByRange } from '../lib/analytics'
 import { buildPresets } from '../lib/periods'
-import { formatCurrency, formatNumber, formatPercent } from '../lib/format'
+import { formatCurrency, formatDate, formatNumber, formatPercent } from '../lib/format'
 
 const INK_MUTED = '#898781'
 const INK_SECONDARY = '#52514e'
@@ -34,6 +34,9 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
   const aggA = useMemo(() => aggregate(filterByRange(records, rangeA.start, rangeA.end)), [records, rangeA])
   const aggB = useMemo(() => aggregate(filterByRange(records, rangeB.start, rangeB.end)), [records, rangeB])
 
+  const labelA = `الفترة أ (${formatDate(rangeA.start)} - ${formatDate(rangeA.end)})`
+  const labelB = `الفترة ب (${formatDate(rangeB.start)} - ${formatDate(rangeB.end)})`
+
   const rows: MetricRow[] = [
     { label: 'إجمالي المبيعات', a: aggA.totalSales, b: aggB.totalSales, format: 'currency', goodDirection: 'up' },
     { label: 'صافي الربح', a: aggA.totalProfit, b: aggB.totalProfit, format: 'currency', goodDirection: 'up' },
@@ -59,7 +62,7 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-bold text-[var(--text)]">مقارنة الفترات</h2>
         <div className="flex flex-wrap items-center gap-2">
           <select
@@ -83,6 +86,18 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
           </select>
         </div>
       </div>
+
+      <p className="mb-4 text-xs text-[var(--text-muted)]">
+        بيتم حساب الفترتين تلقائيًا حسب الاختيار اللي فوق —{' '}
+        <span className="font-semibold" style={{ color: SERIES_CURRENT }}>
+          {labelA}
+        </span>{' '}
+        مقابل{' '}
+        <span className="font-semibold" style={{ color: SERIES_PREVIOUS }}>
+          {labelB}
+        </span>
+        . اختار "فترة مخصصة" لو عايز تحدد تاريخين بنفسك.
+      </p>
 
       {useCustom && (
         <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg bg-gray-50 p-3 sm:grid-cols-2">
@@ -112,10 +127,10 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
               <tr className="border-b border-[var(--border)] text-right text-xs text-[var(--text-muted)]">
                 <th className="py-2 font-medium">المؤشر</th>
                 <th className="py-2 font-medium" style={{ color: SERIES_CURRENT }}>
-                  الفترة أ
+                  أ
                 </th>
                 <th className="py-2 font-medium" style={{ color: SERIES_PREVIOUS }}>
-                  الفترة ب
+                  ب
                 </th>
                 <th className="py-2 font-medium">التغيّر</th>
               </tr>
@@ -158,7 +173,7 @@ export default function ComparisonPanel({ records }: { records: DailyRecord[] })
                 verticalAlign="top"
                 align="right"
                 height={28}
-                formatter={(value) => <span style={{ color: INK_SECONDARY, fontSize: 12 }}>{value === 'الفترة_أ' ? 'الفترة أ' : 'الفترة ب'}</span>}
+                formatter={(value) => <span style={{ color: INK_SECONDARY, fontSize: 12 }}>{value === 'الفترة_أ' ? 'أ' : 'ب'}</span>}
               />
               <Bar dataKey="الفترة_أ" fill={SERIES_CURRENT} radius={[4, 4, 0, 0]} barSize={28} />
               <Bar dataKey="الفترة_ب" fill={SERIES_PREVIOUS} radius={[4, 4, 0, 0]} barSize={28} />
