@@ -47,6 +47,52 @@ export interface DailyRecord {
   returnsValue?: number // قيمة المرتجعات
 }
 
+export interface Item {
+  id: string
+  name: string // اسم الصنف
+  code?: string // كود / باركود
+  unit?: string // الوحدة (علبة، شريط...)
+  category?: string // التصنيف
+  currentStock: number // الكمية الحالية
+  minStock: number // حد الطلب الأدنى (نقطة إعادة الطلب)
+  purchasePrice?: number // سعر الشراء
+  salePrice?: number // سعر البيع
+  supplierId?: string // المورد المفضل
+  updatedAt: string // ISO date - آخر تحديث
+}
+
+export interface Supplier {
+  id: string
+  name: string
+  phone?: string
+  notes?: string
+}
+
+export interface SupplierTransaction {
+  id: string
+  supplierId: string
+  date: string // ISO date
+  type: 'purchase' | 'payment' // شراء بالآجل (يزود الدين) / سداد (يقلل الدين)
+  amount: number
+  note?: string
+}
+
+export interface EmergencyPurchase {
+  id: string
+  date: string // ISO date
+  itemId?: string // ربط بصنف في المخزون لو موجود
+  itemName: string // اسم الصنف
+  sourcePharmacy?: string // اتشرى منين (اسم الصيدلية/المورد)
+  quantity?: number
+  publicPrice?: number // سعر الجمهور (سعر البيع الأصلي للصنف)
+  costPrice?: number // السعر اللي اتدفع فعليًا (بخصم ضعيف غالبًا)
+  note?: string
+}
+
 export interface AppData {
   records: DailyRecord[]
+  items: Item[]
+  suppliers: Supplier[]
+  supplierTransactions: SupplierTransaction[]
+  emergencyPurchases: EmergencyPurchase[]
 }

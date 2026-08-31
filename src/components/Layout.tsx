@@ -1,10 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Table2, RefreshCcw } from 'lucide-react'
+import { LayoutDashboard, Table2, RefreshCcw, Package, Handshake, AlertTriangle } from 'lucide-react'
 import { useAppData } from '../lib/storage'
 
 const navItems = [
   { to: '/', label: 'لوحة التحكم', icon: LayoutDashboard, end: true },
   { to: '/data', label: 'البيانات اليومية', icon: Table2, end: false },
+  { to: '/inventory', label: 'المخزون والأصناف', icon: Package, end: false },
+  { to: '/suppliers', label: 'الموردين والديون', icon: Handshake, end: false },
+  { to: '/emergency-purchases', label: 'الشراء الاضطراري', icon: AlertTriangle, end: false },
 ]
 
 export default function Layout() {

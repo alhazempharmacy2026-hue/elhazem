@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Area,
   AreaChart,
@@ -14,10 +15,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { DollarSign, TrendingUp, UserCheck, Receipt, Truck, RotateCcw } from 'lucide-react'
+import { DollarSign, TrendingUp, UserCheck, Receipt, Truck, RotateCcw, PackageX, TriangleAlert, Wallet, AlertTriangle } from 'lucide-react'
 import { useAppData } from '../lib/storage'
 import { aggregate, buildTrend, invoiceBucketTotals, paymentBreakdown, filterByRange, isoDaysAgo } from '../lib/analytics'
 import { formatCurrency, formatPercent, formatNumber } from '../lib/format'
+import { stockStatus, totalDebt, isThisMonth } from '../lib/inventory'
 import StatCard from '../components/StatCard'
 import ComparisonPanel from '../components/ComparisonPanel'
 
@@ -47,6 +49,14 @@ export default function Dashboard() {
   const buckets = useMemo(() => invoiceBucketTotals(scoped), [scoped])
   const payments = useMemo(() => paymentBreakdown(scoped), [scoped])
 
+  const purchasing = useMemo(() => {
+    const out = data.items.filter((i) => stockStatus(i) === 'out').length
+    const low = data.items.filter((i) => stockStatus(i) === 'low').length
+    const debt = totalDebt(data.suppliers, data.supplierTransactions)
+    const emergencyThisMonth = data.emergencyPurchases.filter((p) => isThisMonth(p.date)).length
+    return { out, low, debt, emergencyThisMonth }
+  }, [data.items, data.suppliers, data.supplierTransactions, data.emergencyPurchases])
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -67,6 +77,29 @@ export default function Dashboard() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+        <h2 className="mb-3 text-sm font-bold text-[var(--text)]">المشتريات والمخزون</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <Link to="/inventory" className="block">
+            <StatCard label="أصناف نفدت" value={formatNumber(purchasing.out)} icon={PackageX} tone={purchasing.out > 0 ? 'danger' : 'neutral'} />
+          </Link>
+          <Link to="/inventory" className="block">
+            <StatCard label="أصناف منخفضة" value={formatNumber(purchasing.low)} icon={TriangleAlert} tone={purchasing.low > 0 ? 'warning' : 'neutral'} />
+          </Link>
+          <Link to="/suppliers" className="block">
+            <StatCard label="مديونية الموردين" value={formatCurrency(purchasing.debt)} icon={Wallet} tone={purchasing.debt > 0 ? 'danger' : 'neutral'} />
+          </Link>
+          <Link to="/emergency-purchases" className="block">
+            <StatCard label="شراء اضطراري هذا الشهر" value={formatNumber(purchasing.emergencyThisMonth)} icon={AlertTriangle} tone={purchasing.emergencyThisMonth > 0 ? 'warning' : 'neutral'} />
+          </Link>
+        </div>
+        {data.items.length === 0 && (
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            روح لصفحة "المخزون والأصناف" واستورد ملف الأصناف من برنامج الصيدلية عشان تبدأ تتابع الأصناف اللي هتخلص
+          </p>
+        )}
       </div>
 
       {data.records.length === 0 ? (
