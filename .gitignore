@@ -12,6 +12,26 @@ dist
 dist-ssr
 *.local
 
+# متغيرات بيئة حقيقية — الملفات .env.example بس اللي تتحفظ في git
+.env
+.env.*
+!.env.example
+
+# Expo / React Native
+apps/mobile/.expo
+apps/mobile/.expo-shared
+apps/mobile/ios
+apps/mobile/android
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Supabase local dev
+supabase/.branches
+supabase/.temp
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,0 +1,19 @@
+<!doctype html>
+<!--
+  GitHub Pages بيقدم ملفات ثابتة بس — أي refresh على رابط زي /orders/xyz هيرجع 404 لأنه مش
+  ملف فعلي. الحل المعروف (spa-github-pages): نحول المسار لـ query string ونعيد التوجيه للجذر،
+  وindex.html بيرجعه لطبيعته قبل ما React Router يشتغل. راجع https://github.com/rafgraph/spa-github-pages
+-->
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // /elhazem/ هو جذر موقع العملاء على GitHub Pages — راجع vite.config.ts (base) لو اتغيّر
+      var basePath = '/elhazem/'
+      var path = location.pathname + location.search + location.hash
+      sessionStorage.setItem('spa-redirect-path', path)
+      location.replace(location.origin + basePath)
+    </script>
+  </head>
+  <body></body>
+</html>

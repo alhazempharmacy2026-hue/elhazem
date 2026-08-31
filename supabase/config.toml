@@ -1,0 +1,25 @@
+# إعدادات مشروع Supabase المحلي (للتطوير عبر `supabase start`).
+# لتشغيل النظام فعليًا: أنشئ مشروع على supabase.com، اربطه بـ `supabase link --project-ref <ref>`،
+# وشغّل `supabase db push` لتطبيق ملفات supabase/migrations على المشروع الحقيقي.
+
+project_id = "elhazem-pharmacy"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173", "http://localhost:8081"]
+
+[storage]
+enabled = true

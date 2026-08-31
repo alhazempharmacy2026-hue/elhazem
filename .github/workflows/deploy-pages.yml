@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - claude/pharmacy-web-app-dashboard-9i7gjo
+      - claude/pharmacy-app-multiplatform-5k84ok
   workflow_dispatch:
 
 permissions:
@@ -26,10 +26,24 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build
+      # موقع العملاء (apps/web) بيتبنى بمفاتيح Supabase الحقيقية لو متوفرة كـ GitHub Secrets،
+      # وإلا بيتنشر ومعاه شاشة إعداد واضحة بدل ما يطلع صفحة بيضا.
+      - run: npm run build:web
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_MAP_STYLE_URL: ${{ secrets.VITE_MAP_STYLE_URL }}
+      - run: npm run build:analytics
+      # صفحة واحدة على GitHub Pages: الموقع الجديد على الجذر، وداشبورد التحليل الداخلي متداخل
+      # تحت /analytics/ — نفس الدومين القديم لسه شغال، بس المسار اتغير.
+      - run: |
+          mkdir -p combined
+          cp -r apps/web/dist/. combined/
+          mkdir -p combined/analytics
+          cp -r apps/analytics/dist/. combined/analytics/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: combined
 
   deploy:
     needs: build

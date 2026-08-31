@@ -2,29 +2,18 @@
   "name": "elhazem",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "lucide-react": "^1.37.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.3",
-    "recharts": "^3.10.1",
-    "tailwindcss": "^4.3.3"
-  },
-  "devDependencies": {
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "@vitejs/plugin-react": "^6.1.0",
-    "oxlint": "^1.79.0",
-    "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "dev:web": "npm run dev -w @elhazem/web",
+    "dev:admin": "npm run dev -w @elhazem/admin",
+    "dev:analytics": "npm run dev -w @elhazem/analytics",
+    "dev:mobile": "npm run start -w @elhazem/mobile",
+    "build:web": "npm run build -w @elhazem/web",
+    "build:admin": "npm run build -w @elhazem/admin",
+    "build:analytics": "npm run build -w @elhazem/analytics",
+    "build": "npm run build -w @elhazem/web && npm run build -w @elhazem/admin && npm run build -w @elhazem/analytics"
   }
 }
