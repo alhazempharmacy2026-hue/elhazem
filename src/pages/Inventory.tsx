@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
+  Ban,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -13,6 +15,7 @@ import {
   ShoppingCart,
   Trash2,
   TriangleAlert,
+  Undo2,
   Upload,
   Wallet,
   X,
@@ -77,7 +80,7 @@ function downloadCSV(filename: string, header: string[], rows: (string | number)
 }
 
 export default function Inventory() {
-  const { data, addItem, updateItem, deleteItem, importItems, importItemSales } = useAppData()
+  const { data, addItem, updateItem, deleteItem, importItems, importItemSales, setItemOrderStatus } = useAppData()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const salesFileInputRef = useRef<HTMLInputElement>(null)
   const [showForm, setShowForm] = useState(false)
@@ -103,7 +106,7 @@ export default function Inventory() {
   const rows = useMemo(() => {
     let list = [...data.items]
     if (statusFilter !== 'all') list = list.filter((i) => stockStatus(i) === statusFilter)
-    if (needsOrderOnly) list = list.filter((i) => (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
+    if (needsOrderOnly) list = list.filter((i) => !i.orderStatus && (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
     if (search.trim()) {
       const q = search.trim().toLowerCase()
       list = list.filter((i) => i.name.toLowerCase().includes(q) || i.code?.toLowerCase().includes(q))
@@ -123,7 +126,7 @@ export default function Inventory() {
 
   function exportOrderList() {
     const list = data.items
-      .filter((i) => (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
+      .filter((i) => !i.orderStatus && (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
       .sort((a, b) => (suggestedOrderQty(b, coverageDays) ?? 0) - (suggestedOrderQty(a, coverageDays) ?? 0))
     downloadCSV(
       `قائمة-الطلبية-${coverageDays}-يوم.csv`,
@@ -339,6 +342,7 @@ export default function Inventory() {
               <th className="px-4 py-3 font-medium">سعر الشراء</th>
               <th className="px-4 py-3 font-medium">سعر البيع</th>
               <th className="px-4 py-3 font-medium">المورد</th>
+              <th className="px-4 py-3 font-medium">المتابعة</th>
               <th className="px-4 py-3 font-medium"></th>
             </tr>
           </thead>
@@ -377,6 +381,58 @@ export default function Inventory() {
                   <td className="px-4 py-3">{item.salePrice !== undefined ? formatCurrency(item.salePrice) : '—'}</td>
                   <td className="px-4 py-3 text-[var(--text-muted)]">{supplierName(item.supplierId)}</td>
                   <td className="px-4 py-3">
+                    {item.orderStatus === 'ordered' && (
+                      <div className="flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand)]/10 px-2 py-1 text-xs font-medium text-[var(--brand-dark)]">
+                          <CheckCircle2 size={12} />
+                          تم الطلب
+                        </span>
+                        <button
+                          onClick={() => setItemOrderStatus(item.id, undefined)}
+                          title="تراجع"
+                          className="rounded-md p-1 text-[var(--text-muted)] hover:bg-gray-100"
+                        >
+                          <Undo2 size={13} />
+                        </button>
+                      </div>
+                    )}
+                    {item.orderStatus === 'not_found' && (
+                      <div className="flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                          <Ban size={12} />
+                          ملقيتوش
+                        </span>
+                        <button
+                          onClick={() => setItemOrderStatus(item.id, undefined)}
+                          title="تراجع"
+                          className="rounded-md p-1 text-[var(--text-muted)] hover:bg-gray-100"
+                        >
+                          <Undo2 size={13} />
+                        </button>
+                      </div>
+                    )}
+                    {!item.orderStatus && status !== 'ok' && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setItemOrderStatus(item.id, 'ordered')}
+                          title="تم الطلب"
+                          className="flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-1 text-xs font-medium text-[var(--text-muted)] hover:bg-[var(--brand)]/10 hover:text-[var(--brand-dark)]"
+                        >
+                          <CheckCircle2 size={13} />
+                          تم الطلب
+                        </button>
+                        <button
+                          onClick={() => setItemOrderStatus(item.id, 'not_found')}
+                          title="ملقيتوش عند المورد"
+                          className="rounded-md border border-[var(--border)] p-1.5 text-[var(--text-muted)] hover:bg-gray-100"
+                        >
+                          <Ban size={13} />
+                        </button>
+                      </div>
+                    )}
+                    {!item.orderStatus && status === 'ok' && '—'}
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <button onClick={() => openEdit(item)} className="rounded-md p-1.5 text-[var(--text-muted)] hover:bg-gray-100 hover:text-[var(--text)]">
                         <Pencil size={14} />
@@ -396,7 +452,7 @@ export default function Inventory() {
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-4 py-10 text-center text-sm text-[var(--text-muted)]">
+                <td colSpan={12} className="px-4 py-10 text-center text-sm text-[var(--text-muted)]">
                   {data.items.length === 0 ? 'لا توجد أصناف — استورد ملف CSV من برنامج الصيدلية أو أضف صنف يدويًا' : 'لا توجد نتائج مطابقة'}
                 </td>
               </tr>

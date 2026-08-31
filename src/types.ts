@@ -62,6 +62,9 @@ export interface Item {
 
   avgDailySales?: number // متوسط الكمية المباعة يوميًا (من تقرير مبيعات الأصناف)
   salesPeriodDays?: number // عدد الأيام اللي اتحسب منها المتوسط (للمرجعية)
+
+  orderStatus?: 'ordered' | 'not_found' // تم الطلب / ملقيتوش عند المورد
+  orderStatusAt?: string // ISO date - وقت آخر تحديث لحالة الطلب
 }
 
 export interface Supplier {

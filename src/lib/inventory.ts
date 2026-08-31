@@ -2,9 +2,17 @@ import type { EmergencyPurchase, Item, Supplier, SupplierTransaction } from '../
 
 export type StockStatus = 'out' | 'low' | 'ok'
 
+// لو مفيش حد طلب أدنى متحدد يدويًا للصنف، بنعتبره "منخفض" لما الكمية الحالية
+// هتخلص خلال أقل من كذا يوم بمعدل بيعه الفعلي — عشان أغلب الأصناف المستوردة
+// من برنامج الصيدلية مفيهاش حد طلب أدنى، فمن غير كده مكانش هيظهر أي صنف "منخفض" أبدًا.
+const LOW_STOCK_DAYS_FALLBACK = 7
+
 export function stockStatus(item: Item): StockStatus {
   if (item.currentStock <= 0) return 'out'
-  if (item.minStock > 0 && item.currentStock <= item.minStock) return 'low'
+  if (item.minStock > 0) return item.currentStock <= item.minStock ? 'low' : 'ok'
+  if (item.avgDailySales && item.avgDailySales > 0 && item.currentStock / item.avgDailySales <= LOW_STOCK_DAYS_FALLBACK) {
+    return 'low'
+  }
   return 'ok'
 }
 
@@ -12,17 +20,6 @@ export const STATUS_LABEL: Record<StockStatus, string> = {
   out: 'نفد',
   low: 'منخفض',
   ok: 'كويس',
-}
-
-export function lowStockItems(items: Item[]): Item[] {
-  return items
-    .filter((i) => stockStatus(i) !== 'ok')
-    .sort((a, b) => {
-      const sa = stockStatus(a)
-      const sb = stockStatus(b)
-      if (sa !== sb) return sa === 'out' ? -1 : 1
-      return a.currentStock - a.minStock - (b.currentStock - b.minStock)
-    })
 }
 
 export function inventoryValue(items: Item[]): number {

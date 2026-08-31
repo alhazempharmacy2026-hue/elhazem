@@ -53,6 +53,7 @@ export interface AppStore {
   deleteItem: (id: string) => void
   importItems: (rows: ParsedItemRow[]) => { added: number; updated: number; newSuppliers: number }
   importItemSales: (rows: ParsedSalesRow[], periodDays: number) => { matched: number; skipped: number }
+  setItemOrderStatus: (id: string, status: Item['orderStatus']) => void
 
   addSupplier: (s: Omit<Supplier, 'id'>) => void
   updateSupplier: (s: Supplier) => void
@@ -152,7 +153,15 @@ export function useAppStore(): AppStore {
           if (row.code?.trim()) existing.code = row.code.trim()
           if (row.unit?.trim()) existing.unit = row.unit.trim()
           if (row.category?.trim()) existing.category = row.category.trim()
-          if (row.currentStock !== undefined) existing.currentStock = row.currentStock
+          // Stock going up means the order arrived (or a manual correction) — the
+          // previous "تم الطلب"/"ملقيتوش" status is stale either way, so clear it.
+          if (row.currentStock !== undefined) {
+            if (row.currentStock > existing.currentStock) {
+              existing.orderStatus = undefined
+              existing.orderStatusAt = undefined
+            }
+            existing.currentStock = row.currentStock
+          }
           if (row.minStock !== undefined) existing.minStock = row.minStock
           if (row.purchasePrice !== undefined) existing.purchasePrice = row.purchasePrice
           if (row.salePrice !== undefined) existing.salePrice = row.salePrice
@@ -220,6 +229,12 @@ export function useAppStore(): AppStore {
     return { matched, skipped }
   }
 
+  const setItemOrderStatus = (id: string, status: Item['orderStatus']) =>
+    setData((prev) => ({
+      ...prev,
+      items: prev.items.map((x) => (x.id === id ? { ...x, orderStatus: status, orderStatusAt: status ? today() : undefined } : x)),
+    }))
+
   const addSupplier = (s: Omit<Supplier, 'id'>) => setData((prev) => ({ ...prev, suppliers: [...prev.suppliers, { ...s, id: uid('sup') }] }))
 
   const updateSupplier = (s: Supplier) =>
@@ -261,6 +276,7 @@ export function useAppStore(): AppStore {
     deleteItem,
     importItems,
     importItemSales,
+    setItemOrderStatus,
     addSupplier,
     updateSupplier,
     deleteSupplier,
