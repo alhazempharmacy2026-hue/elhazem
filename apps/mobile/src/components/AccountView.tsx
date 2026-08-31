@@ -3,6 +3,7 @@ import { router } from 'expo-router'
 import { useState, type ReactNode } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useAuth } from '../context/AuthContext'
+import { isDemoMode } from '../lib/supabaseClient'
 import { colors, fonts, fontSize, spacing } from '../lib/theme'
 import { Button } from './Button'
 import { Card } from './Card'
@@ -23,6 +24,11 @@ export function AccountView({ children }: { children?: ReactNode }) {
   async function handleSave() {
     setSaving(true)
     setSavedMessage(null)
+    if (isDemoMode) {
+      setSavedMessage('وضع تجريبي — التعديلات دي مش بتتحفظ فعليًا')
+      setSaving(false)
+      return
+    }
     try {
       await authApi.updateProfile(client, profile!.id, { fullName, phone })
       setSavedMessage('تم حفظ التعديلات')

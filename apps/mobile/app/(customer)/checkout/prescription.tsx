@@ -7,6 +7,7 @@ import { Button } from '../../../src/components/Button'
 import { ScreenContainer } from '../../../src/components/ScreenContainer'
 import { useAuth } from '../../../src/context/AuthContext'
 import { useCheckout } from '../../../src/context/CheckoutContext'
+import { isDemoMode } from '../../../src/lib/supabaseClient'
 import { colors, fonts, fontSize, radius, spacing } from '../../../src/lib/theme'
 
 export default function PrescriptionStepScreen() {
@@ -33,17 +34,22 @@ export default function PrescriptionStepScreen() {
         ? await ImagePicker.launchCameraAsync({ quality: 0.7, allowsEditing: true })
         : await ImagePicker.launchImageLibraryAsync({ quality: 0.7, allowsEditing: true, mediaTypes: ImagePicker.MediaTypeOptions.Images })
 
-    if (result.canceled || !result.assets?.[0] || !profile) return
+    if (result.canceled || !result.assets?.[0]) return
+    if (!isDemoMode && !profile) return
 
     const asset = result.assets[0]
     setLocalUri(asset.uri)
     setUploading(true)
     try {
+      if (isDemoMode) {
+        setPrescriptionId('demo-prescription')
+        return
+      }
       // لازم نحوّل الـ local URI لـ Blob فعلي قبل ما نبعته لـ prescriptionsApi (متطلب موضح
       // في تعليق الدالة نفسها جوه packages/shared/src/api/prescriptions.ts)
       const blob = await (await fetch(asset.uri)).blob()
       const ext = (asset.uri.split('.').pop() || 'jpg').toLowerCase()
-      const prescription = await prescriptionsApi.uploadPrescriptionImage(client, profile.id, blob, ext)
+      const prescription = await prescriptionsApi.uploadPrescriptionImage(client, profile!.id, blob, ext)
       setPrescriptionId(prescription.id)
     } catch (err) {
       setError('فشل رفع صورة الروشتة، حاول تاني')

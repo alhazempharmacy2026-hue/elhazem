@@ -14,6 +14,8 @@ import { ScreenContainer } from '../../../src/components/ScreenContainer'
 import { useAuth } from '../../../src/context/AuthContext'
 import { useCart } from '../../../src/context/CartContext'
 import { useCheckout } from '../../../src/context/CheckoutContext'
+import { placeDemoOrder } from '../../../src/lib/demoStore'
+import { isDemoMode } from '../../../src/lib/supabaseClient'
 import { colors, fonts, fontSize, spacing } from '../../../src/lib/theme'
 
 export default function ReviewStepScreen() {
@@ -31,6 +33,15 @@ export default function ReviewStepScreen() {
     setError(null)
     setPlacing(true)
     try {
+      if (isDemoMode) {
+        // في الوضع التجريبي بنتخطى Paymob بالكامل ونعتبر أي طلب "اتدفع" فورًا
+        const order = placeDemoOrder(items, paymentMethod)
+        clearCart()
+        reset()
+        router.replace(`/(customer)/order/${order.id}/tracking`)
+        return
+      }
+
       const order = await ordersApi.placeOrder(client, {
         addressId,
         paymentMethod,

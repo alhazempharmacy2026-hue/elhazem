@@ -5,6 +5,7 @@ import * as Notifications from 'expo-notifications'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { useAuth } from '../context/AuthContext'
+import { isDemoMode } from '../lib/supabaseClient'
 
 // تسجيل جهاز الموبايل لاستقبال إشعارات Push (تحديثات حالة الطلب، طلب توصيلة جديدة للمندوب...)
 // وحفظ الـ Expo push token في profiles.expo_push_token عن طريق authApi.updateProfile.
@@ -12,9 +13,10 @@ export function usePushNotificationRegistration() {
   const { client, profile } = useAuth()
 
   useEffect(() => {
+    if (isDemoMode) return
     if (!profile) return
-    // السيميوليتور/الإيموليتور مش بيدعم push tokens حقيقية
-    if (!Device.isDevice) return
+    // السيميوليتور/الإيموليتور ومعاينة الويب مش بيدعموا push tokens حقيقية
+    if (Platform.OS === 'web' || !Device.isDevice) return
 
     let cancelled = false
 

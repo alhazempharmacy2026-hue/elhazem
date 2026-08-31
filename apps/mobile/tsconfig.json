@@ -3,9 +3,23 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
+    "moduleSuffixes": [
+      ".ios",
+      ".android",
+      ".native",
+      ".web",
+      ""
+    ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["app", "src", "app.config.ts", "expo-env.d.ts"]
+  "include": [
+    "app",
+    "src",
+    "app.config.ts",
+    "expo-env.d.ts"
+  ]
 }

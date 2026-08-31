@@ -20,6 +20,6 @@ export const supabase: ElhazemClient | null = isSupabaseConfigured
     })
   : null
 
-export const supabaseConfigErrorMessage =
-  'التطبيق مش متظبط: متغيرات EXPO_PUBLIC_SUPABASE_URL و EXPO_PUBLIC_SUPABASE_ANON_KEY غير موجودة. ' +
-  'راجع ملف .env.example وأنشئ ملف .env بمفاتيح مشروع Supabase الحقيقي، بعدين أعد تشغيل expo start.'
+// من غير مفاتيح Supabase حقيقية، التطبيق بيشتغل في "وضع تجريبي" ببيانات وهمية محلية
+// (راجع src/lib/demoData.ts وdemoStore.ts) بدل ما يعرض شاشة إعداد بس.
+export const isDemoMode = !isSupabaseConfigured

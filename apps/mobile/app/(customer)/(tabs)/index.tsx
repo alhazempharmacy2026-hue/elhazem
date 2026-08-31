@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { EmptyState } from '../../../src/components/EmptyState'
 import { MedicineCard } from '../../../src/components/MedicineCard'
 import { useAuth } from '../../../src/context/AuthContext'
+import { demoCategories, demoMedicines } from '../../../src/lib/demoData'
+import { isDemoMode } from '../../../src/lib/supabaseClient'
 import { colors, fonts, fontSize, radius, spacing } from '../../../src/lib/theme'
 
 export default function CatalogScreen() {
@@ -21,6 +23,14 @@ export default function CatalogScreen() {
 
   const loadMedicines = useCallback(async () => {
     setError(null)
+    if (isDemoMode) {
+      const q = search.trim().toLowerCase()
+      const categoryId = selectedCategory ? demoCategories.find((c) => c.slug === selectedCategory)?.id : undefined
+      let data = categoryId ? demoMedicines.filter((m) => m.categoryId === categoryId) : demoMedicines
+      if (q) data = data.filter((m) => m.nameAr.toLowerCase().includes(q) || m.nameEn?.toLowerCase().includes(q))
+      setMedicines(data)
+      return
+    }
     try {
       const data = await catalogApi.listMedicines(client, {
         categorySlug: selectedCategory ?? undefined,
@@ -35,6 +45,10 @@ export default function CatalogScreen() {
   }, [selectedCategory, search])
 
   useEffect(() => {
+    if (isDemoMode) {
+      setCategories(demoCategories)
+      return
+    }
     catalogApi
       .listCategories(client)
       .then(setCategories)

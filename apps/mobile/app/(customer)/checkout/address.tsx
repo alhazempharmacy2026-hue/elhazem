@@ -11,6 +11,8 @@ import { TextField } from '../../../src/components/TextField'
 import { useAuth } from '../../../src/context/AuthContext'
 import { useCart } from '../../../src/context/CartContext'
 import { useCheckout } from '../../../src/context/CheckoutContext'
+import { demoAddress } from '../../../src/lib/demoData'
+import { isDemoMode } from '../../../src/lib/supabaseClient'
 import { colors, fonts, fontSize, spacing } from '../../../src/lib/theme'
 
 export default function AddressStepScreen() {
@@ -37,6 +39,13 @@ export default function AddressStepScreen() {
   })
 
   useEffect(() => {
+    if (isDemoMode) {
+      setAddresses([demoAddress])
+      setAddressId(demoAddress.id)
+      setShowForm(false)
+      setLoading(false)
+      return
+    }
     if (!profile) return
     addressesApi
       .listAddresses(client, profile.id)
@@ -143,9 +152,9 @@ export default function AddressStepScreen() {
           {formError ? <Text style={styles.formError}>{formError}</Text> : null}
           <Button title="حفظ العنوان" onPress={handleSaveAddress} loading={saving} />
         </Card>
-      ) : (
+      ) : !isDemoMode ? (
         <Button title="+ إضافة عنوان جديد" variant="secondary" onPress={() => setShowForm(true)} />
-      )}
+      ) : null}
 
       <Button title="متابعة" onPress={handleContinue} disabled={!addressId} />
     </ScreenContainer>

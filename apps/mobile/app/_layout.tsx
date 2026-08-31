@@ -15,11 +15,9 @@ import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
-import { ConfigErrorScreen } from '../src/components/ConfigErrorScreen'
 import { LoadingScreen } from '../src/components/LoadingScreen'
 import { AuthProvider } from '../src/context/AuthContext'
 import { CartProvider } from '../src/context/CartContext'
-import { isSupabaseConfigured, supabaseConfigErrorMessage } from '../src/lib/supabaseClient'
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // مش مشكلة لو فشل (ممكن يحصل في بعض بيئات التطوير) — التطبيق هيكمل عادي
@@ -38,11 +36,6 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => {})
     }
   }, [fontsLoaded, fontsError])
-
-  // بلاش نخلي التطبيق يعمل crash صامت لو مفاتيح Supabase ناقصة — نوضح المشكلة للمستخدم/المطور
-  if (!isSupabaseConfigured) {
-    return <ConfigErrorScreen message={supabaseConfigErrorMessage} />
-  }
 
   if (!fontsLoaded && !fontsError) {
     return <LoadingScreen />

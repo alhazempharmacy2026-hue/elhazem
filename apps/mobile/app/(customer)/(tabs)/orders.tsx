@@ -6,6 +6,8 @@ import { EmptyState } from '../../../src/components/EmptyState'
 import { ScreenContainer } from '../../../src/components/ScreenContainer'
 import { StatusBadge } from '../../../src/components/StatusBadge'
 import { useAuth } from '../../../src/context/AuthContext'
+import { listDemoOrders } from '../../../src/lib/demoStore'
+import { isDemoMode } from '../../../src/lib/supabaseClient'
 import { colors, fonts, fontSize, radius, spacing } from '../../../src/lib/theme'
 
 export default function OrderHistoryScreen() {
@@ -15,6 +17,10 @@ export default function OrderHistoryScreen() {
   const [refreshing, setRefreshing] = useState(false)
 
   const load = useCallback(async () => {
+    if (isDemoMode) {
+      setOrders(listDemoOrders())
+      return
+    }
     if (!profile) return
     try {
       const list = await ordersApi.listMyOrders(client, profile.id)

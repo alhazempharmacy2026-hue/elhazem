@@ -19,8 +19,9 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ]
 
-// امنع Metro من الصعود التلقائي فوق nodeModulesPaths المحددة أعلاه — موصى به في دليل Expo
-// للـ monorepos عشان يتجنب لخبطة في نسخ الحزم بين التطبيقات المختلفة
-config.resolver.disableHierarchicalLookup = true
+// ملحوظة: دليل Expo الرسمي للـ monorepos بينصح كمان بـ disableHierarchicalLookup=true، لكن
+// ده بيمنع Metro من إيجاد node_modules متداخلة جوه حزمة معينة (زي react-dom/node_modules/scheduler
+// اللي react-native وreact-dom كل واحد محتاج نسخة مختلفة منها) — فبنسيبه false (الافتراضي) عشان
+// البحث الهرمي العادي لسه شغال، وnodeModulesPaths فوق كافية لإيجاد @elhazem/shared.
 
 module.exports = config

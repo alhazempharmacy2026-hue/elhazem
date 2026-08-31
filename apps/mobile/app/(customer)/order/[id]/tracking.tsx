@@ -13,13 +13,15 @@ import {
 import { useLocalSearchParams } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import MapView, { Marker } from 'react-native-maps'
 import { Card } from '../../../../src/components/Card'
 import { LoadingScreen } from '../../../../src/components/LoadingScreen'
 import { ScreenContainer } from '../../../../src/components/ScreenContainer'
 import { StatusBadge } from '../../../../src/components/StatusBadge'
+import { TrackingMap } from '../../../../src/components/TrackingMap'
 import { useAuth } from '../../../../src/context/AuthContext'
-import { colors, fonts, fontSize, radius, spacing } from '../../../../src/lib/theme'
+import { getDemoCourierLocation, getDemoOrder, getDemoOrderItems } from '../../../../src/lib/demoStore'
+import { isDemoMode } from '../../../../src/lib/supabaseClient'
+import { colors, fonts, fontSize, spacing } from '../../../../src/lib/theme'
 
 export default function OrderTrackingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -33,6 +35,16 @@ export default function OrderTrackingScreen() {
   // تحميل أولي + الاشتراك في تحديثات الطلب اللحظية (Realtime) طول ما الشاشة مفتوحة
   useEffect(() => {
     if (!id) return
+
+    if (isDemoMode) {
+      setOrder(getDemoOrder(id))
+      setItems(getDemoOrderItems(id))
+      setLoading(false)
+      // بنحدّث كل ثانيتين عشان حالة الطلب وموقع المندوب يتقدموا لوحدهم أمام عينك
+      const interval = setInterval(() => setOrder(getDemoOrder(id)), 2000)
+      return () => clearInterval(interval)
+    }
+
     let unsubscribeOrder: (() => void) | undefined
 
     Promise.all([ordersApi.getOrder(client, id), ordersApi.getOrderItems(client, id)])
@@ -49,8 +61,18 @@ export default function OrderTrackingScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
+  // في الوضع التجريبي: احسب موقع المندوب الوهمي كل مرة حالة الطلب (المحدّثة كل ثانيتين فوق) تتغيّر
+  useEffect(() => {
+    if (!isDemoMode || !order) return
+    const location = getDemoCourierLocation(order)
+    setCourierLocation(
+      location ? { courierId: 'demo-courier', orderId: order.id, ...location, updatedAt: new Date().toISOString() } : null,
+    )
+  }, [order])
+
   // بمجرد ما الطلب "في الطريق إليك" وفيه مندوب متعين، تابع موقعه لحظيًا على الخريطة
   useEffect(() => {
+    if (isDemoMode) return
     if (!order?.courierId || order.status !== 'out_for_delivery') {
       setCourierLocation(null)
       return
@@ -87,31 +109,7 @@ export default function OrderTrackingScreen() {
         <StatusBadge label={orderStatusLabels[order.status]} statusKey={order.status} />
       </View>
 
-      {courierLocation ? (
-        <View style={styles.mapWrap}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: courierLocation.lat,
-              longitude: courierLocation.lng,
-              latitudeDelta: 0.02,
-              longitudeDelta: 0.02,
-            }}
-            region={{
-              latitude: courierLocation.lat,
-              longitude: courierLocation.lng,
-              latitudeDelta: 0.02,
-              longitudeDelta: 0.02,
-            }}
-          >
-            <Marker
-              coordinate={{ latitude: courierLocation.lat, longitude: courierLocation.lng }}
-              title="المندوب"
-              description="موقع المندوب الحالي"
-            />
-          </MapView>
-        </View>
-      ) : null}
+      {courierLocation ? <TrackingMap lat={courierLocation.lat} lng={courierLocation.lng} /> : null}
 
       {!isCancelledOrRejected ? (
         <Card>
@@ -155,8 +153,6 @@ export default function OrderTrackingScreen() {
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   orderNumber: { fontFamily: fonts.bold, fontSize: fontSize.lg, color: colors.text },
-  mapWrap: { height: 220, borderRadius: radius.lg, overflow: 'hidden' },
-  map: { flex: 1 },
   sectionTitle: { fontFamily: fonts.semiBold, fontSize: fontSize.md, color: colors.text, textAlign: 'right', marginBottom: spacing.sm },
   timelineRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
   timelineDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.border },

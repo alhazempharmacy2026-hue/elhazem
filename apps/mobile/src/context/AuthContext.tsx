@@ -1,7 +1,8 @@
 import { authApi, type ElhazemClient, type Profile } from '@elhazem/shared'
 import type { Session } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { demoProfile } from '../lib/demoData'
+import { isDemoMode, supabase } from '../lib/supabaseClient'
 
 interface AuthContextValue {
   client: ElhazemClient
@@ -16,13 +17,17 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-// ملاحظة: المكوّن ده ميترندرش إلا لو supabase متظبط (اتشاف قبل كده في app/_layout.tsx)،
-// فآمن هنا نفترض إن supabase مش null.
+// جلسة وهمية بس عشان أي كود (زي app/index.tsx) بيتحقق من `session` كـ "فيه مستخدم داخل"
+// يشتغل عادي في الوضع التجريبي من غير ما يحتاج يعرف حاجة عن Supabase أصلاً.
+const demoSession = { access_token: 'demo', user: { id: demoProfile.id } } as unknown as Session
+
 export function AuthProvider({ children }: PropsWithChildren) {
+  // في الوضع التجريبي `supabase` بيبقى null عمدًا — أي شاشة بتستخدم `client` لازم تتأكد
+  // من isDemoMode الأول قبل ما تنادي عليه (نفس الانضباط المتبع في apps/web).
   const client = supabase as ElhazemClient
-  const [session, setSession] = useState<Session | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [session, setSession] = useState<Session | null>(isDemoMode ? demoSession : null)
+  const [profile, setProfile] = useState<Profile | null>(isDemoMode ? demoProfile : null)
+  const [loading, setLoading] = useState(!isDemoMode)
 
   async function loadProfile() {
     try {
@@ -35,6 +40,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   useEffect(() => {
+    if (isDemoMode) return
     let mounted = true
 
     client.auth.getSession().then(async ({ data }) => {
@@ -69,12 +75,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
       loading,
       refreshProfile: loadProfile,
       async signIn(email, password) {
+        if (isDemoMode) return
         await authApi.signIn(client, { email, password })
       },
       async signUp(params) {
+        if (isDemoMode) return
         await authApi.signUp(client, params)
       },
       async signOut() {
+        if (isDemoMode) return
         await authApi.signOut(client)
         setProfile(null)
       },

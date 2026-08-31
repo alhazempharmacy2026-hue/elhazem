@@ -8,6 +8,8 @@ import { ScreenContainer } from '../../../src/components/ScreenContainer'
 import { QuantityStepper } from '../../../src/components/QuantityStepper'
 import { useAuth } from '../../../src/context/AuthContext'
 import { useCart } from '../../../src/context/CartContext'
+import { demoMedicines } from '../../../src/lib/demoData'
+import { isDemoMode } from '../../../src/lib/supabaseClient'
 import { colors, fonts, fontSize, radius, spacing } from '../../../src/lib/theme'
 
 export default function MedicineDetailScreen() {
@@ -23,6 +25,11 @@ export default function MedicineDetailScreen() {
 
   useEffect(() => {
     if (!id) return
+    if (isDemoMode) {
+      setMedicine(demoMedicines.find((m) => m.id === id) ?? null)
+      setLoading(false)
+      return
+    }
     catalogApi
       .getMedicine(client, id)
       .then(setMedicine)

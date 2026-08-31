@@ -11,9 +11,14 @@
     "dev:admin": "npm run dev -w @elhazem/admin",
     "dev:analytics": "npm run dev -w @elhazem/analytics",
     "dev:mobile": "npm run start -w @elhazem/mobile",
+    "web:mobile": "npm run web -w @elhazem/mobile",
     "build:web": "npm run build -w @elhazem/web",
     "build:admin": "npm run build -w @elhazem/admin",
     "build:analytics": "npm run build -w @elhazem/analytics",
     "build": "npm run build -w @elhazem/web && npm run build -w @elhazem/admin && npm run build -w @elhazem/analytics"
+  },
+  "overrides": {
+    "expo": "~52.0.11",
+    "react-native": "0.76.3"
   }
 }

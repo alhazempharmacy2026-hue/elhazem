@@ -6,6 +6,7 @@ import { Button } from '../../src/components/Button'
 import { ScreenContainer } from '../../src/components/ScreenContainer'
 import { TextField } from '../../src/components/TextField'
 import { useAuth } from '../../src/context/AuthContext'
+import { isDemoMode } from '../../src/lib/supabaseClient'
 import { colors, fonts, fontSize, spacing } from '../../src/lib/theme'
 
 export default function SignInScreen() {
@@ -15,6 +16,18 @@ export default function SignInScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  if (isDemoMode) {
+    return (
+      <ScreenContainer>
+        <Text style={styles.title}>وضع تجريبي</Text>
+        <Text style={styles.subtitle}>
+          التطبيق شغال دلوقتي ببيانات وهمية بدون Supabase — انت مسجل دخول تلقائيًا كـ"عميل تجريبي".
+        </Text>
+        <Button title="الرجوع للتطبيق" onPress={() => router.replace('/')} />
+      </ScreenContainer>
+    )
+  }
 
   async function handleSubmit() {
     setFormError(null)
