@@ -1,5 +1,6 @@
 import { ITEM_COLUMNS } from '../data/itemColumns'
 import { parseCSV } from './csv'
+import { parsePharmacyItemsReport } from './importPharmacyItemsReport'
 
 export interface ParsedItemRow {
   name: string
@@ -17,6 +18,7 @@ export interface ItemImportResult {
   rows: ParsedItemRow[]
   skippedRows: number
   unmatchedHeaders: string[]
+  detectedPharmacySoftwareReport?: boolean
 }
 
 function normalizeHeader(h: string): string {
@@ -31,6 +33,11 @@ function parseNumber(raw: string): number | undefined {
 }
 
 export function importItemsFromCSV(text: string): ItemImportResult {
+  const special = parsePharmacyItemsReport(text)
+  if (special) {
+    return { rows: special, skippedRows: 0, unmatchedHeaders: [], detectedPharmacySoftwareReport: true }
+  }
+
   const rows = parseCSV(text)
   if (rows.length === 0) return { rows: [], skippedRows: 0, unmatchedHeaders: [] }
 

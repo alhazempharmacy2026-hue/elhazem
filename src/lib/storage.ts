@@ -139,9 +139,12 @@ export function useAppStore(): AppStore {
           supplierId = sup.id
         }
 
+        // A row with a code matches/creates by code only — falling back to a name match
+        // would silently merge two distinct products that happen to share the same name
+        // text (seen in real pharmacy exports: same name, different pack size/code).
         const codeKey = row.code?.trim() ? row.code.trim().toLowerCase() : undefined
         const nameKey = row.name.trim().toLowerCase()
-        const existing = (codeKey && byCode.get(codeKey)) || byName.get(nameKey)
+        const existing = codeKey ? byCode.get(codeKey) : byName.get(nameKey)
 
         if (existing) {
           updated++
@@ -197,7 +200,7 @@ export function useAppStore(): AppStore {
         const avgDailySales = periodDays > 0 ? row.quantitySold / periodDays : row.quantitySold
         const codeKey = row.code?.trim() ? row.code.trim().toLowerCase() : undefined
         const nameKey = row.name.trim().toLowerCase()
-        const existing = (codeKey && byCode.get(codeKey)) || byName.get(nameKey)
+        const existing = codeKey ? byCode.get(codeKey) : byName.get(nameKey)
 
         if (existing) {
           matched++

@@ -179,7 +179,9 @@ export default function Inventory() {
         return
       }
       const { added, updated, newSuppliers } = importItems(result.rows)
-      let msg = `تم إضافة ${added} صنف جديد وتحديث ${updated} صنف موجود.`
+      let msg = result.detectedPharmacySoftwareReport
+        ? `تم التعرف تلقائيًا على تقرير أصناف برنامج الصيدلية. تم إضافة ${added} صنف جديد وتحديث ${updated} صنف موجود (التصنيف اتملى باسم الشركة المصنعة).`
+        : `تم إضافة ${added} صنف جديد وتحديث ${updated} صنف موجود.`
       if (newSuppliers > 0) msg += ` تم إنشاء ${newSuppliers} مورد جديد تلقائيًا.`
       if (result.unmatchedHeaders.length > 0) msg += ` أعمدة لم يتم التعرف عليها وتم تجاهلها: ${result.unmatchedHeaders.join('، ')}`
       setImportMsg(msg)
