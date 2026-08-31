@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { catalogApi, type Medicine } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { demoCategories, demoMedicines } from '../lib/demoData'
 import MedicineCard from '../components/MedicineCard'
 
 export default function CategoryPage() {
@@ -11,7 +12,14 @@ export default function CategoryPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!supabase || !slug) return
+    if (!slug) return
+    if (isDemoMode) {
+      const category = demoCategories.find((c) => c.slug === slug)
+      setMedicines(category ? demoMedicines.filter((m) => m.categoryId === category.id) : [])
+      setLoading(false)
+      return
+    }
+    if (!supabase) return
     setLoading(true)
     setError(null)
     catalogApi

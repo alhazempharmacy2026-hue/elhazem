@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Trash2 } from 'lucide-react'
 import { addressesApi, addressSchema, type Address } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { demoAddress } from '../lib/demoData'
 import { useAuth } from '../lib/AuthContext'
 
 const emptyAddress = {
@@ -26,6 +27,10 @@ export default function Account() {
   const [error, setError] = useState<string | null>(null)
 
   function loadAddresses() {
+    if (isDemoMode) {
+      setAddresses([demoAddress])
+      return
+    }
     if (!supabase || !profile) return
     addressesApi.listAddresses(supabase, profile.id).then(setAddresses)
   }
@@ -74,9 +79,11 @@ export default function Account() {
       <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-bold">عناويني</h2>
-          <button onClick={() => setShowForm((s) => !s)} className="text-xs font-medium text-[var(--brand-dark)]">
-            {showForm ? 'إلغاء' : '+ عنوان جديد'}
-          </button>
+          {!isDemoMode && (
+            <button onClick={() => setShowForm((s) => !s)} className="text-xs font-medium text-[var(--brand-dark)]">
+              {showForm ? 'إلغاء' : '+ عنوان جديد'}
+            </button>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -88,15 +95,17 @@ export default function Account() {
                   {address.governorate}، {address.city}، {address.street}، مبنى {address.building}
                 </div>
               </div>
-              <button onClick={() => handleDelete(address.id)} className="p-2 text-[var(--danger)]">
-                <Trash2 size={14} />
-              </button>
+              {!isDemoMode && (
+                <button onClick={() => handleDelete(address.id)} className="p-2 text-[var(--danger)]">
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
           ))}
           {addresses.length === 0 && <p className="text-xs text-[var(--text-muted)]">مفيش عناوين محفوظة</p>}
         </div>
 
-        {showForm && (
+        {showForm && !isDemoMode && (
           <form onSubmit={handleAddAddress} className="mt-4 space-y-2 border-t border-[var(--border)] pt-4">
             <input
               className="input"

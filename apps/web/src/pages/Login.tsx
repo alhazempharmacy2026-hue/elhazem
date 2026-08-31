@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
+import { isDemoMode } from '../lib/supabaseClient'
 
 export default function Login() {
   const { signIn } = useAuth()
@@ -10,6 +11,20 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  if (isDemoMode) {
+    return (
+      <div className="mx-auto max-w-sm rounded-2xl border border-[var(--border)] bg-white p-6 text-center">
+        <h1 className="mb-2 text-lg font-bold">وضع تجريبي</h1>
+        <p className="mb-4 text-sm text-[var(--text-muted)]">
+          الموقع شغال دلوقتي ببيانات وهمية بدون Supabase — انت مسجل دخول تلقائيًا كـ"عميل تجريبي".
+        </p>
+        <Link to="/" className="btn-primary inline-block">
+          الرجوع للمتجر
+        </Link>
+      </div>
+    )
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()

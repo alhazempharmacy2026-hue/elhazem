@@ -11,3 +11,7 @@ try {
 } catch (err) {
   supabaseConfigError = err instanceof Error ? err.message : 'تعذّر الاتصال بالخادم'
 }
+
+// من غير مفاتيح Supabase حقيقية، الموقع بيشتغل في "وضع تجريبي" ببيانات وهمية محلية
+// (راجع src/lib/demoData.ts وdemoStore.ts) بدل ما يعرض شاشة إعداد بس.
+export const isDemoMode = supabase === null

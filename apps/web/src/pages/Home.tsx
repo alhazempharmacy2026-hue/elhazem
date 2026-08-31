@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { catalogApi, type Category, type Medicine } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { demoCategories, demoMedicines } from '../lib/demoData'
 import MedicineCard from '../components/MedicineCard'
 
 export default function Home() {
@@ -13,6 +14,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (isDemoMode) {
+      const q = query.trim().toLowerCase()
+      setCategories(demoCategories)
+      setMedicines(q ? demoMedicines.filter((m) => m.nameAr.toLowerCase().includes(q) || m.nameEn?.toLowerCase().includes(q)) : demoMedicines)
+      setLoading(false)
+      return
+    }
     if (!supabase) return
     setLoading(true)
     setError(null)

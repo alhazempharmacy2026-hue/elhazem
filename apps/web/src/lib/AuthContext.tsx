@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { authApi, type Profile } from '@elhazem/shared'
-import { supabase } from './supabaseClient'
+import { supabase, isDemoMode } from './supabaseClient'
+import { demoProfile } from './demoData'
 
 interface AuthContextValue {
   loading: boolean
@@ -16,7 +17,8 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<Profile | null>(null)
+  // في الوضع التجريبي المستخدم "مسجل دخول" دايمًا كعميل وهمي — مفيش تسجيل دخول حقيقي بدون Supabase
+  const [profile, setProfile] = useState<Profile | null>(isDemoMode ? demoProfile : null)
 
   async function refreshProfile() {
     if (!supabase) return
@@ -44,17 +46,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     isAuthenticated: profile !== null,
     async signIn(email, password) {
+      if (isDemoMode) return
       if (!supabase) throw new Error('الخادم غير مهيأ')
       await authApi.signIn(supabase, { email, password })
       await refreshProfile()
     },
     async signUp(params) {
+      if (isDemoMode) return
       if (!supabase) throw new Error('الخادم غير مهيأ')
       await authApi.signUp(supabase, params)
       await refreshProfile()
     },
     async signOut() {
-      if (!supabase) return
+      if (isDemoMode || !supabase) return
       await authApi.signOut(supabase)
       setProfile(null)
     },

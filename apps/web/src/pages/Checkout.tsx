@@ -11,7 +11,9 @@ import {
   type Address,
   type PaymentMethod,
 } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { demoAddress } from '../lib/demoData'
+import { placeDemoOrder } from '../lib/demoStore'
 import { useAuth } from '../lib/AuthContext'
 import { useCart } from '../lib/CartContext'
 
@@ -30,8 +32,15 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash_on_delivery')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // بيتفعّل قبل ما نفضي العربة عند تأكيد الطلب، عشان مانرجعش لصفحة الكارت وإحنا أصلاً بنتنقل لصفحة التأكيد
+  const [orderPlaced, setOrderPlaced] = useState(false)
 
   useEffect(() => {
+    if (isDemoMode) {
+      setAddresses([demoAddress])
+      setAddressId(demoAddress.id)
+      return
+    }
     if (!supabase || !profile) return
     addressesApi.listAddresses(supabase, profile.id).then((list) => {
       setAddresses(list)
@@ -40,16 +49,27 @@ export default function Checkout() {
     })
   }, [profile])
 
+  useEffect(() => {
+    if (items.length === 0 && !orderPlaced) {
+      navigate('/cart', { replace: true })
+    }
+  }, [items.length, orderPlaced, navigate])
+
   if (items.length === 0) {
-    navigate('/cart', { replace: true })
     return null
   }
 
   async function handleUploadPrescription() {
-    if (!supabase || !profile || !prescriptionFile) return
+    if (!prescriptionFile) return
     setSubmitting(true)
     setError(null)
     try {
+      if (isDemoMode) {
+        setPrescriptionId('demo-prescription')
+        setStep('payment')
+        return
+      }
+      if (!supabase || !profile) return
       const ext = prescriptionFile.name.split('.').pop() ?? 'jpg'
       const prescription = await prescriptionsApi.uploadPrescriptionImage(supabase, profile.id, prescriptionFile, ext)
       setPrescriptionId(prescription.id)
@@ -62,10 +82,20 @@ export default function Checkout() {
   }
 
   async function handlePlaceOrder() {
-    if (!supabase || !addressId) return
+    if (!addressId) return
     setSubmitting(true)
     setError(null)
     try {
+      if (isDemoMode) {
+        // في الوضع التجريبي بنتخطى Paymob بالكامل ونعتبر أي طلب "اتدفع" فورًا
+        const order = placeDemoOrder(items, paymentMethod)
+        setOrderPlaced(true)
+        clear()
+        navigate(`/checkout/complete?orderId=${order.id}`, { replace: true })
+        return
+      }
+
+      if (!supabase) return
       const order = await ordersApi.placeOrder(supabase, {
         addressId,
         paymentMethod,
@@ -73,6 +103,8 @@ export default function Checkout() {
         prescriptionId,
         deliveryFee: DEFAULT_DELIVERY_FEE,
       })
+
+      setOrderPlaced(true)
 
       if (paymentMethod !== 'cash_on_delivery') {
         const { checkoutUrl } = await paymentsApi.createPaymentIntention(supabase, order.id, paymentMethod)

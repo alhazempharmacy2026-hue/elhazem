@@ -15,7 +15,8 @@ import {
   type OrderItem,
   type CourierLocation,
 } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { getDemoOrder, getDemoOrderItems, getDemoCourierLocation } from '../lib/demoStore'
 import TrackingMap from '../components/TrackingMap'
 
 export default function OrderTracking() {
@@ -25,8 +26,17 @@ export default function OrderTracking() {
   const [courierLocation, setCourierLocation] = useState<CourierLocation | null>(null)
 
   useEffect(() => {
-    if (!supabase || !id) return
+    if (!id) return
 
+    if (isDemoMode) {
+      setOrder(getDemoOrder(id))
+      setItems(getDemoOrderItems(id))
+      // بنحدّث كل ثانيتين عشان حالة الطلب وموقع المندوب يتقدموا لوحدهم أمام عينك
+      const interval = setInterval(() => setOrder(getDemoOrder(id)), 2000)
+      return () => clearInterval(interval)
+    }
+
+    if (!supabase) return
     ordersApi.getOrder(supabase, id).then(setOrder)
     ordersApi.getOrderItems(supabase, id).then(setItems)
 
@@ -35,6 +45,15 @@ export default function OrderTracking() {
   }, [id])
 
   useEffect(() => {
+    if (!isDemoMode || !order) return
+    const location = getDemoCourierLocation(order)
+    setCourierLocation(
+      location ? { courierId: 'demo-courier', orderId: order.id, ...location, updatedAt: new Date().toISOString() } : null,
+    )
+  }, [order])
+
+  useEffect(() => {
+    if (isDemoMode) return
     if (!supabase || !order?.courierId || order.status !== 'out_for_delivery') {
       setCourierLocation(null)
       return

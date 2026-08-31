@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ordersApi, formatCurrency, formatDateTime, formatOrderNumber, orderStatusLabels, type Order } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { listDemoOrders } from '../lib/demoStore'
 import { useAuth } from '../lib/AuthContext'
 
 export default function OrdersList() {
@@ -10,6 +11,13 @@ export default function OrdersList() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (isDemoMode) {
+      setOrders(listDemoOrders())
+      setLoading(false)
+      // بنحدّث كل شوية عشان يبان تقدّم حالة الطلبات (محاكاة) وهي مفتوحة الصفحة
+      const interval = setInterval(() => setOrders(listDemoOrders()), 2000)
+      return () => clearInterval(interval)
+    }
     if (!supabase || !profile) return
     ordersApi
       .listMyOrders(supabase, profile.id)

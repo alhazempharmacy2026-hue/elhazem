@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
-import SetupNotice from './pages/SetupNotice'
 import Home from './pages/Home'
 import CategoryPage from './pages/CategoryPage'
 import MedicineDetail from './pages/MedicineDetail'
@@ -13,13 +12,8 @@ import OrderTracking from './pages/OrderTracking'
 import Account from './pages/Account'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import { supabase } from './lib/supabaseClient'
 
 export default function App() {
-  if (!supabase) {
-    return <SetupNotice />
-  }
-
   return (
     <Routes>
       <Route element={<Layout />}>

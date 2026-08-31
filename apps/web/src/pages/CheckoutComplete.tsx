@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import { ordersApi, formatOrderNumber, orderStatusLabels, type Order } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { getDemoOrder } from '../lib/demoStore'
 
 export default function CheckoutComplete() {
   const [params] = useSearchParams()
@@ -10,7 +11,12 @@ export default function CheckoutComplete() {
   const [order, setOrder] = useState<Order | null>(null)
 
   useEffect(() => {
-    if (!supabase || !orderId) return
+    if (!orderId) return
+    if (isDemoMode) {
+      setOrder(getDemoOrder(orderId))
+      return
+    }
+    if (!supabase) return
     // بنعتمد على حالة الطلب الحقيقية من الداتابيز، مش على أي معلومة راجعة في الرابط
     ordersApi.getOrder(supabase, orderId).then(setOrder)
   }, [orderId])

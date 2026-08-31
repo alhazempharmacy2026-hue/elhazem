@@ -3,6 +3,7 @@ import { ShoppingCart, User, LogOut, Search } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useCart } from '../lib/CartContext'
 import { useAuth } from '../lib/AuthContext'
+import { isDemoMode } from '../lib/supabaseClient'
 
 export default function Layout() {
   const { itemCount } = useCart()
@@ -17,6 +18,11 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {isDemoMode && (
+        <div className="bg-[var(--warning)] px-4 py-1.5 text-center text-xs font-medium text-white">
+          وضع تجريبي — البيانات والطلبات دي وهمية ومحفوظة على جهازك بس (راجع SETUP.md عشان تربط النظام بمشروع Supabase حقيقي)
+        </div>
+      )}
       <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
           <Link to="/" className="flex items-center gap-2 shrink-0">

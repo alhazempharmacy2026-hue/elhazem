@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Pill, ShieldAlert } from 'lucide-react'
 import { catalogApi, formatCurrency, type Medicine } from '@elhazem/shared'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, isDemoMode } from '../lib/supabaseClient'
+import { demoMedicines } from '../lib/demoData'
 import { useCart } from '../lib/CartContext'
 
 export default function MedicineDetail() {
@@ -13,7 +14,13 @@ export default function MedicineDetail() {
   const { addItem } = useCart()
 
   useEffect(() => {
-    if (!supabase || !id) return
+    if (!id) return
+    if (isDemoMode) {
+      setMedicine(demoMedicines.find((m) => m.id === id) ?? null)
+      setLoading(false)
+      return
+    }
+    if (!supabase) return
     setLoading(true)
     catalogApi
       .getMedicine(supabase, id)
