@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   Download,
   Package,
@@ -24,6 +26,8 @@ import { formatCurrency, formatDate, formatNumber } from '../lib/format'
 import { inventoryValue, STATUS_LABEL, stockStatus, suggestedOrderQty, type StockStatus } from '../lib/inventory'
 import StatCard from '../components/StatCard'
 import type { Item } from '../types'
+
+const PAGE_SIZE = 50
 
 const STATUS_BADGE: Record<StockStatus, string> = {
   out: 'bg-red-100 text-red-700',
@@ -86,6 +90,7 @@ export default function Inventory() {
   const [coverageDays, setCoverageDays] = useState(14)
   const [showSalesImport, setShowSalesImport] = useState(false)
   const [salesPeriodDays, setSalesPeriodDays] = useState(30)
+  const [page, setPage] = useState(0)
 
   const supplierName = (id?: string) => data.suppliers.find((s) => s.id === id)?.name ?? '—'
 
@@ -111,6 +116,10 @@ export default function Inventory() {
       return a.name.localeCompare(b.name, 'ar')
     })
   }, [data.items, statusFilter, needsOrderOnly, coverageDays, search])
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages - 1)
+  const pagedRows = useMemo(() => rows.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE), [rows, currentPage])
 
   function exportOrderList() {
     const list = data.items
@@ -254,7 +263,10 @@ export default function Inventory() {
           <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(0)
+            }}
             placeholder="ابحث بالاسم أو الكود..."
             className="input w-full pr-9"
           />
@@ -263,7 +275,10 @@ export default function Inventory() {
           {(['all', 'out', 'low', 'ok'] as const).map((s) => (
             <button
               key={s}
-              onClick={() => setStatusFilter(s)}
+              onClick={() => {
+                setStatusFilter(s)
+                setPage(0)
+              }}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 statusFilter === s ? 'bg-[var(--brand)] text-white' : 'text-[var(--text-muted)] hover:bg-gray-100'
               }`}
@@ -282,13 +297,23 @@ export default function Inventory() {
             type="number"
             min={1}
             value={coverageDays}
-            onChange={(e) => setCoverageDays(Math.max(1, Number(e.target.value) || 1))}
+            onChange={(e) => {
+              setCoverageDays(Math.max(1, Number(e.target.value) || 1))
+              setPage(0)
+            }}
             className="input w-20 text-center"
           />
           <span className="text-[var(--text-muted)]">يوم</span>
         </div>
         <label className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
-          <input type="checkbox" checked={needsOrderOnly} onChange={(e) => setNeedsOrderOnly(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={needsOrderOnly}
+            onChange={(e) => {
+              setNeedsOrderOnly(e.target.checked)
+              setPage(0)
+            }}
+          />
           الأصناف اللي محتاجة طلب بس
         </label>
         <button
@@ -318,7 +343,7 @@ export default function Inventory() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((item) => {
+            {pagedRows.map((item) => {
               const status = stockStatus(item)
               const orderQty = suggestedOrderQty(item, coverageDays)
               return (
@@ -379,6 +404,30 @@ export default function Inventory() {
           </tbody>
         </table>
       </div>
+
+      {rows.length > 0 && (
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-[var(--text-muted)]">
+            {formatNumber(rows.length)} صنف — صفحة {formatNumber(currentPage + 1)} من {formatNumber(totalPages)}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+              className="rounded-lg border border-[var(--border)] bg-white p-2 text-[var(--text-muted)] hover:bg-gray-50 disabled:opacity-40"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage >= totalPages - 1}
+              className="rounded-lg border border-[var(--border)] bg-white p-2 text-[var(--text-muted)] hover:bg-gray-50 disabled:opacity-40"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {data.items.length > 0 && (
         <p className="text-xs text-[var(--text-muted)]">
