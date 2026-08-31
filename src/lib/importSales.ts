@@ -1,5 +1,6 @@
 import { SALES_COLUMNS } from '../data/salesColumns'
 import { parseCSV } from './csv'
+import { parsePharmacySalesReport } from './importPharmacySalesReport'
 
 export interface ParsedSalesRow {
   name: string
@@ -11,6 +12,7 @@ export interface SalesImportResult {
   rows: ParsedSalesRow[]
   skippedRows: number
   unmatchedHeaders: string[]
+  detectedPeriodDays?: number
 }
 
 function normalizeHeader(h: string): string {
@@ -25,6 +27,16 @@ function parseNumber(raw: string): number | undefined {
 }
 
 export function importSalesFromCSV(text: string): SalesImportResult {
+  const special = parsePharmacySalesReport(text)
+  if (special) {
+    return {
+      rows: special.rows,
+      skippedRows: 0,
+      unmatchedHeaders: [],
+      detectedPeriodDays: special.periodDays ?? undefined,
+    }
+  }
+
   const rows = parseCSV(text)
   if (rows.length === 0) return { rows: [], skippedRows: 0, unmatchedHeaders: [] }
 

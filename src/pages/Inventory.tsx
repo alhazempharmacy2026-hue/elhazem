@@ -134,9 +134,12 @@ export default function Inventory() {
         setImportMsg('لم يتم العثور على صفوف صالحة في تقرير المبيعات. تأكد إن فيه عمودين "اسم الصنف" و"الكمية المباعة".')
         return
       }
-      const { matched, created } = importItemSales(result.rows, salesPeriodDays)
-      let msg = `تم تحديث معدل البيع اليومي لـ ${matched} صنف موجود.`
-      if (created > 0) msg += ` تم إنشاء ${created} صنف جديد من التقرير (كميته الحالية صفر لحد ما تستورد ملف الأصناف).`
+      const periodDays = result.detectedPeriodDays ?? salesPeriodDays
+      const { matched, skipped } = importItemSales(result.rows, periodDays)
+      let msg = result.detectedPeriodDays
+        ? `تم التعرف تلقائيًا على تقرير مبيعات الأصناف (غطى ${periodDays} يوم حسب تاريخ التقرير نفسه). تم تحديث معدل البيع اليومي لـ ${matched} صنف موجود.`
+        : `تم تحديث معدل البيع اليومي لـ ${matched} صنف موجود (على أساس فترة ${periodDays} يوم).`
+      if (skipped > 0) msg += ` تم تجاهل ${skipped} صف مش موجود في المخزون (غالبًا خدمات زي الحقن أو الإنبودي مش أصناف مخزنية) — استورد ملف الأصناف الأول لو ده صنف حقيقي ناقص.`
       if (result.unmatchedHeaders.length > 0) msg += ` أعمدة لم يتم التعرف عليها: ${result.unmatchedHeaders.join('، ')}`
       setImportMsg(msg)
     }
@@ -485,11 +488,11 @@ export default function Inventory() {
               </button>
             </div>
             <p className="mb-4 text-sm text-[var(--text-muted)]">
-              صدّر من برنامج الصيدلية تقرير مبيعات الأصناف (اسم الصنف، الكمية المباعة) لفترة معينة، وحدد هنا عدد الأيام اللي التقرير بيغطيها عشان نحسب متوسط
-              البيع اليومي لكل صنف.
+              صدّر تقرير "مبيعات الأصناف" من برنامج الصيدلية مباشرة وارفعه — بيتعرف عليه تلقائيًا وياخد فترة التقرير من التاريخ المكتوب فيه. لو رفعت ملف
+              CSV عادي (عمودين: اسم الصنف والكمية المباعة) حدد عدد الأيام يدويًا تحت.
             </p>
             <label className="flex flex-col gap-1 text-xs font-medium text-[var(--text-muted)]">
-              التقرير ده بيغطي كام يوم؟
+              لو مش تقرير من البرنامج مباشرة — التقرير ده بيغطي كام يوم؟
               <input
                 type="number"
                 min={1}

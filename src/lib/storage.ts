@@ -52,7 +52,7 @@ export interface AppStore {
   updateItem: (item: Item) => void
   deleteItem: (id: string) => void
   importItems: (rows: ParsedItemRow[]) => { added: number; updated: number; newSuppliers: number }
-  importItemSales: (rows: ParsedSalesRow[], periodDays: number) => { matched: number; created: number }
+  importItemSales: (rows: ParsedSalesRow[], periodDays: number) => { matched: number; skipped: number }
 
   addSupplier: (s: Omit<Supplier, 'id'>) => void
   updateSupplier: (s: Supplier) => void
@@ -186,7 +186,7 @@ export function useAppStore(): AppStore {
 
   const importItemSales = (rows: ParsedSalesRow[], periodDays: number) => {
     let matched = 0
-    let created = 0
+    let skipped = 0
     setData((prev) => {
       const items = [...prev.items]
       const byCode = new Map<string, Item>()
@@ -202,32 +202,22 @@ export function useAppStore(): AppStore {
         const nameKey = row.name.trim().toLowerCase()
         const existing = codeKey ? byCode.get(codeKey) : byName.get(nameKey)
 
+        // Rows with no matching item are usually pharmacy services (delivery, injections,
+        // Inbody sessions, home visits...) rather than stocked products — skip them instead
+        // of polluting the inventory with fake zero-stock "items".
         if (existing) {
           matched++
           existing.avgDailySales = avgDailySales
           existing.salesPeriodDays = periodDays
           existing.updatedAt = today()
         } else {
-          created++
-          const newItem: Item = {
-            id: uid('item'),
-            name: row.name.trim(),
-            code: row.code?.trim() || undefined,
-            currentStock: 0,
-            minStock: 0,
-            avgDailySales,
-            salesPeriodDays: periodDays,
-            updatedAt: today(),
-          }
-          items.push(newItem)
-          byName.set(nameKey, newItem)
-          if (codeKey) byCode.set(codeKey, newItem)
+          skipped++
         }
       }
 
       return { ...prev, items }
     })
-    return { matched, created }
+    return { matched, skipped }
   }
 
   const addSupplier = (s: Omit<Supplier, 'id'>) => setData((prev) => ({ ...prev, suppliers: [...prev.suppliers, { ...s, id: uid('sup') }] }))
