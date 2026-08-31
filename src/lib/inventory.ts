@@ -5,7 +5,7 @@ export type StockStatus = 'out' | 'low' | 'ok'
 // لو مفيش حد طلب أدنى متحدد يدويًا للصنف، بنعتبره "منخفض" لما الكمية الحالية
 // هتخلص خلال أقل من كذا يوم بمعدل بيعه الفعلي — عشان أغلب الأصناف المستوردة
 // من برنامج الصيدلية مفيهاش حد طلب أدنى، فمن غير كده مكانش هيظهر أي صنف "منخفض" أبدًا.
-const LOW_STOCK_DAYS_FALLBACK = 7
+const LOW_STOCK_DAYS_FALLBACK = 10
 
 export function stockStatus(item: Item): StockStatus {
   if (item.currentStock <= 0) return 'out'
