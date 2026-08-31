@@ -47,6 +47,13 @@ export function emergencyExtraCost(purchase: EmergencyPurchase, items: Item[]): 
   return Math.max(0, (purchase.costPrice - normalCost) * purchase.quantity)
 }
 
+// الكمية المقترح طلبها عشان تغطي عدد أيام معين، بناءً على متوسط المبيعات اليومية للصنف
+export function suggestedOrderQty(item: Item, coverageDays: number): number | null {
+  if (item.avgDailySales === undefined) return null
+  const target = item.avgDailySales * coverageDays
+  return Math.max(0, Math.ceil(target - item.currentStock))
+}
+
 export function isThisMonth(iso: string): boolean {
   const d = new Date(iso)
   const now = new Date()

@@ -1,10 +1,27 @@
 import { useMemo, useRef, useState } from 'react'
-import { AlertTriangle, Download, Package, PackageX, Pencil, Plus, Search, Trash2, TriangleAlert, Upload, Wallet, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  ClipboardList,
+  Download,
+  Package,
+  PackageX,
+  Pencil,
+  Plus,
+  Search,
+  ShoppingCart,
+  Trash2,
+  TriangleAlert,
+  Upload,
+  Wallet,
+  X,
+} from 'lucide-react'
 import { useAppData } from '../lib/storage'
 import { ITEM_COLUMNS } from '../data/itemColumns'
+import { SALES_COLUMNS } from '../data/salesColumns'
 import { importItemsFromCSV } from '../lib/importItems'
+import { importSalesFromCSV } from '../lib/importSales'
 import { formatCurrency, formatDate, formatNumber } from '../lib/format'
-import { inventoryValue, STATUS_LABEL, stockStatus, type StockStatus } from '../lib/inventory'
+import { inventoryValue, STATUS_LABEL, stockStatus, suggestedOrderQty, type StockStatus } from '../lib/inventory'
 import StatCard from '../components/StatCard'
 import type { Item } from '../types'
 
@@ -29,15 +46,46 @@ function downloadTemplate() {
   URL.revokeObjectURL(url)
 }
 
+function downloadSalesTemplate() {
+  const header = SALES_COLUMNS.map((c) => c.label).join(',')
+  const blob = new Blob(['﻿' + header + '\n'], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'نموذج-تقرير-مبيعات-الأصناف.csv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function downloadCSV(filename: string, header: string[], rows: (string | number)[][]) {
+  const escape = (v: string | number) => {
+    const s = String(v)
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
+  const lines = [header.map(escape).join(','), ...rows.map((r) => r.map(escape).join(','))]
+  const blob = new Blob(['﻿' + lines.join('\n') + '\n'], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function Inventory() {
-  const { data, addItem, updateItem, deleteItem, importItems } = useAppData()
+  const { data, addItem, updateItem, deleteItem, importItems, importItemSales } = useAppData()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const salesFileInputRef = useRef<HTMLInputElement>(null)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Item | null>(null)
   const [form, setForm] = useState<Omit<Item, 'id' | 'updatedAt'>>(emptyForm())
   const [importMsg, setImportMsg] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | StockStatus>('all')
+  const [needsOrderOnly, setNeedsOrderOnly] = useState(false)
+  const [coverageDays, setCoverageDays] = useState(14)
+  const [showSalesImport, setShowSalesImport] = useState(false)
+  const [salesPeriodDays, setSalesPeriodDays] = useState(30)
 
   const supplierName = (id?: string) => data.suppliers.find((s) => s.id === id)?.name ?? '—'
 
@@ -50,6 +98,7 @@ export default function Inventory() {
   const rows = useMemo(() => {
     let list = [...data.items]
     if (statusFilter !== 'all') list = list.filter((i) => stockStatus(i) === statusFilter)
+    if (needsOrderOnly) list = list.filter((i) => (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
     if (search.trim()) {
       const q = search.trim().toLowerCase()
       list = list.filter((i) => i.name.toLowerCase().includes(q) || i.code?.toLowerCase().includes(q))
@@ -61,7 +110,40 @@ export default function Inventory() {
       if (order[sa] !== order[sb]) return order[sa] - order[sb]
       return a.name.localeCompare(b.name, 'ar')
     })
-  }, [data.items, statusFilter, search])
+  }, [data.items, statusFilter, needsOrderOnly, coverageDays, search])
+
+  function exportOrderList() {
+    const list = data.items
+      .filter((i) => (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
+      .sort((a, b) => (suggestedOrderQty(b, coverageDays) ?? 0) - (suggestedOrderQty(a, coverageDays) ?? 0))
+    downloadCSV(
+      `قائمة-الطلبية-${coverageDays}-يوم.csv`,
+      ['اسم الصنف', 'الكود', 'الكمية الحالية', 'المتوسط اليومي', `الكمية المقترح طلبها (تكفي ${coverageDays} يوم)`, 'المورد'],
+      list.map((i) => [i.name, i.code ?? '', i.currentStock, i.avgDailySales ?? '', suggestedOrderQty(i, coverageDays) ?? 0, supplierName(i.supplierId)]),
+    )
+  }
+
+  function handleSalesFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const text = String(reader.result ?? '')
+      const result = importSalesFromCSV(text)
+      if (result.rows.length === 0) {
+        setImportMsg('لم يتم العثور على صفوف صالحة في تقرير المبيعات. تأكد إن فيه عمودين "اسم الصنف" و"الكمية المباعة".')
+        return
+      }
+      const { matched, created } = importItemSales(result.rows, salesPeriodDays)
+      let msg = `تم تحديث معدل البيع اليومي لـ ${matched} صنف موجود.`
+      if (created > 0) msg += ` تم إنشاء ${created} صنف جديد من التقرير (كميته الحالية صفر لحد ما تستورد ملف الأصناف).`
+      if (result.unmatchedHeaders.length > 0) msg += ` أعمدة لم يتم التعرف عليها: ${result.unmatchedHeaders.join('، ')}`
+      setImportMsg(msg)
+    }
+    reader.readAsText(file, 'utf-8')
+    e.target.value = ''
+    setShowSalesImport(false)
+  }
 
   function openAdd() {
     setEditing(null)
@@ -130,6 +212,13 @@ export default function Inventory() {
           </button>
           <input ref={fileInputRef} type="file" accept=".csv,text/csv" onChange={handleFile} className="hidden" />
           <button
+            onClick={() => setShowSalesImport(true)}
+            className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--text-muted)] hover:bg-gray-50"
+          >
+            <ClipboardList size={16} />
+            استيراد تقرير المبيعات
+          </button>
+          <button
             onClick={openAdd}
             className="flex items-center gap-2 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-dark)]"
           >
@@ -180,6 +269,32 @@ export default function Inventory() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--border)] bg-white p-3">
+        <div className="flex items-center gap-2 text-sm">
+          <ShoppingCart size={16} className="text-[var(--brand-dark)]" />
+          <span className="text-[var(--text-muted)]">اطلب كمية تكفي</span>
+          <input
+            type="number"
+            min={1}
+            value={coverageDays}
+            onChange={(e) => setCoverageDays(Math.max(1, Number(e.target.value) || 1))}
+            className="input w-20 text-center"
+          />
+          <span className="text-[var(--text-muted)]">يوم</span>
+        </div>
+        <label className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
+          <input type="checkbox" checked={needsOrderOnly} onChange={(e) => setNeedsOrderOnly(e.target.checked)} />
+          الأصناف اللي محتاجة طلب بس
+        </label>
+        <button
+          onClick={exportOrderList}
+          className="mr-auto flex items-center gap-2 rounded-lg border border-[var(--brand)] px-3 py-1.5 text-xs font-medium text-[var(--brand-dark)] hover:bg-[var(--brand)]/10"
+        >
+          <Download size={14} />
+          تصدير قائمة الطلبية
+        </button>
+      </div>
+
       <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
@@ -189,6 +304,8 @@ export default function Inventory() {
               <th className="px-4 py-3 font-medium">الكمية الحالية</th>
               <th className="px-4 py-3 font-medium">حد الطلب الأدنى</th>
               <th className="px-4 py-3 font-medium">الحالة</th>
+              <th className="px-4 py-3 font-medium">المتوسط اليومي</th>
+              <th className="px-4 py-3 font-medium">الكمية المقترح طلبها</th>
               <th className="px-4 py-3 font-medium">سعر الشراء</th>
               <th className="px-4 py-3 font-medium">سعر البيع</th>
               <th className="px-4 py-3 font-medium">المورد</th>
@@ -198,6 +315,7 @@ export default function Inventory() {
           <tbody>
             {rows.map((item) => {
               const status = stockStatus(item)
+              const orderQty = suggestedOrderQty(item, coverageDays)
               return (
                 <tr key={item.id} className="border-b border-[var(--border)] last:border-0 hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-[var(--text)]">
@@ -212,6 +330,18 @@ export default function Inventory() {
                       {status !== 'ok' && <AlertTriangle size={12} />}
                       {STATUS_LABEL[status]}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-[var(--text-muted)]">{item.avgDailySales !== undefined ? formatNumber(item.avgDailySales) : '—'}</td>
+                  <td className="px-4 py-3">
+                    {orderQty !== null ? (
+                      orderQty > 0 ? (
+                        <span className="font-bold text-[var(--brand-dark)]">{formatNumber(orderQty)}</span>
+                      ) : (
+                        <span className="text-[var(--text-muted)]">0</span>
+                      )
+                    ) : (
+                      '—'
+                    )}
                   </td>
                   <td className="px-4 py-3">{item.purchasePrice !== undefined ? formatCurrency(item.purchasePrice) : '—'}</td>
                   <td className="px-4 py-3">{item.salePrice !== undefined ? formatCurrency(item.salePrice) : '—'}</td>
@@ -236,7 +366,7 @@ export default function Inventory() {
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-sm text-[var(--text-muted)]">
+                <td colSpan={11} className="px-4 py-10 text-center text-sm text-[var(--text-muted)]">
                   {data.items.length === 0 ? 'لا توجد أصناف — استورد ملف CSV من برنامج الصيدلية أو أضف صنف يدويًا' : 'لا توجد نتائج مطابقة'}
                 </td>
               </tr>
@@ -338,6 +468,50 @@ export default function Inventory() {
               <button onClick={submit} className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-dark)]">
                 {editing ? 'حفظ التعديلات' : 'إضافة'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSalesImport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-base font-bold text-[var(--text)]">استيراد تقرير مبيعات الأصناف</h2>
+              <button onClick={() => setShowSalesImport(false)} className="rounded-md p-1 text-[var(--text-muted)] hover:bg-gray-100">
+                <X size={18} />
+              </button>
+            </div>
+            <p className="mb-4 text-sm text-[var(--text-muted)]">
+              صدّر من برنامج الصيدلية تقرير مبيعات الأصناف (اسم الصنف، الكمية المباعة) لفترة معينة، وحدد هنا عدد الأيام اللي التقرير بيغطيها عشان نحسب متوسط
+              البيع اليومي لكل صنف.
+            </p>
+            <label className="flex flex-col gap-1 text-xs font-medium text-[var(--text-muted)]">
+              التقرير ده بيغطي كام يوم؟
+              <input
+                type="number"
+                min={1}
+                value={salesPeriodDays}
+                onChange={(e) => setSalesPeriodDays(Math.max(1, Number(e.target.value) || 1))}
+                className="input"
+              />
+            </label>
+            <button onClick={downloadSalesTemplate} className="mt-3 flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)]">
+              <Download size={13} />
+              تنزيل نموذج الأعمدة
+            </button>
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setShowSalesImport(false)} className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-muted)]">
+                إلغاء
+              </button>
+              <button
+                onClick={() => salesFileInputRef.current?.click()}
+                className="flex items-center gap-2 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-dark)]"
+              >
+                <Upload size={16} />
+                اختيار الملف
+              </button>
+              <input ref={salesFileInputRef} type="file" accept=".csv,text/csv" onChange={handleSalesFile} className="hidden" />
             </div>
           </div>
         </div>

@@ -59,6 +59,9 @@ export interface Item {
   salePrice?: number // سعر البيع
   supplierId?: string // المورد المفضل
   updatedAt: string // ISO date - آخر تحديث
+
+  avgDailySales?: number // متوسط الكمية المباعة يوميًا (من تقرير مبيعات الأصناف)
+  salesPeriodDays?: number // عدد الأيام اللي اتحسب منها المتوسط (للمرجعية)
 }
 
 export interface Supplier {

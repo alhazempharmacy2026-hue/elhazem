@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import type { AppData, DailyRecord, EmergencyPurchase, Item, Supplier, SupplierTransaction } from '../types'
 import { seedDailyRecords } from '../data/seed'
 import type { ParsedItemRow } from './importItems'
+import type { ParsedSalesRow } from './importSales'
 
 const STORAGE_KEY = 'elhazem-pharmacy-data-v2'
 
@@ -51,6 +52,7 @@ export interface AppStore {
   updateItem: (item: Item) => void
   deleteItem: (id: string) => void
   importItems: (rows: ParsedItemRow[]) => { added: number; updated: number; newSuppliers: number }
+  importItemSales: (rows: ParsedSalesRow[], periodDays: number) => { matched: number; created: number }
 
   addSupplier: (s: Omit<Supplier, 'id'>) => void
   updateSupplier: (s: Supplier) => void
@@ -179,6 +181,52 @@ export function useAppStore(): AppStore {
     return { added, updated, newSuppliers }
   }
 
+  const importItemSales = (rows: ParsedSalesRow[], periodDays: number) => {
+    let matched = 0
+    let created = 0
+    setData((prev) => {
+      const items = [...prev.items]
+      const byCode = new Map<string, Item>()
+      const byName = new Map<string, Item>()
+      for (const it of items) {
+        if (it.code) byCode.set(it.code.trim().toLowerCase(), it)
+        byName.set(it.name.trim().toLowerCase(), it)
+      }
+
+      for (const row of rows) {
+        const avgDailySales = periodDays > 0 ? row.quantitySold / periodDays : row.quantitySold
+        const codeKey = row.code?.trim() ? row.code.trim().toLowerCase() : undefined
+        const nameKey = row.name.trim().toLowerCase()
+        const existing = (codeKey && byCode.get(codeKey)) || byName.get(nameKey)
+
+        if (existing) {
+          matched++
+          existing.avgDailySales = avgDailySales
+          existing.salesPeriodDays = periodDays
+          existing.updatedAt = today()
+        } else {
+          created++
+          const newItem: Item = {
+            id: uid('item'),
+            name: row.name.trim(),
+            code: row.code?.trim() || undefined,
+            currentStock: 0,
+            minStock: 0,
+            avgDailySales,
+            salesPeriodDays: periodDays,
+            updatedAt: today(),
+          }
+          items.push(newItem)
+          byName.set(nameKey, newItem)
+          if (codeKey) byCode.set(codeKey, newItem)
+        }
+      }
+
+      return { ...prev, items }
+    })
+    return { matched, created }
+  }
+
   const addSupplier = (s: Omit<Supplier, 'id'>) => setData((prev) => ({ ...prev, suppliers: [...prev.suppliers, { ...s, id: uid('sup') }] }))
 
   const updateSupplier = (s: Supplier) =>
@@ -219,6 +267,7 @@ export function useAppStore(): AppStore {
     updateItem,
     deleteItem,
     importItems,
+    importItemSales,
     addSupplier,
     updateSupplier,
     deleteSupplier,
