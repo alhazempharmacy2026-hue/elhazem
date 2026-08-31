@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - claude/pharmacy-web-app-dashboard-9i7gjo
+      - claude/inventory-purchasing-system-h4zqhk
   workflow_dispatch:
 
 permissions:
