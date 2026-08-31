@@ -112,6 +112,9 @@ export default function Inventory() {
       list = list.filter((i) => i.name.toLowerCase().includes(q) || i.code?.toLowerCase().includes(q))
     }
     return list.sort((a, b) => {
+      const qtyA = suggestedOrderQty(a, coverageDays) ?? -1
+      const qtyB = suggestedOrderQty(b, coverageDays) ?? -1
+      if (qtyA !== qtyB) return qtyB - qtyA
       const sa = stockStatus(a)
       const sb = stockStatus(b)
       const order: Record<StockStatus, number> = { out: 0, low: 1, ok: 2 }
