@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="{{ settings.color_accent }}">
+    <meta name="theme-color" content="{{ settings.color_brand }}">
     <link rel="canonical" href="{{ canonical_url }}">
 
     {%- if settings.favicon != blank -%}
@@ -50,6 +50,7 @@
         --color-bg-soft: {{ settings.color_bg_soft }};
         --color-text: {{ settings.color_text }};
         --color-muted: {{ settings.color_muted }};
+        --color-brand: {{ settings.color_brand }};
         --color-accent: {{ settings.color_accent }};
         --color-accent-text: {{ settings.color_accent_text }};
         --color-sale: {{ settings.color_sale }};

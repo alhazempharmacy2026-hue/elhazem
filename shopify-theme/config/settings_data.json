@@ -1,14 +1,14 @@
 {
   "current": {
-    "logo_width": 130,
+    "logo_width": 180,
     "color_bg": "#ffffff",
-    "color_bg_soft": "#fdf6f3",
-    "color_text": "#241c1b",
-    "color_muted": "#7a6d6a",
-    "color_accent": "#b8615f",
+    "color_bg_soft": "#f1f6fc",
+    "color_text": "#152a52",
+    "color_muted": "#5c6d88",
+    "color_accent": "#c8102e",
     "color_accent_text": "#ffffff",
-    "color_sale": "#c0392b",
-    "color_border": "#ece2de",
+    "color_sale": "#c8102e",
+    "color_border": "#dbe4f1",
     "font_family": "Cairo",
     "font_size_base": 16,
     "page_width": 1340,
@@ -29,6 +29,7 @@
     "phone": "",
     "social_facebook": "",
     "social_instagram": "",
-    "social_tiktok": ""
+    "social_tiktok": "",
+    "color_brand": "#1f5fa8"
   }
 }

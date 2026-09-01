@@ -18,12 +18,12 @@
       {
         "type": "range",
         "id": "logo_width",
-        "min": 60,
-        "max": 220,
+        "min": 80,
+        "max": 320,
         "step": 10,
         "unit": "px",
         "label": "عرض الشعار",
-        "default": 130
+        "default": 180
       },
       {
         "type": "image_picker",
@@ -45,25 +45,33 @@
         "type": "color",
         "id": "color_bg_soft",
         "label": "خلفية ثانوية (أقسام)",
-        "default": "#fdf6f3"
+        "default": "#f1f6fc"
       },
       {
         "type": "color",
         "id": "color_text",
         "label": "لون النص",
-        "default": "#241c1b"
+        "default": "#152a52"
       },
       {
         "type": "color",
         "id": "color_muted",
         "label": "لون النص الثانوي",
-        "default": "#7a6d6a"
+        "default": "#5c6d88"
+      },
+      {
+        "type": "color",
+        "id": "color_brand",
+        "label": "لون الهوية (الأزرق)",
+        "info": "بيستخدم في الروابط والأيقونات وأرقام الخطوات وحالة الاختيار.",
+        "default": "#1f5fa8"
       },
       {
         "type": "color",
         "id": "color_accent",
-        "label": "اللون الأساسي (الأزرار)",
-        "default": "#b8615f"
+        "label": "لون الأزرار (الأحمر)",
+        "default": "#c8102e",
+        "info": "لون زر الشراء وشارة عدد المنتجات في العربة."
       },
       {
         "type": "color",
@@ -75,13 +83,13 @@
         "type": "color",
         "id": "color_sale",
         "label": "لون الخصم",
-        "default": "#c0392b"
+        "default": "#c8102e"
       },
       {
         "type": "color",
         "id": "color_border",
         "label": "لون الحدود",
-        "default": "#ece2de"
+        "default": "#dbe4f1"
       }
     ]
   },
@@ -93,10 +101,22 @@
         "id": "font_family",
         "label": "الخط",
         "options": [
-          { "value": "Cairo", "label": "Cairo" },
-          { "value": "Tajawal", "label": "Tajawal" },
-          { "value": "Almarai", "label": "Almarai" },
-          { "value": "IBM Plex Sans Arabic", "label": "IBM Plex Sans Arabic" }
+          {
+            "value": "Cairo",
+            "label": "Cairo"
+          },
+          {
+            "value": "Tajawal",
+            "label": "Tajawal"
+          },
+          {
+            "value": "Almarai",
+            "label": "Almarai"
+          },
+          {
+            "value": "IBM Plex Sans Arabic",
+            "label": "IBM Plex Sans Arabic"
+          }
         ],
         "default": "Cairo"
       },
