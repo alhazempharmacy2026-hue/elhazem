@@ -1,5 +1,7 @@
 {
   "current": {
+    "logo": "shopify://shop_images/elhazemlogoar.png",
+    "favicon": "shopify://shop_images/elhazemfavicon.png",
     "logo_width": 180,
     "color_bg": "#ffffff",
     "color_bg_soft": "#f1f6fc",

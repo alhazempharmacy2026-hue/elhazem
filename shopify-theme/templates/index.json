@@ -1,34 +1,45 @@
 {
   "sections": {
     "hero": {
-      "type": "hero-slideshow",
+      "type": "hero-products",
       "blocks": {
-        "slide-1": {
-          "type": "slide",
+        "t1": {
+          "type": "point",
           "settings": {
-            "kicker": "أصلي ١٠٠٪",
-            "heading": "جمالك يستحق الأصلي",
-            "text": "منتجات عناية وميك أب أصلية بأسعار تنافسية، وتوصيل لكل محافظات مصر.",
-            "button_label": "تسوقي دلوقتي"
+            "icon": "shield",
+            "text": "أصلي ١٠٠٪"
           }
         },
-        "slide-2": {
-          "type": "slide",
+        "t2": {
+          "type": "point",
           "settings": {
-            "kicker": "عرض الأسبوع",
-            "heading": "خصومات على العناية بالبشرة",
-            "text": "وفري لحد ٣٠٪ على أشهر الماركات.",
-            "button_label": "شوفي العروض"
+            "icon": "cash",
+            "text": "الدفع عند الاستلام"
+          }
+        },
+        "t3": {
+          "type": "point",
+          "settings": {
+            "icon": "truck",
+            "text": "شحن لكل مصر"
           }
         }
       },
       "block_order": [
-        "slide-1",
-        "slide-2"
+        "t1",
+        "t2",
+        "t3"
       ],
       "settings": {
-        "text_align": "start",
-        "autoplay": 6
+        "collection": "offers",
+        "count": 3,
+        "kicker": "من صيدلية الحازم",
+        "heading": "منتجات أصلية… من صيدلية حقيقية",
+        "text": "مش صفحة بتبيع — صيدلية معروفة بتوصّلك منتجات عناية أصلية ١٠٠٪ لكل محافظات مصر.",
+        "button_label": "تسوقي دلوقتي",
+        "button_link": "/collections/skincare",
+        "show_whatsapp": true,
+        "whatsapp_label": "اسألي الصيدلي"
       }
     },
     "usp": {
