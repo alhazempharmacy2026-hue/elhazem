@@ -1,0 +1,24 @@
+<div class="section">
+  <div class="container">
+    <div class="auth-card">
+      <h1>{{ 'customer.register.title' | t }}</h1>
+      {%- form 'activate_customer_password' -%}
+        {%- if form.errors -%}
+          <p class="form-status form-status--error">{{ form.errors | default_errors }}</p>
+        {%- endif -%}
+        <div class="field">
+          <label for="activate-password">{{ 'customer.login.password' | t }}</label>
+          <input id="activate-password" type="password" name="customer[password]" autocomplete="new-password" required>
+        </div>
+        <div class="field">
+          <label for="activate-password-confirm">{{ 'customer.login.password' | t }}</label>
+          <input id="activate-password-confirm" type="password" name="customer[password_confirmation]" autocomplete="new-password" required>
+        </div>
+        <button type="submit" class="btn btn--full">{{ 'customer.register.submit' | t }}</button>
+        <button type="submit" name="decline" class="btn btn--outline btn--full" style="margin-top:.5rem">
+          {{ 'customer.recover.cancel' | t }}
+        </button>
+      {%- endform -%}
+    </div>
+  </div>
+</div>

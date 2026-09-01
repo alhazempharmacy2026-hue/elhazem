@@ -1,0 +1,69 @@
+<div class="section">
+  <div class="container article-body">
+    <nav class="breadcrumb">
+      <a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a>
+      <span>/</span><a href="{{ blog.url }}">{{ blog.title }}</a>
+    </nav>
+
+    <h1>{{ article.title }}</h1>
+    <p class="article-card__meta">
+      {{ 'blogs.article.posted_on' | t }} {{ article.published_at | date: '%d/%m/%Y' }}
+      {%- if article.author != blank %} · {{ article.author }}{% endif -%}
+    </p>
+
+    {%- if article.image -%}
+      <img
+        src="{{ article.image | image_url: width: 1200 }}"
+        srcset="{{ article.image | image_url: width: 600 }} 600w, {{ article.image | image_url: width: 1200 }} 1200w"
+        sizes="(min-width: 990px) 760px, 92vw"
+        alt="{{ article.image.alt | escape }}"
+        width="1200"
+        height="700"
+        style="margin-bottom:1.5rem"
+      >
+    {%- endif -%}
+
+    <div class="rte">{{ article.content }}</div>
+
+    <p style="margin-top:2rem">
+      <a class="section-head__link" href="{{ blog.url }}">← {{ 'blogs.article.back_to_blog' | t }}</a>
+    </p>
+
+    {%- if blog.comments_enabled? -%}
+      <div style="margin-top:2.5rem">
+        {%- for comment in article.comments -%}
+          <div class="quote" style="margin-bottom:1rem">
+            <p class="quote__text">{{ comment.content }}</p>
+            <footer class="quote__author">{{ comment.author }}</footer>
+          </div>
+        {%- endfor -%}
+
+        {%- form 'new_comment', article -%}
+          {%- if form.errors -%}
+            <p class="form-status form-status--error">{{ form.errors | default_errors }}</p>
+          {%- endif -%}
+          {%- if form.posted_successfully? -%}
+            <p class="form-status form-status--success">{{ 'general.newsletter.success' | t }}</p>
+          {%- endif -%}
+          <div class="field">
+            <label for="comment-author">{{ 'customer.register.first_name' | t }}</label>
+            <input id="comment-author" type="text" name="comment[author]" required>
+          </div>
+          <div class="field">
+            <label for="comment-email">{{ 'customer.login.email' | t }}</label>
+            <input id="comment-email" type="email" name="comment[email]" required>
+          </div>
+          <div class="field">
+            <label for="comment-body">{{ 'blogs.article.read_more' | t }}</label>
+            <textarea id="comment-body" name="comment[body]" required></textarea>
+          </div>
+          <button type="submit" class="btn">{{ 'general.newsletter.submit' | t }}</button>
+        {%- endform -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{ "name": "المقال", "settings": [] }
+{% endschema %}

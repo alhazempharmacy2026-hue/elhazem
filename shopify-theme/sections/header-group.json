@@ -1,0 +1,42 @@
+{
+  "name": "الهيدر",
+  "type": "header",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "message-1": {
+          "type": "message",
+          "settings": {
+            "text": "شحن مجاني للطلبات فوق ١٠٠٠ جنيه"
+          }
+        },
+        "message-2": {
+          "type": "message",
+          "settings": {
+            "text": "الدفع عند الاستلام متاح لكل محافظات مصر"
+          }
+        },
+        "message-3": {
+          "type": "message",
+          "settings": {
+            "text": "منتجات أصلية ١٠٠٪ · استبدال خلال ١٤ يوم"
+          }
+        }
+      },
+      "block_order": ["message-1", "message-2", "message-3"],
+      "settings": {
+        "bg": "#241c1b",
+        "text_color": "#ffffff",
+        "interval": 5
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "menu": "main-menu"
+      }
+    }
+  },
+  "order": ["announcement-bar", "header"]
+}

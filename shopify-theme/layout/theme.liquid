@@ -1,0 +1,129 @@
+<!doctype html>
+<html
+  lang="{{ request.locale.iso_code }}"
+  dir="{% if request.locale.iso_code == 'ar' or request.locale.iso_code == 'he' or request.locale.iso_code == 'fa' %}rtl{% else %}ltr{% endif %}"
+>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="{{ settings.color_accent }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 48, height: 48 }}">
+    {%- endif -%}
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; {{ 'general.search.results_for' | t }} {{ current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.pagination.page' | t: number: current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {%- render 'meta-tags' -%}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family={{ settings.font_family | replace: ' ', '+' }}:wght@400;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    >
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family={{ settings.font_family | replace: ' ', '+' }}:wght@400;600;700;800&display=swap">
+    </noscript>
+
+    <style>
+      :root {
+        --font-body: '{{ settings.font_family }}', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        --font-size-base: {{ settings.font_size_base }}px;
+        --page-width: {{ settings.page_width }}px;
+        --radius: {{ settings.radius }}px;
+        --logo-width: {{ settings.logo_width }}px;
+        --color-bg: {{ settings.color_bg }};
+        --color-bg-soft: {{ settings.color_bg_soft }};
+        --color-text: {{ settings.color_text }};
+        --color-muted: {{ settings.color_muted }};
+        --color-accent: {{ settings.color_accent }};
+        --color-accent-text: {{ settings.color_accent_text }};
+        --color-sale: {{ settings.color_sale }};
+        --color-border: {{ settings.color_border }};
+        --drawer-hidden-x: 100%;
+      }
+      html[dir='rtl'] { --drawer-hidden-x: -100%; }
+      html[dir='rtl'] .drawer--start { --drawer-hidden-x: 100%; }
+      html[dir='ltr'] .drawer--start { --drawer-hidden-x: -100%; }
+    </style>
+
+    <link rel="stylesheet" href="{{ 'base.css' | asset_url }}">
+
+    <script>
+      window.themeRoutes = {
+        root: {{ routes.root_url | json }},
+        cart: {{ routes.cart_url | json }},
+        cart_add: {{ routes.cart_add_url | json }},
+        cart_change: {{ routes.cart_change_url | json }},
+        predictive_search: {{ routes.predictive_search_url | json }}
+      };
+      window.themeMoneyFormat = {{ shop.money_format | strip_html | json }};
+      window.themeStrings = {
+        products: {
+          product: {
+            add_to_cart: {{ 'products.product.add_to_cart' | t | json }},
+            sold_out: {{ 'products.product.sold_out' | t | json }},
+            unavailable: {{ 'products.product.unavailable' | t | json }},
+            added: {{ 'products.product.added' | t | json }}
+          }
+        },
+        general: {
+          share: { copied: {{ 'general.share.copied' | t | json }} }
+        },
+        cart: {
+          general: {
+            free_shipping_progress: {{ 'cart.general.free_shipping_progress' | t: amount: '[amount]' | json }},
+            free_shipping_reached: {{ 'cart.general.free_shipping_reached' | t | json }}
+          }
+        }
+      };
+    </script>
+    <script src="{{ 'theme.js' | asset_url }}" defer></script>
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="template-{{ template.name | handle }}">
+    <a class="skip-link" href="#main">{{ 'general.accessibility.skip_to_content' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="main" role="main">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {%- if settings.cart_drawer -%}
+      {% section 'cart-drawer' %}
+    {%- endif -%}
+
+    {%- if settings.whatsapp_float and settings.whatsapp_number != blank -%}
+      <a
+        class="wa-float"
+        href="https://wa.me/{{ settings.whatsapp_number }}"
+        target="_blank"
+        rel="noopener"
+        aria-label="WhatsApp"
+      >
+        {%- render 'icon', name: 'whatsapp' -%}
+      </a>
+    {%- endif -%}
+
+    <div class="overlay"></div>
+  </body>
+</html>

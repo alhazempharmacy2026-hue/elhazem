@@ -1,0 +1,52 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "vendor": { "type": "vendor", "settings": {} },
+        "title": { "type": "title", "settings": {} },
+        "price": { "type": "price", "settings": {} },
+        "stock": { "type": "stock", "settings": {} },
+        "variant_picker": { "type": "variant_picker", "settings": {} },
+        "buy_buttons": { "type": "buy_buttons", "settings": { "show_dynamic_checkout": true } },
+        "trust": {
+          "type": "trust",
+          "settings": { "trust_1": "الدفع عند الاستلام", "trust_2": "منتج أصلي ١٠٠٪" }
+        },
+        "whatsapp": { "type": "whatsapp", "settings": {} },
+        "description": { "type": "description", "settings": {} },
+        "accordion": {
+          "type": "accordion",
+          "settings": {
+            "row_1_title": "المكونات",
+            "row_2_title": "طريقة الاستخدام",
+            "row_3_title": "الشحن والاستبدال",
+            "row_3_content": "<p>الشحن لكل محافظات مصر خلال ٢-٤ أيام عمل. الاستبدال متاح خلال ١٤ يوم بشرط عدم فتح المنتج.</p>"
+          }
+        },
+        "sku": { "type": "sku", "settings": {} },
+        "share": { "type": "share", "settings": {} }
+      },
+      "block_order": [
+        "vendor",
+        "title",
+        "price",
+        "stock",
+        "variant_picker",
+        "buy_buttons",
+        "trust",
+        "whatsapp",
+        "description",
+        "accordion",
+        "sku",
+        "share"
+      ],
+      "settings": {}
+    },
+    "related": {
+      "type": "related-products",
+      "settings": { "heading": "منتجات تعجبك كمان", "limit": 4 }
+    }
+  },
+  "order": ["main", "related"]
+}

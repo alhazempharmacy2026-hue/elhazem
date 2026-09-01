@@ -1,0 +1,161 @@
+{
+  "general": {
+    "accessibility": {
+      "skip_to_content": "تخطي إلى المحتوى",
+      "close": "إغلاق",
+      "previous": "السابق",
+      "next": "التالي",
+      "menu": "القائمة",
+      "search": "بحث",
+      "cart": "عربة التسوق",
+      "account": "حسابي"
+    },
+    "search": {
+      "title": "ابحث عن منتج",
+      "placeholder": "دوري على كريم، سيروم، ميك أب...",
+      "submit": "بحث",
+      "results_for": "نتائج البحث عن",
+      "no_results": "مفيش نتائج لـ \"{{ terms }}\". جربي كلمة تانية أو تصفحي الأقسام.",
+      "results_count": {
+        "one": "نتيجة واحدة",
+        "other": "{{ count }} نتيجة"
+      }
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "صفحة {{ number }}"
+    },
+    "newsletter": {
+      "email": "بريدك الإلكتروني",
+      "submit": "اشتركي",
+      "success": "تمام! هتوصلك عروضنا أول بأول."
+    },
+    "share": {
+      "label": "شاركي المنتج",
+      "copied": "تم نسخ الرابط"
+    },
+    "breadcrumb": {
+      "home": "الرئيسية"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "أضيفي للعربة",
+      "buy_now": "اشتري دلوقتي",
+      "sold_out": "نفدت الكمية",
+      "unavailable": "غير متاح",
+      "quantity": "الكمية",
+      "vendor": "الماركة",
+      "sku": "كود المنتج",
+      "on_sale": "خصم",
+      "save_amount": "توفري {{ amount }}",
+      "regular_price": "السعر الأصلي",
+      "sale_price": "السعر بعد الخصم",
+      "from_price": "يبدأ من",
+      "in_stock": "متوفر",
+      "low_stock": "باقي {{ count }} قطع بس!",
+      "added": "تمت الإضافة للعربة",
+      "quick_add": "إضافة سريعة",
+      "choose_options": "اختاري المواصفات",
+      "description": "الوصف",
+      "ingredients": "المكونات",
+      "how_to_use": "طريقة الاستخدام",
+      "shipping_returns": "الشحن والاستبدال",
+      "ask_on_whatsapp": "اسألينا على واتساب",
+      "share": "مشاركة",
+      "related": "منتجات تعجبك كمان",
+      "recently_viewed": "شوفتيها قريب",
+      "media_gallery": "صور المنتج",
+      "view_details": "عرض التفاصيل"
+    }
+  },
+  "collections": {
+    "general": {
+      "all_products": "كل المنتجات",
+      "empty": "مفيش منتجات في القسم ده حاليًا.",
+      "products_count": {
+        "one": "منتج واحد",
+        "other": "{{ count }} منتج"
+      },
+      "view_all": "شوفي الكل",
+      "filters": "فلترة",
+      "clear_filters": "مسح الفلاتر",
+      "apply": "تطبيق",
+      "sort_by": "ترتيب حسب",
+      "price_range": "نطاق السعر"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "عربة التسوق",
+      "empty": "عربتك فاضية",
+      "empty_note": "ابدئي التسوق واختاري منتجاتك المفضلة.",
+      "continue_shopping": "أكملي التسوق",
+      "subtotal": "الإجمالي الفرعي",
+      "checkout": "إتمام الطلب",
+      "remove": "حذف",
+      "quantity": "الكمية",
+      "product": "المنتج",
+      "total": "الإجمالي",
+      "note": "ملاحظات على الطلب",
+      "note_placeholder": "أي تفاصيل تحبي نعرفها عن طلبك",
+      "shipping_note": "الشحن والضرائب بتتحسب في صفحة إتمام الطلب.",
+      "cod_note": "الدفع عند الاستلام متاح لكل محافظات مصر.",
+      "free_shipping_progress": "باقي {{ amount }} وتحصلي على شحن مجاني",
+      "free_shipping_reached": "مبروك! الشحن مجاني على طلبك"
+    }
+  },
+  "customer": {
+    "account": {
+      "title": "حسابي",
+      "orders": "طلباتي",
+      "addresses": "عناويني",
+      "logout": "تسجيل الخروج",
+      "no_orders": "لسه مفيش طلبات."
+    },
+    "login": {
+      "title": "تسجيل الدخول",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "submit": "دخول",
+      "forgot": "نسيتي كلمة المرور؟",
+      "create": "إنشاء حساب جديد",
+      "guest": "المتابعة كضيف"
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "first_name": "الاسم الأول",
+      "last_name": "اسم العائلة",
+      "submit": "إنشاء الحساب",
+      "has_account": "عندك حساب بالفعل؟"
+    },
+    "recover": {
+      "title": "استعادة كلمة المرور",
+      "submit": "إرسال",
+      "cancel": "إلغاء",
+      "success": "بعتنالك رسالة على بريدك لو الحساب موجود."
+    },
+    "orders": {
+      "order_number": "رقم الطلب",
+      "date": "التاريخ",
+      "payment_status": "حالة الدفع",
+      "fulfillment_status": "حالة الشحن",
+      "total": "الإجمالي"
+    }
+  },
+  "blogs": {
+    "article": {
+      "read_more": "اقرئي المزيد",
+      "back_to_blog": "رجوع للمدونة",
+      "posted_on": "نُشر في"
+    }
+  },
+  "sections": {
+    "404": {
+      "title": "الصفحة مش موجودة",
+      "text": "الرابط اللي دخلتي عليه مش شغال أو الصفحة اتشالت.",
+      "cta": "ارجعي للرئيسية"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+<div class="section">
+  <div class="container">
+    <h1>{{ page_title }}</h1>
+    <div class="tiles" style="--tiles-md:4">
+      {%- for collection in collections -%}
+        <a class="tile" href="{{ collection.url }}">
+          <div class="tile__media">
+            {%- if collection.featured_image -%}
+              <img
+                src="{{ collection.featured_image | image_url: width: 600 }}"
+                srcset="{{ collection.featured_image | image_url: width: 300 }} 300w, {{ collection.featured_image | image_url: width: 600 }} 600w"
+                sizes="(min-width: 750px) 22vw, 45vw"
+                alt="{{ collection.featured_image.alt | escape }}"
+                width="600"
+                height="750"
+                loading="lazy"
+              >
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
+            {%- endif -%}
+          </div>
+          <span class="tile__label">{{ collection.title }}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{ "name": "كل المجموعات", "settings": [] }
+{% endschema %}

@@ -1,0 +1,161 @@
+{
+  "general": {
+    "accessibility": {
+      "skip_to_content": "Skip to content",
+      "close": "Close",
+      "previous": "Previous",
+      "next": "Next",
+      "menu": "Menu",
+      "search": "Search",
+      "cart": "Cart",
+      "account": "Account"
+    },
+    "search": {
+      "title": "Search products",
+      "placeholder": "Search for a cream, serum, makeup...",
+      "submit": "Search",
+      "results_for": "Search results for",
+      "no_results": "No results for \"{{ terms }}\". Try another keyword or browse our collections.",
+      "results_count": {
+        "one": "1 result",
+        "other": "{{ count }} results"
+      }
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{ number }}"
+    },
+    "newsletter": {
+      "email": "Your email",
+      "submit": "Subscribe",
+      "success": "Thanks! You're on the list."
+    },
+    "share": {
+      "label": "Share this product",
+      "copied": "Link copied"
+    },
+    "breadcrumb": {
+      "home": "Home"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to cart",
+      "buy_now": "Buy it now",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "quantity": "Quantity",
+      "vendor": "Brand",
+      "sku": "SKU",
+      "on_sale": "Sale",
+      "save_amount": "Save {{ amount }}",
+      "regular_price": "Regular price",
+      "sale_price": "Sale price",
+      "from_price": "From",
+      "in_stock": "In stock",
+      "low_stock": "Only {{ count }} left!",
+      "added": "Added to cart",
+      "quick_add": "Quick add",
+      "choose_options": "Choose options",
+      "description": "Description",
+      "ingredients": "Ingredients",
+      "how_to_use": "How to use",
+      "shipping_returns": "Shipping & returns",
+      "ask_on_whatsapp": "Ask us on WhatsApp",
+      "share": "Share",
+      "related": "You may also like",
+      "recently_viewed": "Recently viewed",
+      "media_gallery": "Product media",
+      "view_details": "View details"
+    }
+  },
+  "collections": {
+    "general": {
+      "all_products": "All products",
+      "empty": "No products in this collection yet.",
+      "products_count": {
+        "one": "1 product",
+        "other": "{{ count }} products"
+      },
+      "view_all": "View all",
+      "filters": "Filter",
+      "clear_filters": "Clear filters",
+      "apply": "Apply",
+      "sort_by": "Sort by",
+      "price_range": "Price range"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Your cart",
+      "empty": "Your cart is empty",
+      "empty_note": "Start shopping and pick your favourites.",
+      "continue_shopping": "Continue shopping",
+      "subtotal": "Subtotal",
+      "checkout": "Checkout",
+      "remove": "Remove",
+      "quantity": "Quantity",
+      "product": "Product",
+      "total": "Total",
+      "note": "Order notes",
+      "note_placeholder": "Anything we should know about your order",
+      "shipping_note": "Shipping and taxes are calculated at checkout.",
+      "cod_note": "Cash on delivery available across all Egyptian governorates.",
+      "free_shipping_progress": "You're {{ amount }} away from free shipping",
+      "free_shipping_reached": "You've unlocked free shipping!"
+    }
+  },
+  "customer": {
+    "account": {
+      "title": "My account",
+      "orders": "Orders",
+      "addresses": "Addresses",
+      "logout": "Log out",
+      "no_orders": "You haven't placed any orders yet."
+    },
+    "login": {
+      "title": "Log in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Log in",
+      "forgot": "Forgot your password?",
+      "create": "Create an account",
+      "guest": "Continue as guest"
+    },
+    "register": {
+      "title": "Create account",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "submit": "Create account",
+      "has_account": "Already have an account?"
+    },
+    "recover": {
+      "title": "Reset password",
+      "submit": "Send",
+      "cancel": "Cancel",
+      "success": "We've sent you an email if that account exists."
+    },
+    "orders": {
+      "order_number": "Order",
+      "date": "Date",
+      "payment_status": "Payment status",
+      "fulfillment_status": "Fulfillment status",
+      "total": "Total"
+    }
+  },
+  "blogs": {
+    "article": {
+      "read_more": "Read more",
+      "back_to_blog": "Back to blog",
+      "posted_on": "Posted on"
+    }
+  },
+  "sections": {
+    "404": {
+      "title": "Page not found",
+      "text": "The page you're looking for doesn't exist or has been moved.",
+      "cta": "Back to home"
+    }
+  }
+}

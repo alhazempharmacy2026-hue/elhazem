@@ -1,0 +1,53 @@
+<div class="section {% if section.settings.soft_bg %}section--soft{% endif %}">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>{{ section.settings.heading }}</h2>
+        {%- if section.settings.subheading != blank -%}
+          <p class="section-head__sub">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+    <div class="quotes">
+      {%- for block in section.blocks -%}
+        <blockquote class="quote" {{ block.shopify_attributes }}>
+          <div class="quote__stars" aria-label="{{ block.settings.rating }}/5">
+            {%- for i in (1..block.settings.rating) -%}★{%- endfor -%}
+          </div>
+          <p class="quote__text">{{ block.settings.text }}</p>
+          <footer class="quote__author">{{ block.settings.author }}{% if block.settings.city != blank %} — {{ block.settings.city }}{% endif %}</footer>
+        </blockquote>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "آراء العملاء",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "العنوان", "default": "عملاؤنا بيقولوا إيه" },
+    { "type": "text", "id": "subheading", "label": "العنوان الفرعي" },
+    { "type": "checkbox", "id": "soft_bg", "label": "خلفية ثانوية", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "quote",
+      "name": "رأي",
+      "settings": [
+        { "type": "textarea", "id": "text", "label": "النص", "default": "المنتج أصلي والتوصيل كان أسرع مما توقعت. هتعامل تاني أكيد." },
+        { "type": "text", "id": "author", "label": "الاسم", "default": "منة" },
+        { "type": "text", "id": "city", "label": "المدينة", "default": "القاهرة" },
+        { "type": "range", "id": "rating", "min": 1, "max": 5, "step": 1, "label": "التقييم", "default": 5 }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "آراء العملاء",
+      "blocks": [{ "type": "quote" }, { "type": "quote" }, { "type": "quote" }]
+    }
+  ]
+}
+{% endschema %}

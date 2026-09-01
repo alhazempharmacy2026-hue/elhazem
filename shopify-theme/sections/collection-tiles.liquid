@@ -1,0 +1,84 @@
+<div class="section {% if section.settings.soft_bg %}section--soft{% endif %}">
+  <div class="container">
+    {%- if section.settings.heading != blank -%}
+      <div class="section-head">
+        <div>
+          <h2>{{ section.settings.heading }}</h2>
+          {%- if section.settings.subheading != blank -%}
+            <p class="section-head__sub">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="tiles" style="--tiles-md: {{ section.settings.columns }}">
+      {%- for block in section.blocks -%}
+        {%- assign collection = collections[block.settings.collection] -%}
+        <a
+          class="tile {% if section.settings.shape == 'round' %}tile--round{% endif %}"
+          href="{{ collection.url | default: block.settings.link | default: routes.all_products_collection_url }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="tile__media">
+            {%- assign image = block.settings.image | default: collection.featured_image -%}
+            {%- if image -%}
+              <img
+                src="{{ image | image_url: width: 600 }}"
+                srcset="{{ image | image_url: width: 300 }} 300w, {{ image | image_url: width: 600 }} 600w"
+                sizes="(min-width: 750px) 22vw, 45vw"
+                alt="{{ image.alt | escape }}"
+                width="600"
+                height="750"
+                loading="lazy"
+              >
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
+            {%- endif -%}
+          </div>
+          <span class="tile__label">{{ block.settings.title | default: collection.title }}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "أقسام المتجر",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "العنوان", "default": "تسوقي حسب القسم" },
+    { "type": "text", "id": "subheading", "label": "العنوان الفرعي" },
+    {
+      "type": "select",
+      "id": "shape",
+      "label": "شكل الصورة",
+      "options": [
+        { "value": "card", "label": "مستطيل" },
+        { "value": "round", "label": "دائري" }
+      ],
+      "default": "card"
+    },
+    { "type": "range", "id": "columns", "min": 2, "max": 6, "step": 1, "label": "عدد الأعمدة (كمبيوتر)", "default": 4 },
+    { "type": "checkbox", "id": "soft_bg", "label": "خلفية ثانوية", "default": false }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "قسم",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "المجموعة" },
+        { "type": "text", "id": "title", "label": "الاسم (اختياري)" },
+        { "type": "image_picker", "id": "image", "label": "صورة (اختياري)" },
+        { "type": "url", "id": "link", "label": "رابط بديل" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "أقسام المتجر",
+      "blocks": [{ "type": "tile" }, { "type": "tile" }, { "type": "tile" }, { "type": "tile" }]
+    }
+  ]
+}
+{% endschema %}

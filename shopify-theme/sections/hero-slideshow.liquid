@@ -1,0 +1,114 @@
+{%- if section.blocks.size > 0 -%}
+  <hero-slideshow
+    class="hero {% if section.settings.text_align == 'center' %}hero--center{% endif %}"
+    data-autoplay="{{ section.settings.autoplay | default: 0 }}"
+  >
+    <div class="hero__slides" data-slides>
+      {%- for block in section.blocks -%}
+        <div class="hero__slide" data-slide aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}" {{ block.shopify_attributes }}>
+          <div class="hero__media">
+            {%- if block.settings.image -%}
+              <img
+                src="{{ block.settings.image | image_url: width: 1800 }}"
+                srcset="{{ block.settings.image | image_url: width: 750 }} 750w, {{ block.settings.image | image_url: width: 1200 }} 1200w, {{ block.settings.image | image_url: width: 1800 }} 1800w"
+                sizes="100vw"
+                alt="{{ block.settings.image.alt | escape }}"
+                width="1800"
+                height="1000"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                fetchpriority="{% if forloop.first %}high{% else %}auto{% endif %}"
+              >
+            {%- else -%}
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder' }}
+            {%- endif -%}
+            <div class="hero__overlay"></div>
+          </div>
+
+          <div class="hero__content">
+            <div class="container">
+              {%- if block.settings.kicker != blank -%}
+                <span class="hero__kicker">{{ block.settings.kicker }}</span>
+              {%- endif -%}
+              {%- if block.settings.heading != blank -%}
+                <h2 class="hero__title">{{ block.settings.heading }}</h2>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <p class="hero__text">{{ block.settings.text }}</p>
+              {%- endif -%}
+              {%- if block.settings.button_label != blank -%}
+                <div class="hero__cta">
+                  <a class="btn btn--lg" href="{{ block.settings.button_link | default: routes.all_products_collection_url }}">
+                    {{ block.settings.button_label }}
+                  </a>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.blocks.size > 1 -%}
+      <div class="hero__dots">
+        {%- for block in section.blocks -%}
+          <button
+            type="button"
+            class="hero__dot"
+            data-dot
+            aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-label="{{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </hero-slideshow>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "بانر رئيسي",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "محاذاة النص",
+      "options": [
+        { "value": "start", "label": "بداية السطر" },
+        { "value": "center", "label": "منتصف" }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "range",
+      "id": "autoplay",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "ث",
+      "label": "التبديل التلقائي (0 = إيقاف)",
+      "default": 6
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "شريحة",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "الصورة" },
+        { "type": "text", "id": "kicker", "label": "نص علوي صغير", "default": "جديد" },
+        { "type": "text", "id": "heading", "label": "العنوان", "default": "جمالك يستحق الأصلي" },
+        { "type": "text", "id": "text", "label": "النص", "default": "منتجات عناية وميك أب أصلية بأسعار تنافسية، وتوصيل لكل مصر." },
+        { "type": "text", "id": "button_label", "label": "نص الزر", "default": "تسوقي دلوقتي" },
+        { "type": "url", "id": "button_link", "label": "رابط الزر" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "بانر رئيسي",
+      "blocks": [{ "type": "slide" }]
+    }
+  ]
+}
+{% endschema %}

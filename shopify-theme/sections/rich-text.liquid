@@ -1,0 +1,24 @@
+<div class="section {% if section.settings.soft_bg %}section--soft{% endif %}">
+  <div class="container {% if section.settings.center %}text-center{% endif %}" style="max-width:760px">
+    {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}
+    <div class="rte">{{ section.settings.text }}</div>
+    {%- if section.settings.button_label != blank -%}
+      <a class="btn" style="margin-top:1rem" href="{{ section.settings.button_link }}">{{ section.settings.button_label }}</a>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "نص",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "العنوان" },
+    { "type": "richtext", "id": "text", "label": "النص", "default": "<p>اكتبي هنا نبذة عن متجرك.</p>" },
+    { "type": "text", "id": "button_label", "label": "نص الزر" },
+    { "type": "url", "id": "button_link", "label": "رابط الزر" },
+    { "type": "checkbox", "id": "center", "label": "توسيط النص", "default": true },
+    { "type": "checkbox", "id": "soft_bg", "label": "خلفية ثانوية", "default": false }
+  ],
+  "presets": [{ "name": "نص" }]
+}
+{% endschema %}

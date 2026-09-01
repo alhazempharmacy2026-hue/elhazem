@@ -1,0 +1,59 @@
+<div class="section">
+  <div class="container page-narrow">
+    <h1>{{ page.title | default: section.settings.heading }}</h1>
+    {%- if page.content != blank -%}
+      <div class="rte">{{ page.content }}</div>
+    {%- endif -%}
+
+    {%- form 'contact' -%}
+      {%- if form.posted_successfully? -%}
+        <p class="form-status form-status--success">{{ section.settings.success_message }}</p>
+      {%- elsif form.errors -%}
+        <p class="form-status form-status--error">{{ form.errors | default_errors }}</p>
+      {%- endif -%}
+
+      <div class="field">
+        <label for="contact-name">الاسم</label>
+        <input id="contact-name" type="text" name="contact[الاسم]" required>
+      </div>
+      <div class="field">
+        <label for="contact-phone">رقم الموبايل</label>
+        <input id="contact-phone" type="tel" name="contact[رقم الموبايل]" required>
+      </div>
+      <div class="field">
+        <label for="contact-email">{{ 'customer.login.email' | t }}</label>
+        <input id="contact-email" type="email" name="contact[email]" required>
+      </div>
+      <div class="field">
+        <label for="contact-body">رسالتك</label>
+        <textarea id="contact-body" name="contact[body]" required></textarea>
+      </div>
+      <button type="submit" class="btn">إرسال</button>
+    {%- endform -%}
+
+    {%- if settings.whatsapp_number != blank -%}
+      <p style="margin-top:1.5rem">
+        <a class="btn btn--outline" href="https://wa.me/{{ settings.whatsapp_number }}" target="_blank" rel="noopener">
+          {%- render 'icon', name: 'whatsapp' -%}
+          {{ 'products.product.ask_on_whatsapp' | t }}
+        </a>
+      </p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "نموذج التواصل",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "العنوان", "default": "تواصلي معانا" },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "رسالة النجاح",
+      "default": "وصلتنا رسالتك، هنرد عليكِ في أقرب وقت."
+    }
+  ],
+  "presets": [{ "name": "نموذج التواصل" }]
+}
+{% endschema %}

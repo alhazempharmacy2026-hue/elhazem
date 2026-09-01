@@ -1,0 +1,37 @@
+{
+  "name": "الفوتر",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "menu-1": {
+          "type": "menu",
+          "settings": {
+            "heading": "تسوقي",
+            "menu": "main-menu"
+          }
+        },
+        "menu-2": {
+          "type": "menu",
+          "settings": {
+            "heading": "خدمة العملاء",
+            "menu": "footer"
+          }
+        },
+        "newsletter": {
+          "type": "newsletter",
+          "settings": {
+            "heading": "اشتركي في النشرة",
+            "text": "خصومات وعروض حصرية قبل الكل."
+          }
+        }
+      },
+      "block_order": ["menu-1", "menu-2", "newsletter"],
+      "settings": {
+        "show_payment_icons": true
+      }
+    }
+  },
+  "order": ["footer"]
+}

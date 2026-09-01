@@ -1,0 +1,58 @@
+<div class="section">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="{{ routes.account_url }}">{{ 'customer.account.title' | t }}</a>
+      <span>/</span>{{ order.name }}
+    </nav>
+
+    <h1>{{ 'customer.orders.order_number' | t }} {{ order.name }}</h1>
+    <p class="cart-note">{{ order.created_at | date: '%d/%m/%Y' }}</p>
+
+    <div class="table-wrap" style="margin-top:1.5rem">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{{ 'cart.general.product' | t }}</th>
+            <th>{{ 'cart.general.quantity' | t }}</th>
+            <th>{{ 'cart.general.total' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- for line in order.line_items -%}
+            <tr>
+              <td>
+                {{ line.title }}
+                {%- if line.sku != blank %}<br><span class="cart-line__variant">{{ line.sku }}</span>{% endif -%}
+              </td>
+              <td>{{ line.quantity }}</td>
+              <td>{{ line.final_line_price | money }}</td>
+            </tr>
+          {%- endfor -%}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2">{{ 'cart.general.subtotal' | t }}</th>
+            <td>{{ order.subtotal_price | money }}</td>
+          </tr>
+          {%- for shipping in order.shipping_methods -%}
+            <tr>
+              <th colspan="2">{{ shipping.title }}</th>
+              <td>{{ shipping.price | money }}</td>
+            </tr>
+          {%- endfor -%}
+          <tr>
+            <th colspan="2">{{ 'cart.general.total' | t }}</th>
+            <td><strong>{{ order.total_price | money }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div style="display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:2rem">
+      <div>
+        <h2>{{ 'customer.account.addresses' | t }}</h2>
+        <div class="rte">{{ order.shipping_address | format_address }}</div>
+      </div>
+    </div>
+  </div>
+</div>

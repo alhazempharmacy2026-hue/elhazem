@@ -1,0 +1,173 @@
+<header class="header">
+  <div class="container header__inner">
+    <button
+      type="button"
+      class="header__icon header__burger"
+      data-drawer-open="menu-drawer"
+      aria-label="{{ 'general.accessibility.menu' | t }}"
+    >
+      {%- render 'icon', name: 'menu' -%}
+    </button>
+
+    <a class="header__logo" href="{{ routes.root_url }}">
+      {%- if settings.logo -%}
+        <img
+          src="{{ settings.logo | image_url: width: 400 }}"
+          alt="{{ shop.name | escape }}"
+          width="{{ settings.logo.width }}"
+          height="{{ settings.logo.height }}"
+        >
+      {%- else -%}
+        {{ shop.name }}
+      {%- endif -%}
+    </a>
+
+    <nav class="header__nav" aria-label="{{ 'general.accessibility.menu' | t }}">
+      <ul class="nav-list">
+        {%- for link in section.settings.menu.links -%}
+          <li>
+            <a class="nav-list__link" href="{{ link.url }}">
+              {{ link.title }}
+              {%- if link.links.size > 0 -%}{% render 'icon', name: 'chevron' %}{%- endif -%}
+            </a>
+            {%- if link.links.size > 0 -%}
+              <ul class="nav-dropdown">
+                {%- for child in link.links -%}
+                  <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <button
+        type="button"
+        class="header__icon"
+        data-drawer-open="search-drawer"
+        aria-label="{{ 'general.accessibility.search' | t }}"
+      >
+        {%- render 'icon', name: 'search' -%}
+      </button>
+
+      {%- if shop.customer_accounts_enabled -%}
+        <a
+          class="header__icon"
+          href="{{ routes.account_url }}"
+          aria-label="{{ 'general.accessibility.account' | t }}"
+        >
+          {%- render 'icon', name: 'user' -%}
+        </a>
+      {%- endif -%}
+
+      {%- if settings.cart_drawer -%}
+        <button
+          type="button"
+          class="header__icon"
+          data-drawer-open="cart-drawer-panel"
+          aria-label="{{ 'general.accessibility.cart' | t }}"
+        >
+          {%- render 'icon', name: 'cart' -%}
+          <span class="header__cart-count" data-cart-count {% if cart.item_count == 0 %}hidden{% endif %}>
+            {{- cart.item_count -}}
+          </span>
+        </button>
+      {%- else -%}
+        <a class="header__icon" href="{{ routes.cart_url }}" aria-label="{{ 'general.accessibility.cart' | t }}">
+          {%- render 'icon', name: 'cart' -%}
+          <span class="header__cart-count" data-cart-count {% if cart.item_count == 0 %}hidden{% endif %}>
+            {{- cart.item_count -}}
+          </span>
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</header>
+
+{%- comment -%} Mobile navigation drawer {%- endcomment -%}
+<theme-drawer id="menu-drawer" class="drawer drawer--start" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="drawer__head">
+    <h2>{{ 'general.accessibility.menu' | t }}</h2>
+    <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {%- render 'icon', name: 'close' -%}
+    </button>
+  </div>
+  <div class="drawer__body">
+    <ul class="mobile-nav">
+      {%- for link in section.settings.menu.links -%}
+        <li>
+          <a href="{{ link.url }}">{{ link.title }}</a>
+          {%- if link.links.size > 0 -%}
+            <ul>
+              {%- for child in link.links -%}
+                <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+    {%- if settings.whatsapp_number != blank -%}
+      <a class="btn btn--outline btn--full" style="margin-top:1.25rem" href="https://wa.me/{{ settings.whatsapp_number }}" target="_blank" rel="noopener">
+        {%- render 'icon', name: 'whatsapp' -%}
+        {{ 'products.product.ask_on_whatsapp' | t }}
+      </a>
+    {%- endif -%}
+  </div>
+</theme-drawer>
+
+{%- comment -%} Search drawer {%- endcomment -%}
+<theme-drawer id="search-drawer" class="drawer" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="drawer__head">
+    <h2>{{ 'general.search.title' | t }}</h2>
+    <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {%- render 'icon', name: 'close' -%}
+    </button>
+  </div>
+  <div class="drawer__body">
+    <form action="{{ routes.search_url }}" method="get" role="search">
+      <input type="hidden" name="type" value="product">
+      <div class="field">
+        <label class="visually-hidden" for="header-search">{{ 'general.search.title' | t }}</label>
+        <input
+          id="header-search"
+          type="search"
+          name="q"
+          placeholder="{{ 'general.search.placeholder' | t }}"
+          data-drawer-focus
+        >
+      </div>
+      <button type="submit" class="btn btn--full">{{ 'general.search.submit' | t }}</button>
+    </form>
+
+    {%- if section.settings.search_links != blank -%}
+      <ul class="footer__list" style="margin-top:1.5rem">
+        {%- for link in section.settings.search_links.links -%}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</theme-drawer>
+
+{% schema %}
+{
+  "name": "الهيدر",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "قائمة التنقل",
+      "default": "main-menu"
+    },
+    {
+      "type": "link_list",
+      "id": "search_links",
+      "label": "روابط سريعة داخل البحث"
+    }
+  ],
+  "enabled_on": { "groups": ["header"] }
+}
+{% endschema %}

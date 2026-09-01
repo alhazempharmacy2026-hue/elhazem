@@ -1,0 +1,253 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "El Hazem Beauty",
+    "theme_version": "1.0.0",
+    "theme_author": "El Hazem",
+    "theme_documentation_url": "https://github.com/alhazempharmacy2026-hue/elhazem",
+    "theme_support_url": "https://github.com/alhazempharmacy2026-hue/elhazem"
+  },
+  {
+    "name": "الهوية والشعار",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "شعار المتجر"
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 60,
+        "max": 220,
+        "step": 10,
+        "unit": "px",
+        "label": "عرض الشعار",
+        "default": 130
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "أيقونة المتصفح (Favicon)"
+      }
+    ]
+  },
+  {
+    "name": "الألوان",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_bg",
+        "label": "خلفية الصفحة",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_bg_soft",
+        "label": "خلفية ثانوية (أقسام)",
+        "default": "#fdf6f3"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "لون النص",
+        "default": "#241c1b"
+      },
+      {
+        "type": "color",
+        "id": "color_muted",
+        "label": "لون النص الثانوي",
+        "default": "#7a6d6a"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "اللون الأساسي (الأزرار)",
+        "default": "#b8615f"
+      },
+      {
+        "type": "color",
+        "id": "color_accent_text",
+        "label": "لون النص فوق الأزرار",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_sale",
+        "label": "لون الخصم",
+        "default": "#c0392b"
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "label": "لون الحدود",
+        "default": "#ece2de"
+      }
+    ]
+  },
+  {
+    "name": "الخطوط والمقاسات",
+    "settings": [
+      {
+        "type": "select",
+        "id": "font_family",
+        "label": "الخط",
+        "options": [
+          { "value": "Cairo", "label": "Cairo" },
+          { "value": "Tajawal", "label": "Tajawal" },
+          { "value": "Almarai", "label": "Almarai" },
+          { "value": "IBM Plex Sans Arabic", "label": "IBM Plex Sans Arabic" }
+        ],
+        "default": "Cairo"
+      },
+      {
+        "type": "range",
+        "id": "font_size_base",
+        "min": 14,
+        "max": 18,
+        "step": 1,
+        "unit": "px",
+        "label": "حجم الخط الأساسي",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "page_width",
+        "min": 1100,
+        "max": 1600,
+        "step": 20,
+        "unit": "px",
+        "label": "أقصى عرض للصفحة",
+        "default": 1340
+      },
+      {
+        "type": "range",
+        "id": "radius",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "استدارة الحواف",
+        "default": 14
+      }
+    ]
+  },
+  {
+    "name": "عربة التسوق",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "cart_drawer",
+        "label": "فتح العربة كدرج جانبي (أسرع)",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "free_shipping_bar",
+        "label": "إظهار شريط الشحن المجاني",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_threshold",
+        "label": "حد الشحن المجاني",
+        "info": "بالجنيه المصري، أرقام فقط. مثال: 1000",
+        "default": "1000"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_cod_note",
+        "label": "إظهار ملاحظة الدفع عند الاستلام",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "كروت المنتجات",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "card_show_vendor",
+        "label": "إظهار اسم الماركة",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_second_image",
+        "label": "إظهار الصورة الثانية عند المرور",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_quick_add",
+        "label": "زر الإضافة السريعة",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_sale_badge",
+        "label": "شارة الخصم",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_savings",
+        "label": "إظهار قيمة التوفير",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "low_stock_notice",
+        "label": "تنبيه قرب نفاد الكمية",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "low_stock_threshold",
+        "min": 1,
+        "max": 25,
+        "step": 1,
+        "label": "حد التنبيه (عدد القطع)",
+        "default": 8
+      }
+    ]
+  },
+  {
+    "name": "التواصل والسوشيال ميديا",
+    "settings": [
+      {
+        "type": "text",
+        "id": "whatsapp_number",
+        "label": "رقم واتساب",
+        "info": "بصيغة دولية بدون + أو مسافات. مثال: 201012345678",
+        "default": "201000000000"
+      },
+      {
+        "type": "checkbox",
+        "id": "whatsapp_float",
+        "label": "إظهار زر واتساب العائم",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "phone",
+        "label": "رقم الهاتف"
+      },
+      {
+        "type": "text",
+        "id": "social_facebook",
+        "label": "Facebook"
+      },
+      {
+        "type": "text",
+        "id": "social_instagram",
+        "label": "Instagram"
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok",
+        "label": "TikTok"
+      }
+    ]
+  }
+]

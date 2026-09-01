@@ -1,0 +1,48 @@
+<div class="section section--soft">
+  <div class="container">
+    <div class="section-head">
+      <div><h2>{{ section.settings.heading }}</h2></div>
+    </div>
+
+    <product-recommendations
+      data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.limit }}"
+    >
+      {%- if recommendations.performed -%}
+        {%- if recommendations.products_count > 0 -%}
+          <div class="product-grid" style="--grid-md:3;--grid-lg:4">
+            {%- for item in recommendations.products -%}
+              {%- render 'product-card', product: item -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        {%- assign fallback = collections[section.settings.fallback_collection] -%}
+        {%- if fallback.products.size > 0 -%}
+          <div class="product-grid" style="--grid-md:3;--grid-lg:4">
+            {%- for item in fallback.products limit: section.settings.limit -%}
+              {%- unless item.id == product.id -%}
+                {%- render 'product-card', product: item -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    </product-recommendations>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "منتجات مقترحة",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "العنوان", "default": "منتجات تعجبك كمان" },
+    { "type": "range", "id": "limit", "min": 4, "max": 12, "step": 2, "label": "عدد المنتجات", "default": 4 },
+    {
+      "type": "collection",
+      "id": "fallback_collection",
+      "label": "مجموعة احتياطية",
+      "info": "تظهر لو Shopify لسه مجمعتش بيانات كافية للتوصيات."
+    }
+  ]
+}
+{% endschema %}

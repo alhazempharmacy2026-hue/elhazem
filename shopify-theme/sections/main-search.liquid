@@ -1,0 +1,49 @@
+{%- paginate search.results by 24 -%}
+  <div class="section">
+    <div class="container">
+      <h1>{{ 'general.search.title' | t }}</h1>
+
+      <form action="{{ routes.search_url }}" method="get" role="search" style="max-width:520px;margin-bottom:2rem">
+        <input type="hidden" name="type" value="product">
+        <div style="display:flex;gap:.5rem">
+          <label class="visually-hidden" for="search-page">{{ 'general.search.title' | t }}</label>
+          <input
+            id="search-page"
+            type="search"
+            name="q"
+            value="{{ search.terms | escape }}"
+            placeholder="{{ 'general.search.placeholder' | t }}"
+          >
+          <button type="submit" class="btn">{{ 'general.search.submit' | t }}</button>
+        </div>
+      </form>
+
+      {%- if search.performed -%}
+        {%- if search.results_count > 0 -%}
+          <p class="collection-toolbar__count">
+            {{ 'general.search.results_count' | t: count: search.results_count }}
+          </p>
+          <div class="product-grid" style="--grid-md:3;--grid-lg:4;margin-top:1rem">
+            {%- for item in search.results -%}
+              {%- if item.object_type == 'product' -%}
+                {%- render 'product-card', product: item -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+          {%- render 'pagination', paginate: paginate -%}
+        {%- else -%}
+          <div class="empty-state">
+            <p>{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+            <a class="btn" href="{{ routes.all_products_collection_url }}">
+              {{ 'collections.general.all_products' | t }}
+            </a>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </div>
+{%- endpaginate -%}
+
+{% schema %}
+{ "name": "صفحة البحث", "settings": [] }
+{% endschema %}

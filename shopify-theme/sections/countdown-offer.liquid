@@ -1,0 +1,42 @@
+<div class="section section--soft" data-countdown-section>
+  <div class="container text-center">
+    {%- if section.settings.kicker != blank -%}
+      <span class="hero__kicker" style="color:var(--color-accent)">{{ section.settings.kicker }}</span>
+    {%- endif -%}
+    <h2>{{ section.settings.heading }}</h2>
+    {%- if section.settings.text != blank -%}
+      <p class="section-head__sub" style="margin-bottom:1.25rem">{{ section.settings.text }}</p>
+    {%- endif -%}
+
+    <countdown-timer class="countdown" data-deadline="{{ section.settings.deadline }}T{{ section.settings.deadline_time }}:00">
+      <span class="countdown__unit"><span class="countdown__num" data-unit="days">00</span><span class="countdown__label">يوم</span></span>
+      <span class="countdown__unit"><span class="countdown__num" data-unit="hours">00</span><span class="countdown__label">ساعة</span></span>
+      <span class="countdown__unit"><span class="countdown__num" data-unit="minutes">00</span><span class="countdown__label">دقيقة</span></span>
+      <span class="countdown__unit"><span class="countdown__num" data-unit="seconds">00</span><span class="countdown__label">ثانية</span></span>
+    </countdown-timer>
+
+    {%- if section.settings.button_label != blank -%}
+      <div style="margin-top:1.5rem">
+        <a class="btn btn--lg" href="{{ section.settings.button_link | default: routes.all_products_collection_url }}">
+          {{ section.settings.button_label }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "عرض بعدّاد تنازلي",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "نص علوي صغير", "default": "عرض محدود" },
+    { "type": "text", "id": "heading", "label": "العنوان", "default": "خصم ٢٥٪ على العناية بالبشرة" },
+    { "type": "text", "id": "text", "label": "النص", "default": "العرض ينتهي قريبًا — اطلبي قبل ما الكمية تخلص." },
+    { "type": "text", "id": "deadline", "label": "تاريخ الانتهاء (YYYY-MM-DD)", "default": "2026-12-31" },
+    { "type": "text", "id": "deadline_time", "label": "وقت الانتهاء (HH:MM)", "default": "23:59" },
+    { "type": "text", "id": "button_label", "label": "نص الزر", "default": "اطلبي دلوقتي" },
+    { "type": "url", "id": "button_link", "label": "رابط الزر" }
+  ],
+  "presets": [{ "name": "عرض بعدّاد تنازلي" }]
+}
+{% endschema %}

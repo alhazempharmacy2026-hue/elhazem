@@ -1,0 +1,61 @@
+{% layout none %}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" dir="{% if request.locale.iso_code == 'ar' %}rtl{% else %}ltr{% endif %}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {%- assign gift_card_value = gift_card.initial_value | money -%}
+    <title>بطاقة هدية {{ gift_card_value }} — {{ shop.name }}</title>
+    <link rel="stylesheet" href="{{ 'base.css' | asset_url }}">
+    <style>
+      :root {
+        --font-body: system-ui, sans-serif;
+        --font-size-base: 16px;
+        --page-width: 620px;
+        --radius: 14px;
+        --color-bg: #ffffff;
+        --color-bg-soft: #fdf6f3;
+        --color-text: #241c1b;
+        --color-muted: #7a6d6a;
+        --color-accent: #b8615f;
+        --color-accent-text: #ffffff;
+        --color-sale: #c0392b;
+        --color-border: #ece2de;
+      }
+      .gift-code {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        padding: 1rem;
+        border: 1px dashed var(--color-border);
+        border-radius: var(--radius);
+        background: var(--color-bg-soft);
+        text-align: center;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="section">
+      <div class="container text-center">
+        <h1>{{ shop.name }}</h1>
+        <p class="section-head__sub">بطاقة هدية بقيمة</p>
+        <p style="font-size:2.2rem;font-weight:800;margin:.25rem 0 1.5rem">{{ gift_card.initial_value | money }}</p>
+
+        <p class="gift-code">{{ gift_card.code | format_code }}</p>
+
+        {%- if gift_card.expires_on -%}
+          <p class="cart-note" style="margin-top:1rem">صالحة حتى {{ gift_card.expires_on | date: '%d/%m/%Y' }}</p>
+        {%- endif -%}
+
+        {%- if gift_card.balance != gift_card.initial_value -%}
+          <p class="cart-note">الرصيد المتبقي: {{ gift_card.balance | money }}</p>
+        {%- endif -%}
+
+        <p style="margin-top:2rem">
+          <a class="btn" href="{{ shop.url }}">تسوقي دلوقتي</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

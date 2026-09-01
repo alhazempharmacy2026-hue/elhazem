@@ -1,0 +1,70 @@
+{%- comment -%}Accepts: item, line (1-based index){%- endcomment -%}
+<div class="cart-line" data-cart-line="{{ line }}">
+  <a class="cart-line__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+    {%- if item.image -%}
+      <img
+        src="{{ item.image | image_url: width: 180 }}"
+        alt="{{ item.image.alt | escape }}"
+        width="90"
+        height="90"
+        loading="lazy"
+      >
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder' }}
+    {%- endif -%}
+  </a>
+
+  <div class="cart-line__body">
+    <a class="cart-line__title" href="{{ item.url }}">{{ item.product.title | escape }}</a>
+
+    {%- unless item.product.has_only_default_variant -%}
+      <div class="cart-line__variant">{{ item.variant.title }}</div>
+    {%- endunless -%}
+
+    {%- if item.selling_plan_allocation -%}
+      <div class="cart-line__variant">{{ item.selling_plan_allocation.selling_plan.name }}</div>
+    {%- endif -%}
+
+    {%- for property in item.properties -%}
+      {%- unless property.last == blank or property.first[0] == '_' -%}
+        <div class="cart-line__variant">{{ property.first }}: {{ property.last }}</div>
+      {%- endunless -%}
+    {%- endfor -%}
+
+    {%- if item.original_line_price > item.final_line_price -%}
+      <div class="cart-line__variant">
+        {%- for discount in item.line_level_discount_allocations -%}
+          {{ discount.discount_application.title }} (−{{ discount.amount | money }})<br>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <div class="cart-line__foot">
+      <quantity-input class="qty">
+        <button type="button" data-step="down" aria-label="−">−</button>
+        <input
+          type="number"
+          value="{{ item.quantity }}"
+          min="0"
+          {% if item.variant.inventory_management and item.variant.inventory_policy == 'deny' %}
+            max="{{ item.variant.inventory_quantity }}"
+          {% endif %}
+          data-line="{{ line }}"
+          aria-label="{{ 'cart.general.quantity' | t }}"
+        >
+        <button type="button" data-step="up" aria-label="+">+</button>
+      </quantity-input>
+
+      <div>
+        <strong>{{ item.final_line_price | money }}</strong>
+        {%- if item.original_line_price > item.final_line_price -%}
+          <s class="price__compare">{{ item.original_line_price | money }}</s>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <button type="button" class="cart-line__remove" data-cart-remove data-line="{{ line }}">
+      {{ 'cart.general.remove' | t }}
+    </button>
+  </div>
+</div>

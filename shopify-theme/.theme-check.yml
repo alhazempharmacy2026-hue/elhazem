@@ -1,0 +1,11 @@
+# Theme Check configuration
+#
+# RemoteAsset is disabled for one deliberate reason: the storefront is
+# Arabic-first and Shopify's font library has no good Arabic web fonts.
+# Cairo / Tajawal / Almarai / IBM Plex Sans Arabic are loaded from Google
+# Fonts with preconnect + display=swap, and every rule declares a local
+# system fallback so text renders before the webfont arrives.
+extends: theme-check:recommended
+
+RemoteAsset:
+  enabled: false

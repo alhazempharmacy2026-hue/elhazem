@@ -1,0 +1,375 @@
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign low_threshold = settings.low_stock_threshold
+-%}
+
+<div class="section" data-product-root>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a>
+      {%- if collection -%}
+        <span>/</span><a href="{{ collection.url }}">{{ collection.title }}</a>
+      {%- endif -%}
+      <span>/</span>{{ product.title }}
+    </nav>
+
+    <div class="product">
+      {%- comment -%} ---------- Gallery ---------- {%- endcomment -%}
+      <media-gallery class="gallery">
+        <div class="gallery__main" data-gallery-main>
+          {%- if product.featured_media -%}
+            <img
+              src="{{ product.featured_media | image_url: width: 1000 }}"
+              srcset="{{ product.featured_media | image_url: width: 500 }} 500w, {{ product.featured_media | image_url: width: 1000 }} 1000w, {{ product.featured_media | image_url: width: 1500 }} 1500w"
+              sizes="(min-width: 990px) 50vw, 100vw"
+              alt="{{ product.featured_media.alt | escape }}"
+              width="1000"
+              height="1000"
+              fetchpriority="high"
+            >
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder' }}
+          {%- endif -%}
+        </div>
+
+        {%- if product.media.size > 1 -%}
+          <div class="gallery__thumbs" role="group" aria-label="{{ 'products.product.media_gallery' | t }}">
+            {%- for media in product.media -%}
+              <button
+                type="button"
+                class="gallery__thumb"
+                data-gallery-thumb
+                data-media-id="{{ media.id }}"
+                data-src="{{ media | image_url: width: 1000 }}"
+                data-srcset="{{ media | image_url: width: 500 }} 500w, {{ media | image_url: width: 1000 }} 1000w"
+                data-alt="{{ media.alt | escape }}"
+                aria-current="{% if media.id == product.featured_media.id %}true{% else %}false{% endif %}"
+                aria-label="{{ forloop.index }}"
+              >
+                <img
+                  src="{{ media | image_url: width: 160 }}"
+                  alt=""
+                  width="80"
+                  height="80"
+                  loading="lazy"
+                >
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </media-gallery>
+
+      {%- comment -%} ---------- Info ---------- {%- endcomment -%}
+      <div class="product__info">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'vendor' -%}
+              {%- if product.vendor != blank -%}
+                <div class="product__vendor" {{ block.shopify_attributes }}>{{ product.vendor }}</div>
+              {%- endif -%}
+
+            {%- when 'title' -%}
+              <h1 class="product__title" {{ block.shopify_attributes }}>{{ product.title }}</h1>
+
+            {%- when 'price' -%}
+              <div class="product__price" data-price-block {{ block.shopify_attributes }}>
+                {%- render 'price', variant: variant, show_savings: true -%}
+              </div>
+
+            {%- when 'stock' -%}
+              <div data-stock-block style="margin-bottom:.9rem" {{ block.shopify_attributes }}>
+                {%- if variant.available == false -%}
+                  <span class="stock stock--out">{{ 'products.product.sold_out' | t }}</span>
+                {%- elsif settings.low_stock_notice
+                    and variant.inventory_management == 'shopify'
+                    and variant.inventory_policy == 'deny'
+                    and variant.inventory_quantity > 0
+                    and variant.inventory_quantity <= low_threshold -%}
+                  <span class="stock stock--low">{{ 'products.product.low_stock' | t: count: variant.inventory_quantity }}</span>
+                {%- else -%}
+                  <span class="stock stock--in">{{ 'products.product.in_stock' | t }}</span>
+                {%- endif -%}
+              </div>
+
+            {%- when 'variant_picker' -%}
+              {%- unless product.has_only_default_variant -%}
+                <variant-picker
+                  data-section-id="{{ section.id }}"
+                  data-url="{{ product.url }}"
+                  {{ block.shopify_attributes }}
+                >
+                  {%- for option in product.options_with_values -%}
+                    {%- liquid
+                      assign is_swatch = false
+                      assign opt_index = option.position | minus: 1
+                      assign option_name = option.name | downcase
+                      if option_name contains 'لون' or option_name contains 'color' or option_name contains 'colour' or option_name contains 'درجة' or option_name contains 'shade'
+                        assign is_swatch = true
+                      endif
+                    -%}
+                    <div class="option" data-option-index="{{ forloop.index0 }}">
+                      <span class="option__label">
+                        {{ option.name }}
+                        <span data-option-selected>: {{ option.selected_value }}</span>
+                      </span>
+                      <div class="option__values">
+                        {%- for value in option.values -%}
+                          {%- liquid
+                            assign swatch_image = null
+                            if is_swatch
+                              for v in product.variants
+                                if v.options[opt_index] == value and v.featured_media
+                                  assign swatch_image = v.featured_media
+                                  break
+                                endif
+                              endfor
+                            endif
+                          -%}
+                          <label
+                            class="option__value {% if is_swatch %}option__value--swatch{% endif %}"
+                            title="{{ value | escape }}"
+                          >
+                            <input
+                              type="radio"
+                              name="option-{{ section.id }}-{{ option.position }}"
+                              value="{{ value | escape }}"
+                              {% if option.selected_value == value %}checked{% endif %}
+                            >
+                            {%- if is_swatch -%}
+                              <span
+                                class="swatch"
+                                style="{% if swatch_image %}background-image:url({{ swatch_image | image_url: width: 80 }}){% else %}background-color:{{ value | downcase | replace: ' ', '' }}{% endif %}"
+                              ></span>
+                              <span class="visually-hidden">{{ value }}</span>
+                            {%- else -%}
+                              {{ value }}
+                            {%- endif -%}
+                          </label>
+                        {%- endfor -%}
+                      </div>
+                    </div>
+                  {%- endfor -%}
+
+                  <script type="application/json">
+                    [
+                      {%- for v in product.variants -%}
+                        {
+                          "id": {{ v.id }},
+                          "options": {{ v.options | json }},
+                          "available": {{ v.available }},
+                          "featured_media": {% if v.featured_media %}{"id": {{ v.featured_media.id }}}{% else %}null{% endif %}
+                        }{%- unless forloop.last -%},{%- endunless -%}
+                      {%- endfor -%}
+                    ]
+                  </script>
+                </variant-picker>
+              {%- endunless -%}
+
+            {%- when 'buy_buttons' -%}
+              <div data-atc-anchor {{ block.shopify_attributes }}>
+                <product-form>
+                  {%- form 'product', product, id: 'product-form', novalidate: 'novalidate' -%}
+                    <input type="hidden" name="id" value="{{ variant.id }}" data-variant-id>
+                    <p class="form-status form-status--error" data-form-error hidden></p>
+
+                    <div class="product__buy">
+                      <quantity-input class="qty">
+                        <button type="button" data-step="down" aria-label="−">−</button>
+                        <input
+                          type="number"
+                          name="quantity"
+                          value="1"
+                          min="1"
+                          aria-label="{{ 'products.product.quantity' | t }}"
+                        >
+                        <button type="button" data-step="up" aria-label="+">+</button>
+                      </quantity-input>
+
+                      <button
+                        type="submit"
+                        class="btn btn--lg"
+                        data-add-button
+                        {% unless variant.available %}disabled{% endunless %}
+                      >
+                        <span data-add-text>
+                          {%- if variant.available -%}
+                            {{ 'products.product.add_to_cart' | t }}
+                          {%- else -%}
+                            {{ 'products.product.sold_out' | t }}
+                          {%- endif -%}
+                        </span>
+                      </button>
+                    </div>
+
+                    {%- if block.settings.show_dynamic_checkout -%}
+                      {{ form | payment_button }}
+                    {%- endif -%}
+                  {%- endform -%}
+                </product-form>
+              </div>
+
+            {%- when 'trust' -%}
+              <div class="usp" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:1.25rem 0" {{ block.shopify_attributes }}>
+                <div class="usp__item">
+                  {%- render 'icon', name: 'cash' -%}
+                  <span class="usp__title">{{ block.settings.trust_1 }}</span>
+                </div>
+                <div class="usp__item">
+                  {%- render 'icon', name: 'shield' -%}
+                  <span class="usp__title">{{ block.settings.trust_2 }}</span>
+                </div>
+              </div>
+
+            {%- when 'whatsapp' -%}
+              {%- if settings.whatsapp_number != blank -%}
+                {%- assign wa_text = product.title | append: ' — ' | append: shop.url | append: product.url | url_encode -%}
+                <a
+                  class="btn btn--outline btn--full"
+                  style="margin-bottom:1rem"
+                  href="https://wa.me/{{ settings.whatsapp_number }}?text={{ wa_text }}"
+                  target="_blank"
+                  rel="noopener"
+                  {{ block.shopify_attributes }}
+                >
+                  {%- render 'icon', name: 'whatsapp' -%}
+                  {{ 'products.product.ask_on_whatsapp' | t }}
+                </a>
+              {%- endif -%}
+
+            {%- when 'description' -%}
+              {%- if product.description != blank -%}
+                <div class="rte" style="margin-bottom:1.25rem" {{ block.shopify_attributes }}>
+                  {{ product.description }}
+                </div>
+              {%- endif -%}
+
+            {%- when 'accordion' -%}
+              <div class="accordion" {{ block.shopify_attributes }}>
+                {%- if block.settings.row_1_title != blank and block.settings.row_1_content != blank -%}
+                  <details class="accordion__item">
+                    <summary class="accordion__summary">{{ block.settings.row_1_title }}</summary>
+                    <div class="accordion__content rte">{{ block.settings.row_1_content }}</div>
+                  </details>
+                {%- endif -%}
+                {%- if block.settings.row_2_title != blank and block.settings.row_2_content != blank -%}
+                  <details class="accordion__item">
+                    <summary class="accordion__summary">{{ block.settings.row_2_title }}</summary>
+                    <div class="accordion__content rte">{{ block.settings.row_2_content }}</div>
+                  </details>
+                {%- endif -%}
+                {%- if block.settings.row_3_title != blank and block.settings.row_3_content != blank -%}
+                  <details class="accordion__item">
+                    <summary class="accordion__summary">{{ block.settings.row_3_title }}</summary>
+                    <div class="accordion__content rte">{{ block.settings.row_3_content }}</div>
+                  </details>
+                {%- endif -%}
+              </div>
+
+            {%- when 'sku' -%}
+              <div data-sku-block class="cart-note" style="margin-top:.75rem" {{ block.shopify_attributes }}>
+                {%- if variant.sku != blank -%}
+                  {{ 'products.product.sku' | t }}: {{ variant.sku }}
+                {%- endif -%}
+              </div>
+
+            {%- when 'share' -%}
+              <button
+                type="button"
+                class="cart-line__remove"
+                style="margin-top:.75rem"
+                data-share="{{ shop.url }}{{ product.url }}"
+                {{ block.shopify_attributes }}
+              >
+                {{ 'products.product.share' | t }}
+              </button>
+
+            {%- when 'custom_liquid' -%}
+              <div {{ block.shopify_attributes }}>{{ block.settings.custom_liquid }}</div>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%} ---------- Sticky add to cart (mobile) ---------- {%- endcomment -%}
+<sticky-atc class="sticky-atc">
+  <div class="sticky-atc__info">
+    <div class="sticky-atc__title">{{ product.title }}</div>
+    <div class="sticky-atc__price">{{ variant.price | money }}</div>
+  </div>
+  <button
+    type="button"
+    class="btn"
+    data-sticky-add
+    {% unless variant.available %}disabled{% endunless %}
+  >
+    {%- if variant.available -%}
+      {{ 'products.product.add_to_cart' | t }}
+    {%- else -%}
+      {{ 'products.product.sold_out' | t }}
+    {%- endif -%}
+  </button>
+</sticky-atc>
+
+{% schema %}
+{
+  "name": "صفحة المنتج",
+  "blocks": [
+    { "type": "vendor", "name": "الماركة", "limit": 1 },
+    { "type": "title", "name": "اسم المنتج", "limit": 1 },
+    { "type": "price", "name": "السعر", "limit": 1 },
+    { "type": "stock", "name": "حالة التوفر", "limit": 1 },
+    { "type": "variant_picker", "name": "اختيار المواصفات", "limit": 1 },
+    {
+      "type": "buy_buttons",
+      "name": "أزرار الشراء",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_dynamic_checkout",
+          "label": "إظهار أزرار الدفع السريع",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "trust",
+      "name": "شارات الثقة",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "trust_1", "label": "الشارة الأولى", "default": "الدفع عند الاستلام" },
+        { "type": "text", "id": "trust_2", "label": "الشارة الثانية", "default": "منتج أصلي ١٠٠٪" }
+      ]
+    },
+    { "type": "whatsapp", "name": "زر واتساب", "limit": 1 },
+    { "type": "description", "name": "الوصف", "limit": 1 },
+    {
+      "type": "accordion",
+      "name": "تفاصيل قابلة للطي",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "row_1_title", "label": "عنوان ١", "default": "المكونات" },
+        { "type": "richtext", "id": "row_1_content", "label": "محتوى ١" },
+        { "type": "text", "id": "row_2_title", "label": "عنوان ٢", "default": "طريقة الاستخدام" },
+        { "type": "richtext", "id": "row_2_content", "label": "محتوى ٢" },
+        { "type": "text", "id": "row_3_title", "label": "عنوان ٣", "default": "الشحن والاستبدال" },
+        {
+          "type": "richtext",
+          "id": "row_3_content",
+          "label": "محتوى ٣",
+          "default": "<p>الشحن لكل محافظات مصر خلال ٢-٤ أيام عمل. الاستبدال متاح خلال ١٤ يوم بشرط عدم فتح المنتج.</p>"
+        }
+      ]
+    },
+    { "type": "sku", "name": "كود المنتج", "limit": 1 },
+    { "type": "share", "name": "مشاركة", "limit": 1 },
+    {
+      "type": "custom_liquid",
+      "name": "كود مخصص",
+      "settings": [{ "type": "liquid", "id": "custom_liquid", "label": "Liquid" }]
+    }
+  ]
+}
+{% endschema %}

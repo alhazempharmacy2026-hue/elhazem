@@ -1,0 +1,58 @@
+<div class="section">
+  <div class="container page-narrow">
+    <nav class="breadcrumb">
+      <a href="{{ routes.account_url }}">{{ 'customer.account.title' | t }}</a>
+      <span>/</span>{{ 'customer.account.addresses' | t }}
+    </nav>
+
+    <h1>{{ 'customer.account.addresses' | t }}</h1>
+
+    {%- paginate customer.addresses by 10 -%}
+      {%- for address in customer.addresses -%}
+        <div class="auth-card" style="margin-bottom:1rem;max-width:none">
+          <div class="rte">{{ address | format_address }}</div>
+          {%- form 'customer_address', address -%}
+            <input type="hidden" name="_method" value="delete">
+            <button type="submit" class="cart-line__remove">{{ 'cart.general.remove' | t }}</button>
+          {%- endform -%}
+        </div>
+      {%- endfor -%}
+      {%- render 'pagination', paginate: paginate -%}
+    {%- endpaginate -%}
+
+    <div class="auth-card" style="max-width:none">
+      <h2>{{ 'customer.account.addresses' | t }}</h2>
+      {%- form 'customer_address', customer.new_address -%}
+        <div class="field">
+          <label for="address-first">{{ 'customer.register.first_name' | t }}</label>
+          <input id="address-first" type="text" name="address[first_name]" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label for="address-last">{{ 'customer.register.last_name' | t }}</label>
+          <input id="address-last" type="text" name="address[last_name]" autocomplete="family-name">
+        </div>
+        <div class="field">
+          <label for="address-1">العنوان</label>
+          <input id="address-1" type="text" name="address[address1]" autocomplete="address-line1">
+        </div>
+        <div class="field">
+          <label for="address-city">المدينة</label>
+          <input id="address-city" type="text" name="address[city]" autocomplete="address-level2">
+        </div>
+        <div class="field">
+          <label for="address-province">المحافظة</label>
+          <input id="address-province" type="text" name="address[province]" autocomplete="address-level1">
+        </div>
+        <div class="field">
+          <label for="address-country">الدولة</label>
+          <input id="address-country" type="text" name="address[country]" value="Egypt" autocomplete="country-name">
+        </div>
+        <div class="field">
+          <label for="address-phone">رقم الموبايل</label>
+          <input id="address-phone" type="tel" name="address[phone]" autocomplete="tel">
+        </div>
+        <button type="submit" class="btn btn--full">{{ 'general.newsletter.submit' | t }}</button>
+      {%- endform -%}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,169 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-slideshow",
+      "blocks": {
+        "slide-1": {
+          "type": "slide",
+          "settings": {
+            "kicker": "أصلي ١٠٠٪",
+            "heading": "جمالك يستحق الأصلي",
+            "text": "منتجات عناية وميك أب أصلية بأسعار تنافسية، وتوصيل لكل محافظات مصر.",
+            "button_label": "تسوقي دلوقتي"
+          }
+        },
+        "slide-2": {
+          "type": "slide",
+          "settings": {
+            "kicker": "عرض الأسبوع",
+            "heading": "خصومات على العناية بالبشرة",
+            "text": "وفري لحد ٣٠٪ على أشهر الماركات.",
+            "button_label": "شوفي العروض"
+          }
+        }
+      },
+      "block_order": ["slide-1", "slide-2"],
+      "settings": { "text_align": "start", "autoplay": 6 }
+    },
+    "usp": {
+      "type": "usp-row",
+      "blocks": {
+        "u1": { "type": "item", "settings": { "icon": "truck", "title": "شحن لكل مصر", "text": "توصيل ٢-٤ أيام عمل" } },
+        "u2": { "type": "item", "settings": { "icon": "cash", "title": "الدفع عند الاستلام", "text": "ادفعي لما يوصلك" } },
+        "u3": { "type": "item", "settings": { "icon": "shield", "title": "أصلي ١٠٠٪", "text": "مصادر موثوقة ومضمونة" } },
+        "u4": { "type": "item", "settings": { "icon": "return", "title": "استبدال ١٤ يوم", "text": "لو المنتج مش مناسب" } }
+      },
+      "block_order": ["u1", "u2", "u3", "u4"],
+      "settings": {}
+    },
+    "categories": {
+      "type": "collection-tiles",
+      "blocks": {
+        "t1": { "type": "tile", "settings": { "title": "العناية بالبشرة" } },
+        "t2": { "type": "tile", "settings": { "title": "المكياج" } },
+        "t3": { "type": "tile", "settings": { "title": "العناية بالشعر" } },
+        "t4": { "type": "tile", "settings": { "title": "العطور" } }
+      },
+      "block_order": ["t1", "t2", "t3", "t4"],
+      "settings": {
+        "heading": "تسوقي حسب القسم",
+        "shape": "round",
+        "columns": 4,
+        "soft_bg": false
+      }
+    },
+    "best-sellers": {
+      "type": "featured-collection",
+      "settings": {
+        "heading": "الأكثر مبيعًا",
+        "subheading": "اللي كل الناس بتطلبه",
+        "limit": 8,
+        "columns": 4,
+        "soft_bg": false
+      }
+    },
+    "promo": {
+      "type": "promo-banner",
+      "settings": {
+        "kicker": "باقات موفرة",
+        "heading": "روتين عناية كامل بأقل سعر",
+        "text": "<p>اختاري باقة العناية المناسبة لنوع بشرتك ووفري لحد ٣٠٪ على الباقة.</p>",
+        "button_label": "شوفي الباقات",
+        "reverse": false
+      }
+    },
+    "new-arrivals": {
+      "type": "featured-collection",
+      "settings": {
+        "heading": "وصل حديثًا",
+        "limit": 8,
+        "columns": 4,
+        "soft_bg": true
+      }
+    },
+    "countdown": {
+      "type": "countdown-offer",
+      "settings": {
+        "kicker": "عرض محدود",
+        "heading": "خصم ٢٥٪ على العناية بالبشرة",
+        "text": "العرض ينتهي قريبًا — اطلبي قبل ما الكمية تخلص.",
+        "deadline": "2026-12-31",
+        "deadline_time": "23:59",
+        "button_label": "اطلبي دلوقتي"
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "q1": {
+          "type": "quote",
+          "settings": {
+            "text": "المنتج أصلي والتوصيل كان أسرع مما توقعت. هتعامل تاني أكيد.",
+            "author": "منة",
+            "city": "القاهرة",
+            "rating": 5
+          }
+        },
+        "q2": {
+          "type": "quote",
+          "settings": {
+            "text": "أسعارهم أحسن من أي مكان تاني، والدعم على الواتساب بيرد بسرعة.",
+            "author": "سارة",
+            "city": "الإسكندرية",
+            "rating": 5
+          }
+        },
+        "q3": {
+          "type": "quote",
+          "settings": {
+            "text": "طلبت بالدفع عند الاستلام ووصلني في يومين. تجربة ممتازة.",
+            "author": "نورا",
+            "city": "المنصورة",
+            "rating": 5
+          }
+        }
+      },
+      "block_order": ["q1", "q2", "q3"],
+      "settings": { "heading": "عملاؤنا بيقولوا إيه", "soft_bg": false }
+    },
+    "faq": {
+      "type": "faq",
+      "blocks": {
+        "f1": {
+          "type": "faq",
+          "settings": {
+            "question": "الشحن بياخد قد إيه؟",
+            "answer": "<p>القاهرة والجيزة من ١ إلى ٢ يوم عمل، وباقي المحافظات من ٢ إلى ٤ أيام عمل.</p>"
+          }
+        },
+        "f2": {
+          "type": "faq",
+          "settings": {
+            "question": "أقدر أدفع عند الاستلام؟",
+            "answer": "<p>أيوه، الدفع عند الاستلام متاح لكل محافظات مصر، وكمان بنقبل الدفع بالفيزا والمحفظة الإلكترونية.</p>"
+          }
+        },
+        "f3": {
+          "type": "faq",
+          "settings": {
+            "question": "المنتجات أصلية؟",
+            "answer": "<p>كل منتجاتنا أصلية ١٠٠٪ ومن موزعين معتمدين، ولو حصل أي شك بنستبدل المنتج فورًا.</p>"
+          }
+        }
+      },
+      "block_order": ["f1", "f2", "f3"],
+      "settings": { "heading": "أسئلة شائعة" }
+    }
+  },
+  "order": [
+    "hero",
+    "usp",
+    "categories",
+    "best-sellers",
+    "promo",
+    "new-arrivals",
+    "countdown",
+    "testimonials",
+    "faq"
+  ]
+}

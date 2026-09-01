@@ -1,0 +1,58 @@
+<theme-drawer id="cart-drawer-panel" class="drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="{{ 'cart.general.title' | t }}">
+  <div class="drawer__head">
+    <h2>{{ 'cart.general.title' | t }}</h2>
+    <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {%- render 'icon', name: 'close' -%}
+    </button>
+  </div>
+
+  <div data-cart-section-id="cart-drawer" style="display:contents">
+    {%- if cart.item_count == 0 -%}
+      <div class="drawer__body">
+        <div class="empty-state">
+          {%- render 'icon', name: 'bag-empty' -%}
+          <h3>{{ 'cart.general.empty' | t }}</h3>
+          <p class="cart-note">{{ 'cart.general.empty_note' | t }}</p>
+          <a class="btn" href="{{ routes.all_products_collection_url }}" data-drawer-close>
+            {{ 'cart.general.continue_shopping' | t }}
+          </a>
+        </div>
+      </div>
+    {%- else -%}
+      <div class="drawer__body">
+        {%- render 'free-shipping-bar' -%}
+        <cart-items>
+          {%- for item in cart.items -%}
+            {%- render 'cart-line-item', item: item, line: forloop.index -%}
+          {%- endfor -%}
+        </cart-items>
+      </div>
+
+      <div class="drawer__foot">
+        <form action="{{ routes.cart_url }}" method="post" id="cart-drawer-form">
+          <div class="cart-summary__row cart-summary__row--total">
+            <span>{{ 'cart.general.subtotal' | t }}</span>
+            <span>{{ cart.total_price | money }}</span>
+          </div>
+          <p class="cart-note">{{ 'cart.general.shipping_note' | t }}</p>
+          {%- if settings.show_cod_note -%}
+            <p class="cart-note">💵 {{ 'cart.general.cod_note' | t }}</p>
+          {%- endif -%}
+          <button type="submit" name="checkout" class="btn btn--full btn--lg" style="margin-top:.6rem">
+            {{ 'cart.general.checkout' | t }}
+          </button>
+        </form>
+        <a class="btn btn--outline btn--full" style="margin-top:.5rem" href="{{ routes.cart_url }}">
+          {{ 'cart.general.title' | t }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</theme-drawer>
+
+{% schema %}
+{
+  "name": "درج عربة التسوق",
+  "settings": []
+}
+{% endschema %}

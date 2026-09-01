@@ -1,0 +1,62 @@
+{%- if section.blocks.size > 0 -%}
+  <announcement-bar
+    class="announcement"
+    style="background:{{ section.settings.bg }};color:{{ section.settings.text_color }}"
+    data-interval="{{ section.settings.interval }}"
+  >
+    <div class="container announcement__inner">
+      {%- for block in section.blocks -%}
+        <div data-announcement {% unless forloop.first %}hidden{% endunless %} {{ block.shopify_attributes }}>
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}">{{ block.settings.text }}</a>
+          {%- else -%}
+            <span>{{ block.settings.text }}</span>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </announcement-bar>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "شريط الإعلانات",
+  "max_blocks": 4,
+  "settings": [
+    { "type": "color", "id": "bg", "label": "لون الخلفية", "default": "#241c1b" },
+    { "type": "color", "id": "text_color", "label": "لون النص", "default": "#ffffff" },
+    {
+      "type": "range",
+      "id": "interval",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "unit": "ث",
+      "label": "مدة تبديل الرسائل",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "رسالة",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "النص",
+          "default": "شحن مجاني للطلبات فوق ١٠٠٠ جنيه"
+        },
+        { "type": "url", "id": "link", "label": "الرابط" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "شريط الإعلانات",
+      "blocks": [{ "type": "message" }, { "type": "message" }]
+    }
+  ],
+  "enabled_on": { "groups": ["header"] }
+}
+{% endschema %}

@@ -1,0 +1,55 @@
+<div class="section section--tight">
+  <div class="container">
+    <div class="usp">
+      {%- for block in section.blocks -%}
+        <div class="usp__item" {{ block.shopify_attributes }}>
+          {%- render 'icon', name: block.settings.icon -%}
+          <span class="usp__title">{{ block.settings.title }}</span>
+          <span class="usp__text">{{ block.settings.text }}</span>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "مميزات المتجر",
+  "max_blocks": 4,
+  "blocks": [
+    {
+      "type": "item",
+      "name": "ميزة",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "الأيقونة",
+          "options": [
+            { "value": "truck", "label": "شحن" },
+            { "value": "cash", "label": "دفع عند الاستلام" },
+            { "value": "shield", "label": "منتج أصلي" },
+            { "value": "return", "label": "استبدال" },
+            { "value": "headset", "label": "دعم" },
+            { "value": "sparkle", "label": "عروض" }
+          ],
+          "default": "truck"
+        },
+        { "type": "text", "id": "title", "label": "العنوان", "default": "شحن لكل مصر" },
+        { "type": "text", "id": "text", "label": "النص", "default": "توصيل ٢-٤ أيام عمل" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "مميزات المتجر",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "truck", "title": "شحن لكل مصر", "text": "توصيل ٢-٤ أيام عمل" } },
+        { "type": "item", "settings": { "icon": "cash", "title": "الدفع عند الاستلام", "text": "ادفعي لما توصلك" } },
+        { "type": "item", "settings": { "icon": "shield", "title": "أصلي ١٠٠٪", "text": "مصادر موثوقة ومضمونة" } },
+        { "type": "item", "settings": { "icon": "return", "title": "استبدال ١٤ يوم", "text": "لو المنتج مش مناسب" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
