@@ -24,7 +24,11 @@
           }
         }
       },
-      "block_order": ["message-1", "message-2", "message-3"],
+      "block_order": [
+        "message-1",
+        "message-2",
+        "message-3"
+      ],
       "settings": {
         "bg": "#241c1b",
         "text_color": "#ffffff",
@@ -34,9 +38,13 @@
     "header": {
       "type": "header",
       "settings": {
-        "menu": "main-menu"
+        "menu": "main-menu",
+        "inline_search": true
       }
     }
   },
-  "order": ["announcement-bar", "header"]
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
 }

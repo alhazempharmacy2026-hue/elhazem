@@ -43,9 +43,25 @@
     </nav>
 
     <div class="header__actions">
+      {%- if section.settings.inline_search -%}
+        <form class="header__search" action="{{ routes.search_url }}" method="get" role="search">
+          <input type="hidden" name="type" value="product">
+          <label class="visually-hidden" for="header-inline-search">{{ 'general.search.title' | t }}</label>
+          <input
+            id="header-inline-search"
+            type="search"
+            name="q"
+            placeholder="{{ 'general.search.placeholder' | t }}"
+          >
+          <button type="submit" aria-label="{{ 'general.search.submit' | t }}">
+            {%- render 'icon', name: 'search' -%}
+          </button>
+        </form>
+      {%- endif -%}
+
       <button
         type="button"
-        class="header__icon"
+        class="header__icon {% if section.settings.inline_search %}header__icon--search{% endif %}"
         data-drawer-open="search-drawer"
         aria-label="{{ 'general.accessibility.search' | t }}"
       >
@@ -166,6 +182,13 @@
       "type": "link_list",
       "id": "search_links",
       "label": "روابط سريعة داخل البحث"
+    },
+    {
+      "type": "checkbox",
+      "id": "inline_search",
+      "label": "إظهار خانة البحث في الهيدر (كمبيوتر)",
+      "info": "في الموبايل البحث بيفضل أيقونة بتفتح درج.",
+      "default": true
     }
   ],
   "enabled_on": { "groups": ["header"] }

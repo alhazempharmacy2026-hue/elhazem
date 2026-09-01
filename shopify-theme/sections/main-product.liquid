@@ -236,6 +236,9 @@
                 </a>
               {%- endif -%}
 
+            {%- when 'bundle' -%}
+              {%- render 'bundle', product: product, block: block -%}
+
             {%- when 'description' -%}
               {%- if product.description != blank -%}
                 <div class="rte" style="margin-bottom:1.25rem" {{ block.shopify_attributes }}>
@@ -344,6 +347,20 @@
       ]
     },
     { "type": "whatsapp", "name": "زر واتساب", "limit": 1 },
+    {
+      "type": "bundle",
+      "name": "اشتري معاه (باقة)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "اختاري لحد ٣ منتجات بتتباع مع المنتج ده. العميلة تقدر تشيل أي واحد منهم، والزرار بيضيف المحدد كله للعربة مرة واحدة."
+        },
+        { "type": "product", "id": "product_1", "label": "منتج ١" },
+        { "type": "product", "id": "product_2", "label": "منتج ٢" },
+        { "type": "product", "id": "product_3", "label": "منتج ٣" }
+      ]
+    },
     { "type": "description", "name": "الوصف", "limit": 1 },
     {
       "type": "accordion",

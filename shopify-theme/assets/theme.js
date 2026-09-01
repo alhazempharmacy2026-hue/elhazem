@@ -195,6 +195,20 @@
       return data;
     },
 
+    async addMany(items) {
+      const response = await fetch(`${routes.cart_add || '/cart/add'}.js`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ items: items })
+      });
+      const data = await response.json();
+      if (!response.ok) throw data;
+      const state = await fetchJSON(`${routes.cart || '/cart'}.js`);
+      await this.refreshSections();
+      this.publish(state);
+      return data;
+    },
+
     async change(payload) {
       const state = await fetchJSON(`${routes.cart_change || '/cart/change'}.js`, {
         method: 'POST',
@@ -572,6 +586,75 @@
     }
   }
   customElements.define('countdown-timer', CountdownTimer);
+
+  /* ---------------- bundles & routines ---------------- */
+
+  class BundleAdd extends HTMLElement {
+    connectedCallback() {
+      this.button = this.querySelector('[data-bundle-submit]');
+      this.totalEl = this.querySelector('[data-bundle-total]');
+      this.compareEl = this.querySelector('[data-bundle-compare]');
+      this.saveEl = this.querySelector('[data-bundle-save]');
+      if (!this.button) return;
+
+      this.addEventListener('change', () => this.updateTotals());
+      this.button.addEventListener('click', () => this.submit());
+      this.updateTotals();
+    }
+
+    get entries() {
+      const boxes = Array.from(this.querySelectorAll('[data-bundle-item]'));
+      if (!boxes.length) return [];
+      return boxes
+        .filter((box) => box.type !== 'checkbox' || box.checked)
+        .map((box) => ({
+          id: Number(box.value),
+          quantity: 1,
+          price: Number(box.getAttribute('data-price') || 0),
+          compare: Number(box.getAttribute('data-compare') || box.getAttribute('data-price') || 0)
+        }));
+    }
+
+    updateTotals() {
+      const entries = this.entries;
+      const price = entries.reduce((sum, e) => sum + e.price, 0);
+      const compare = entries.reduce((sum, e) => sum + e.compare, 0);
+
+      if (this.totalEl) this.totalEl.textContent = formatMoney(price);
+      if (this.compareEl) {
+        this.compareEl.textContent = formatMoney(compare);
+        this.compareEl.hidden = compare <= price;
+      }
+      if (this.saveEl) {
+        this.saveEl.textContent = t('products.product.save_amount', { amount: formatMoney(compare - price) });
+        this.saveEl.hidden = compare <= price;
+      }
+      this.button.toggleAttribute('disabled', entries.length === 0);
+    }
+
+    async submit() {
+      const entries = this.entries;
+      if (!entries.length) return;
+
+      const label = this.button.innerHTML;
+      this.button.setAttribute('disabled', '');
+      this.button.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        await cart.addMany(entries.map((e) => ({ id: e.id, quantity: e.quantity })));
+        const drawer = document.getElementById('cart-drawer-panel');
+        if (drawer && drawer.open) drawer.open(this.button);
+        else toast(t('products.product.added'));
+      } catch (error) {
+        toast((error && error.description) || '');
+      } finally {
+        this.button.removeAttribute('disabled');
+        this.button.innerHTML = label;
+        this.updateTotals();
+      }
+    }
+  }
+  customElements.define('bundle-add', BundleAdd);
 
   /* ---------------- product recommendations ---------------- */
 

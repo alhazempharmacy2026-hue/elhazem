@@ -22,29 +22,93 @@
           }
         }
       },
-      "block_order": ["slide-1", "slide-2"],
-      "settings": { "text_align": "start", "autoplay": 6 }
+      "block_order": [
+        "slide-1",
+        "slide-2"
+      ],
+      "settings": {
+        "text_align": "start",
+        "autoplay": 6
+      }
     },
     "usp": {
       "type": "usp-row",
       "blocks": {
-        "u1": { "type": "item", "settings": { "icon": "truck", "title": "شحن لكل مصر", "text": "توصيل ٢-٤ أيام عمل" } },
-        "u2": { "type": "item", "settings": { "icon": "cash", "title": "الدفع عند الاستلام", "text": "ادفعي لما يوصلك" } },
-        "u3": { "type": "item", "settings": { "icon": "shield", "title": "أصلي ١٠٠٪", "text": "مصادر موثوقة ومضمونة" } },
-        "u4": { "type": "item", "settings": { "icon": "return", "title": "استبدال ١٤ يوم", "text": "لو المنتج مش مناسب" } }
+        "u1": {
+          "type": "item",
+          "settings": {
+            "icon": "truck",
+            "title": "شحن لكل مصر",
+            "text": "توصيل ٢-٤ أيام عمل"
+          }
+        },
+        "u2": {
+          "type": "item",
+          "settings": {
+            "icon": "cash",
+            "title": "الدفع عند الاستلام",
+            "text": "ادفعي لما يوصلك"
+          }
+        },
+        "u3": {
+          "type": "item",
+          "settings": {
+            "icon": "shield",
+            "title": "أصلي ١٠٠٪",
+            "text": "مصادر موثوقة ومضمونة"
+          }
+        },
+        "u4": {
+          "type": "item",
+          "settings": {
+            "icon": "return",
+            "title": "استبدال ١٤ يوم",
+            "text": "لو المنتج مش مناسب"
+          }
+        }
       },
-      "block_order": ["u1", "u2", "u3", "u4"],
+      "block_order": [
+        "u1",
+        "u2",
+        "u3",
+        "u4"
+      ],
       "settings": {}
     },
     "categories": {
       "type": "collection-tiles",
       "blocks": {
-        "t1": { "type": "tile", "settings": { "title": "العناية بالبشرة" } },
-        "t2": { "type": "tile", "settings": { "title": "المكياج" } },
-        "t3": { "type": "tile", "settings": { "title": "العناية بالشعر" } },
-        "t4": { "type": "tile", "settings": { "title": "العطور" } }
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "title": "العناية بالبشرة"
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "title": "المكياج"
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "title": "العناية بالشعر"
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "title": "العطور"
+          }
+        }
       },
-      "block_order": ["t1", "t2", "t3", "t4"],
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4"
+      ],
       "settings": {
         "heading": "تسوقي حسب القسم",
         "shape": "round",
@@ -123,8 +187,15 @@
           }
         }
       },
-      "block_order": ["q1", "q2", "q3"],
-      "settings": { "heading": "عملاؤنا بيقولوا إيه", "soft_bg": false }
+      "block_order": [
+        "q1",
+        "q2",
+        "q3"
+      ],
+      "settings": {
+        "heading": "عملاؤنا بيقولوا إيه",
+        "soft_bg": false
+      }
     },
     "faq": {
       "type": "faq",
@@ -151,8 +222,66 @@
           }
         }
       },
-      "block_order": ["f1", "f2", "f3"],
-      "settings": { "heading": "أسئلة شائعة" }
+      "block_order": [
+        "f1",
+        "f2",
+        "f3"
+      ],
+      "settings": {
+        "heading": "أسئلة شائعة"
+      }
+    },
+    "routine": {
+      "type": "routine-builder",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "step_label": "التنظيف",
+            "note": "صباحًا ومساءً"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "step_label": "التونر",
+            "note": "بعد الغسول على طول"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "step_label": "السيروم",
+            "note": "مساءً"
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "step_label": "الترطيب",
+            "note": "صباحًا ومساءً"
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "step_label": "واقي الشمس",
+            "note": "صباحًا وكل ساعتين"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5"
+      ],
+      "settings": {
+        "heading": "روتين البشرة الدهنية",
+        "subheading": "خمس خطوات بالترتيب — أضيفيها كلها بضغطة واحدة",
+        "soft_bg": true
+      }
     }
   },
   "order": [
@@ -160,6 +289,7 @@
     "usp",
     "categories",
     "best-sellers",
+    "routine",
     "promo",
     "new-arrivals",
     "countdown",

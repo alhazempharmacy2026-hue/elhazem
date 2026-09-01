@@ -67,7 +67,12 @@
       "related": "You may also like",
       "recently_viewed": "Recently viewed",
       "media_gallery": "Product media",
-      "view_details": "View details"
+      "view_details": "View details",
+      "buy_together": "Buy it with",
+      "this_item": "This item",
+      "bundle_total": "Bundle total",
+      "add_selected": "Add selected to cart",
+      "select_at_least_one": "Select at least one product"
     }
   },
   "collections": {
@@ -156,6 +161,12 @@
       "title": "Page not found",
       "text": "The page you're looking for doesn't exist or has been moved.",
       "cta": "Back to home"
+    },
+    "routine": {
+      "step": "Step {{ number }}",
+      "total": "Routine total",
+      "add_full": "Add the whole routine to cart",
+      "instead_of": "instead of"
     }
   }
 }

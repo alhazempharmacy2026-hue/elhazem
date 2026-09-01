@@ -1,0 +1,107 @@
+{%- comment -%}
+  "Buy it with" — the current product plus up to three companions, each
+  toggleable. Totals recalculate in the browser; one request adds them all.
+  Accepts: product (the page's product), block (the section block holding the picks)
+{%- endcomment -%}
+{%- assign base_variant = product.selected_or_first_available_variant -%}
+
+{%- capture bundle_items -%}
+  {%- for index in (1..3) -%}
+    {%- liquid
+      case index
+        when 1
+          assign companion = block.settings.product_1
+        when 2
+          assign companion = block.settings.product_2
+        when 3
+          assign companion = block.settings.product_3
+      endcase
+      assign companion_variant = companion.selected_or_first_available_variant
+    -%}
+    {%- if companion != blank and companion.id != product.id and companion_variant.available -%}
+      <label class="bundle__item">
+        <input
+          type="checkbox"
+          data-bundle-item
+          value="{{ companion_variant.id }}"
+          data-price="{{ companion_variant.price }}"
+          data-compare="{{ companion_variant.compare_at_price | default: companion_variant.price }}"
+          checked
+        >
+        <span class="bundle__media">
+          {%- if companion.featured_media -%}
+            <img
+              src="{{ companion.featured_media | image_url: width: 112 }}"
+              alt="{{ companion.featured_media.alt | escape }}"
+              width="56"
+              height="56"
+              loading="lazy"
+            >
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder' }}
+          {%- endif -%}
+        </span>
+        <span>
+          <span class="bundle__name">{{ companion.title | escape }}</span>
+          <span class="bundle__meta">
+            <strong>{{ companion_variant.price | money }}</strong>
+            {%- if companion_variant.compare_at_price > companion_variant.price -%}
+              <s>{{ companion_variant.compare_at_price | money }}</s>
+            {%- endif -%}
+          </span>
+        </span>
+      </label>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if bundle_items contains 'bundle__item' and base_variant.available -%}
+  <bundle-add class="bundle" {{ block.shopify_attributes }}>
+    <div class="bundle__head">{{ 'products.product.buy_together' | t }}</div>
+
+    <div class="bundle__list">
+      <label class="bundle__item">
+        <input
+          type="checkbox"
+          data-bundle-item
+          value="{{ base_variant.id }}"
+          data-price="{{ base_variant.price }}"
+          data-compare="{{ base_variant.compare_at_price | default: base_variant.price }}"
+          checked
+          disabled
+        >
+        <span class="bundle__media">
+          {%- if product.featured_media -%}
+            <img
+              src="{{ product.featured_media | image_url: width: 112 }}"
+              alt="{{ product.featured_media.alt | escape }}"
+              width="56"
+              height="56"
+              loading="lazy"
+            >
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder' }}
+          {%- endif -%}
+        </span>
+        <span>
+          <span class="bundle__name">{{ product.title | escape }}</span>
+          <span class="bundle__self">{{ 'products.product.this_item' | t }}</span>
+        </span>
+      </label>
+
+      {{ bundle_items }}
+    </div>
+
+    <div class="bundle__foot">
+      <div class="bundle__totals">
+        <span class="bundle__self">{{ 'products.product.bundle_total' | t }}</span>
+        <span class="bundle__total" data-bundle-total></span>
+        <s class="price__compare" data-bundle-compare hidden></s>
+        <span class="price__save" data-bundle-save hidden></span>
+      </div>
+      <button type="button" class="btn btn--sm" data-bundle-submit>
+        {{ 'products.product.add_selected' | t }}
+      </button>
+    </div>
+  </bundle-add>
+{%- endif -%}
