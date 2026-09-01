@@ -25,6 +25,17 @@
   assign saved = compare_total | minus: total
 -%}
 
+{%- if available_steps == 0 -%}
+  {%- if request.design_mode -%}
+    <div class="section">
+      <div class="container">
+        <p class="form-status form-status--error">
+          اختاري منتج لكل خطوة في قسم "{{ section.settings.heading }}" — القسم ده مش بيظهر للزبائن طالما الخطوات فاضية.
+        </p>
+      </div>
+    </div>
+  {%- endif -%}
+{%- else -%}
 <div class="section {% if section.settings.soft_bg %}section--soft{% endif %}">
   <div class="container">
     <div class="section-head">
@@ -42,6 +53,7 @@
     <bundle-add>
       <div class="routine" style="--routine-cols: {{ section.blocks.size | at_most: 5 }}">
         {%- for block in section.blocks -%}
+          {%- if block.settings.product == blank -%}{%- continue -%}{%- endif -%}
           {%- liquid
             assign step_product = block.settings.product
             assign step_variant = step_product.selected_or_first_available_variant
@@ -92,9 +104,6 @@
               {%- else -%}
                 <span class="stock stock--out">{{ 'products.product.sold_out' | t }}</span>
               {%- endif -%}
-            {%- else -%}
-              <div class="routine__media">{{ 'product-1' | placeholder_svg_tag: 'placeholder' }}</div>
-              <span class="routine__title">{{ 'products.product.choose_options' | t }}</span>
             {%- endif -%}
           </div>
         {%- endfor -%}
@@ -124,6 +133,7 @@
     </bundle-add>
   </div>
 </div>
+{%- endif -%}
 
 {% schema %}
 {

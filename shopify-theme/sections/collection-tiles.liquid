@@ -14,9 +14,10 @@
     <div class="tiles" style="--tiles-md: {{ section.settings.columns }}">
       {%- for block in section.blocks -%}
         {%- assign collection = collections[block.settings.collection] -%}
+        {%- if collection == blank and block.settings.link == blank -%}{%- continue -%}{%- endif -%}
         <a
           class="tile {% if section.settings.shape == 'round' %}tile--round{% endif %}"
-          href="{{ collection.url | default: block.settings.link | default: routes.all_products_collection_url }}"
+          href="{{ collection.url | default: block.settings.link }}"
           {{ block.shopify_attributes }}
         >
           <div class="tile__media">

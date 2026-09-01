@@ -1,39 +1,33 @@
 {%- assign collection = collections[section.settings.collection] -%}
-<div class="section {% if section.settings.soft_bg %}section--soft{% endif %}">
-  <div class="container">
-    <div class="section-head">
-      <div>
-        <h2>{{ section.settings.heading | default: collection.title }}</h2>
-        {%- if section.settings.subheading != blank -%}
-          <p class="section-head__sub">{{ section.settings.subheading }}</p>
-        {%- endif -%}
-      </div>
-      {%- if collection != blank -%}
+{%- if collection.products.size > 0 -%}
+  <div class="section {% if section.settings.soft_bg %}section--soft{% endif %}">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>{{ section.settings.heading | default: collection.title }}</h2>
+          {%- if section.settings.subheading != blank -%}
+            <p class="section-head__sub">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+        </div>
         <a class="section-head__link" href="{{ collection.url }}">{{ 'collections.general.view_all' | t }} →</a>
-      {%- endif -%}
-    </div>
+      </div>
 
-    {%- if collection.products.size > 0 -%}
       <div class="product-grid" style="--grid-md: {{ section.settings.columns | minus: 1 }}; --grid-lg: {{ section.settings.columns }}">
         {%- for product in collection.products limit: section.settings.limit -%}
           {%- render 'product-card', product: product -%}
         {%- endfor -%}
       </div>
-    {%- else -%}
-      <div class="product-grid" style="--grid-md: {{ section.settings.columns | minus: 1 }}; --grid-lg: {{ section.settings.columns }}">
-        {%- for i in (1..section.settings.limit) -%}
-          <div class="card">
-            <div class="card__media">{{ 'product-1' | placeholder_svg_tag: 'placeholder' }}</div>
-            <div class="card__info">
-              <h3 class="card__title">اسم المنتج</h3>
-              <div class="price"><span class="price__current">{{ 19900 | money }}</span></div>
-            </div>
-          </div>
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
+    </div>
   </div>
-</div>
+{%- elsif request.design_mode -%}
+  <div class="section">
+    <div class="container">
+      <p class="form-status form-status--error">
+        اختاري مجموعة لقسم "{{ section.settings.heading }}" — القسم ده مش بيظهر للزبائن طالما فاضي.
+      </p>
+    </div>
+  </div>
+{%- endif -%}
 
 {% schema %}
 {
