@@ -81,25 +81,29 @@
         "t1": {
           "type": "tile",
           "settings": {
-            "title": "العناية بالبشرة"
+            "title": "العناية بالبشرة",
+            "collection": "skincare"
           }
         },
         "t2": {
           "type": "tile",
           "settings": {
-            "title": "المكياج"
+            "title": "العناية بالشعر",
+            "collection": "haircare"
           }
         },
         "t3": {
           "type": "tile",
           "settings": {
-            "title": "العناية بالشعر"
+            "title": "العناية بالجسم",
+            "collection": "bodycare"
           }
         },
         "t4": {
           "type": "tile",
           "settings": {
-            "title": "العطور"
+            "title": "واقي الشمس",
+            "collection": "sunscreen"
           }
         }
       },
@@ -119,11 +123,12 @@
     "best-sellers": {
       "type": "featured-collection",
       "settings": {
-        "heading": "الأكثر مبيعًا",
-        "subheading": "اللي كل الناس بتطلبه",
+        "heading": "العروض",
+        "subheading": "أسعار مخفّضة على مجموعة مختارة",
         "limit": 8,
         "columns": 4,
-        "soft_bg": false
+        "soft_bg": false,
+        "collection": "offers"
       }
     },
     "promo": {
@@ -133,16 +138,19 @@
         "heading": "روتين عناية كامل بأقل سعر",
         "text": "<p>اختاري باقة العناية المناسبة لنوع بشرتك ووفري لحد ٣٠٪ على الباقة.</p>",
         "button_label": "شوفي الباقات",
-        "reverse": false
+        "reverse": false,
+        "button_link": "/collections/skincare"
       }
     },
     "new-arrivals": {
       "type": "featured-collection",
       "settings": {
-        "heading": "وصل حديثًا",
+        "heading": "منتجات كورية",
         "limit": 8,
         "columns": 4,
-        "soft_bg": true
+        "soft_bg": true,
+        "collection": "korean",
+        "subheading": "أشهر ماركات الكيوتي الكورية، أصلية ١٠٠٪"
       }
     },
     "countdown": {
@@ -153,7 +161,8 @@
         "text": "العرض ينتهي قريبًا — اطلبي قبل ما الكمية تخلص.",
         "deadline": "2026-12-31",
         "deadline_time": "23:59",
-        "button_label": "اطلبي دلوقتي"
+        "button_label": "اطلبي دلوقتي",
+        "button_link": "/collections/offers"
       }
     },
     "testimonials": {
@@ -238,35 +247,40 @@
           "type": "step",
           "settings": {
             "step_label": "التنظيف",
-            "note": "صباحًا ومساءً"
+            "note": "صباحًا ومساءً",
+            "product": "anua-heartleaf-quercetinol-pore-deep-cleansing-foam"
           }
         },
         "s2": {
           "type": "step",
           "settings": {
             "step_label": "التونر",
-            "note": "بعد الغسول على طول"
+            "note": "بعد الغسول على طول",
+            "product": "anua-niacinamide-txa-brightening-booster-toner-250ml"
           }
         },
         "s3": {
           "type": "step",
           "settings": {
             "step_label": "السيروم",
-            "note": "مساءً"
+            "note": "مساءً",
+            "product": "أنوا-نياسيناميد-10-سيروم-تي-اكس-ايه-4-30-مل"
           }
         },
         "s4": {
           "type": "step",
           "settings": {
             "step_label": "الترطيب",
-            "note": "صباحًا ومساءً"
+            "note": "صباحًا ومساءً",
+            "product": "anua-azelic-acid-cica-skin-soothing-moisturizer-100ml"
           }
         },
         "s5": {
           "type": "step",
           "settings": {
             "step_label": "واقي الشمس",
-            "note": "صباحًا وكل ساعتين"
+            "note": "صباحًا وكل ساعتين",
+            "product": "anua-zero-cast-moisturizing-finish-spf-50-sunscreen-50ml"
           }
         }
       },
@@ -278,7 +292,7 @@
         "s5"
       ],
       "settings": {
-        "heading": "روتين البشرة الدهنية",
+        "heading": "روتين كوري كامل للبشرة",
         "subheading": "خمس خطوات بالترتيب — أضيفيها كلها بضغطة واحدة",
         "soft_bg": true
       }
