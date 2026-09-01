@@ -1119,10 +1119,11 @@ html[dir="ltr"] .routine__step::after { content: "→"; inset-inline-start: auto
 .bundle__item input[disabled] { opacity: .6; }
 .bundle__media { border-radius: calc(var(--radius) - 8px); overflow: hidden; background: var(--color-bg-soft); }
 .bundle__media img { width: 56px; height: 56px; object-fit: cover; }
-.bundle__name { font-size: .9rem; font-weight: 600; line-height: 1.45; }
+.bundle__name { display: block; font-size: .9rem; font-weight: 600; line-height: 1.45; }
 .bundle__meta { display: flex; align-items: baseline; gap: .45rem; font-size: .85rem; }
 .bundle__meta s { color: var(--color-muted); }
 .bundle__self { font-size: .76rem; color: var(--color-muted); }
+.bundle__item .bundle__self { display: block; }
 .bundle__foot {
   display: flex;
   flex-wrap: wrap;
