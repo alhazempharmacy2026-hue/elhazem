@@ -63,6 +63,23 @@ p { margin: 0 0 1em; }
 }
 .skip-link:focus { top: 0; }
 
+/* Custom elements default to display:inline, which collapses every section
+   built on one. Give each the box it is written against; class rules that set
+   their own display (.drawer, .qty, .countdown, .sticky-atc) win on specificity. */
+announcement-bar,
+hero-slideshow,
+media-gallery,
+cart-items,
+product-form,
+variant-picker,
+product-recommendations,
+facets-panel,
+theme-drawer { display: block; }
+
+quantity-input { display: inline-flex; }
+countdown-timer,
+sticky-atc { display: flex; }
+
 /* ---------- Layout ---------- */
 
 .container {
@@ -136,6 +153,7 @@ p { margin: 0 0 1em; }
 .btn--full { width: 100%; }
 .btn--sm { padding: .55rem 1rem; font-size: .88rem; }
 .btn--lg { padding: 1rem 2rem; font-size: 1.05rem; }
+.btn svg { width: 1.15em; height: 1.15em; flex: 0 0 auto; }
 
 .link-underline {
   border-bottom: 1px solid currentColor;
