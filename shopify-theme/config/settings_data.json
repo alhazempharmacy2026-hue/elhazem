@@ -15,7 +15,7 @@
     "radius": 14,
     "cart_drawer": true,
     "free_shipping_bar": true,
-    "free_shipping_threshold": "1000",
+    "free_shipping_threshold": "1500",
     "show_cod_note": true,
     "card_show_vendor": true,
     "card_show_second_image": true,
