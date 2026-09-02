@@ -26,6 +26,16 @@ a:hover { color: var(--color-brand); }
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
+/* Default size for every icon from snippets/icon.liquid. Component rules like
+   `.btn svg` or `.usp__item svg` are more specific and still win. */
+.icon {
+  display: inline-block;   /* the global `svg { display: block }` would drop it onto its own line */
+  width: 1.15em;
+  height: 1.15em;
+  flex: 0 0 auto;
+  vertical-align: -.15em;
+}
+
 h1, h2, h3, h4 {
   margin: 0 0 .5em;
   line-height: 1.3;
@@ -236,6 +246,9 @@ textarea { min-height: 110px; resize: vertical; }
 }
 .header__logo { flex: 0 0 auto; font-weight: 800; font-size: 1.2rem; }
 .header__logo img { width: var(--logo-width); height: auto; }
+@media (max-width: 749px) {
+  .header__logo img { width: min(var(--logo-width), 124px); }
+}
 .header__nav { display: none; flex: 1 1 auto; }
 @media (min-width: 990px) { .header__nav { display: block; } }
 .header__actions {

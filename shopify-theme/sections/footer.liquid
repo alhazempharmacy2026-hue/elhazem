@@ -22,7 +22,7 @@
 
         {%- if settings.phone != blank -%}
           <p class="footer__about" style="margin-top:.6rem">
-            {%- render 'icon', name: 'phone' -%} <a href="tel:{{ settings.phone | remove: ' ' }}">{{ settings.phone }}</a>
+            {%- render 'icon', name: 'phone' -%} <a dir="ltr" href="tel:{{ settings.phone | remove: ' ' }}">{{ settings.phone }}</a>
           </p>
         {%- endif -%}
 
