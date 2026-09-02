@@ -6,6 +6,7 @@ on:
       - main
       - claude/pharmacy-web-app-dashboard-9i7gjo
       - claude/inventory-purchasing-system-h4zqhk
+      - claude/system-explanation-7gxuzv
   workflow_dispatch:
 
 permissions:
