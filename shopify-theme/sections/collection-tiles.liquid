@@ -21,7 +21,12 @@
           {{ block.shopify_attributes }}
         >
           <div class="tile__media">
-            {%- assign image = block.settings.image | default: collection.featured_image -%}
+            {%- liquid
+              assign image = block.settings.image | default: collection.featured_image
+              if image == blank
+                assign image = collection.products.first.featured_image
+              endif
+            -%}
             {%- if image -%}
               <img
                 src="{{ image | image_url: width: 600 }}"
