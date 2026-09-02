@@ -20,13 +20,15 @@
           href="{{ collection.url | default: block.settings.link }}"
           {{ block.shopify_attributes }}
         >
-          <div class="tile__media">
-            {%- liquid
-              assign image = block.settings.image | default: collection.featured_image
-              if image == blank
-                assign image = collection.products.first.featured_image
-              endif
-            -%}
+          {%- liquid
+            assign image = block.settings.image | default: collection.featured_image
+            assign from_product = false
+            if image == blank
+              assign image = collection.products.first.featured_image
+              assign from_product = true
+            endif
+          -%}
+          <div class="tile__media {% if from_product %}tile__media--product{% endif %}">
             {%- if image -%}
               <img
                 src="{{ image | image_url: width: 600 }}"

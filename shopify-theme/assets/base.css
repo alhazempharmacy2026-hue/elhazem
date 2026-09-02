@@ -546,11 +546,29 @@ textarea { min-height: 110px; resize: vertical; }
   background: rgba(255, 255, 255, .92);
   font-weight: 700;
   font-size: .92rem;
+  /* Arabic descenders (ة ر س م ج) sit well below the baseline — a tight line
+     box clips them against the tile's overflow edge. */
+  line-height: 1.75;
   text-align: center;
 }
-.tile--round .tile__media { aspect-ratio: 1 / 1; border-radius: 50%; overflow: hidden; }
-.tile--round { background: transparent; }
-.tile--round .tile__label { position: static; background: transparent; padding: .6rem 0 0; }
+.tile--round .tile__media {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-bg-soft);
+}
+/* A borrowed product shot is on white, so no fill behind it is ever visible.
+   A hairline ring is what actually makes the circle read. */
+.tile--round .tile__media { box-shadow: inset 0 0 0 1px var(--color-border); }
+.tile--round {
+  background: transparent;
+  overflow: visible;   /* the circle clips itself; the label must not be cropped */
+}
+.tile--round .tile__label {
+  position: static;
+  background: transparent;
+  padding: .7rem 0 .25rem;
+}
 
 /* ---------- Trust / USP row ---------- */
 
@@ -1329,7 +1347,7 @@ html[dir="ltr"] .routine__step::after { content: "→"; inset-inline-start: auto
 .phero__name {
   font-size: .82rem;
   font-weight: 600;
-  line-height: 1.45;
+  line-height: 1.65;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
