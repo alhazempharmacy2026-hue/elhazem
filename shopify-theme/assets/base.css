@@ -240,17 +240,40 @@ textarea { min-height: 110px; resize: vertical; }
 }
 .header__inner {
   display: flex;
+  flex-wrap: wrap;          /* lets the search bar drop to its own row on phones */
   align-items: center;
   gap: 1rem;
   min-height: 66px;
+}
+@media (max-width: 989px) {
+  .header__inner { gap: .45rem; min-height: 52px; padding-block: .3rem; }
+  .header__icon { width: 40px; height: 40px; }
+  .header__search { margin-bottom: .4rem; }
+  .header__search input { padding: .58rem 1rem; }
 }
 .header__logo { flex: 0 0 auto; font-weight: 800; font-size: 1.2rem; }
 .header__logo img { width: var(--logo-width); height: auto; }
 @media (max-width: 749px) {
   .header__logo img { width: min(var(--logo-width), 124px); }
 }
-.header__nav { display: none; flex: 1 1 auto; }
-@media (min-width: 990px) { .header__nav { display: block; } }
+.header__nav { display: none; }
+@media (min-width: 990px) {
+  /* Seven categories and a real search field do not fit one row, and squeezing
+     them made the nav spill over the search. The search keeps the top row with
+     the logo; the nav gets a full row of its own underneath. */
+  .header__nav {
+    display: block;
+    order: 9;
+    flex: 1 0 100%;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-top: 1px solid var(--color-border);
+    margin-top: .1rem;
+  }
+  .header__nav::-webkit-scrollbar { display: none; }
+  .nav-list { flex-wrap: nowrap; padding-block: .15rem; }
+}
 .header__actions {
   display: flex;
   align-items: center;
@@ -300,10 +323,14 @@ textarea { min-height: 110px; resize: vertical; }
   display: inline-flex;
   align-items: center;
   gap: .3rem;
-  padding: .6rem .8rem;
+  padding: .6rem .7rem;
   border-radius: 999px;
   font-weight: 600;
   font-size: .96rem;
+  white-space: nowrap;   /* a squeezed nav must shrink the search, not stack words */
+}
+@media (max-width: 1180px) {
+  .nav-list__link { padding: .6rem .5rem; font-size: .9rem; }
 }
 .nav-list__link:hover { background: var(--color-bg-soft); color: var(--color-text); }
 .nav-list__link svg { width: 11px; height: 11px; opacity: .6; }
@@ -1181,42 +1208,68 @@ html[dir="ltr"] .routine__step::after { content: "→"; inset-inline-start: auto
 
 /* ---------- Inline header search (desktop) ---------- */
 
-.header__search { display: none; }
+/* Search is the main way people navigate a catalogue on a phone, so it gets a
+   full-width row of its own under the logo rather than hiding behind an icon. */
+.header__search {
+  display: flex;
+  align-items: center;
+  order: 9;
+  flex: 1 0 100%;
+  margin-bottom: .5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg-soft);
+  overflow: hidden;
+}
+.header__search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: .7rem 1.1rem;
+  /* 16px keeps iOS Safari from zooming the page when the field is focused */
+  font-size: 16px;
+}
+.header__search input:focus { outline: none; }
+.header__search:focus-within { border-color: var(--color-brand); }
+.header__search button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  align-self: stretch;
+  border: 0;
+  background: var(--color-brand);
+  color: #fff;
+}
+.header__search button svg { width: 19px; height: 19px; }
+
+/* the bar replaces the magnifier, so the icon would only be a duplicate */
+.header__icon--search { display: none; }
+
 @media (min-width: 990px) {
+  /* logo, then the search, then the icons at the far end */
+  .header__logo { order: 1; }
+  .header__actions { order: 3; }
   .header__search {
-    display: flex;
-    align-items: center;
-    flex: 0 1 300px;
-    margin-inline-end: .5rem;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    background: var(--color-bg-soft);
-    overflow: hidden;
-  }
-  .header__search input {
+    order: 2;
     flex: 1 1 auto;
-    min-width: 0;
-    border: 0;
-    background: transparent;
-    padding: .55rem .95rem;
-    font-size: .9rem;
+    max-width: 520px;
+    min-width: 180px;
+    margin-bottom: 0;
+    margin-inline: 1.5rem;
   }
-  .header__search input:focus { outline: none; }
-  .header__search:focus-within { border-color: var(--color-brand); }
+  .header__search input { padding: .55rem .95rem; font-size: .9rem; }
   .header__search button {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 40px;
+    align-self: auto;
     height: 38px;
-    border: 0;
     background: transparent;
     color: var(--color-muted);
   }
   .header__search button:hover { color: var(--color-brand); }
   .header__search button svg { width: 18px; height: 18px; }
-  .header__icon--search { display: none; }
 }
 
 /* ---------- Hero built from live products ---------- */

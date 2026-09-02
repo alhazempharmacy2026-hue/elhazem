@@ -42,22 +42,23 @@
       </ul>
     </nav>
 
+    {%- if section.settings.inline_search -%}
+      <form class="header__search" action="{{ routes.search_url }}" method="get" role="search">
+        <input type="hidden" name="type" value="product">
+        <label class="visually-hidden" for="header-inline-search">{{ 'general.search.title' | t }}</label>
+        <input
+          id="header-inline-search"
+          type="search"
+          name="q"
+          placeholder="{{ 'general.search.placeholder' | t }}"
+        >
+        <button type="submit" aria-label="{{ 'general.search.submit' | t }}">
+          {%- render 'icon', name: 'search' -%}
+        </button>
+      </form>
+    {%- endif -%}
+
     <div class="header__actions">
-      {%- if section.settings.inline_search -%}
-        <form class="header__search" action="{{ routes.search_url }}" method="get" role="search">
-          <input type="hidden" name="type" value="product">
-          <label class="visually-hidden" for="header-inline-search">{{ 'general.search.title' | t }}</label>
-          <input
-            id="header-inline-search"
-            type="search"
-            name="q"
-            placeholder="{{ 'general.search.placeholder' | t }}"
-          >
-          <button type="submit" aria-label="{{ 'general.search.submit' | t }}">
-            {%- render 'icon', name: 'search' -%}
-          </button>
-        </form>
-      {%- endif -%}
 
       <button
         type="button"
