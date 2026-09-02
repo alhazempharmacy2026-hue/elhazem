@@ -428,6 +428,10 @@ textarea { min-height: 110px; resize: vertical; }
 }
 
 .card { position: relative; display: flex; flex-direction: column; height: 100%; }
+/* Badges and the quick-add button anchor to the image, not the whole card —
+   otherwise the button lands on the price row, which is what a touch device
+   shows permanently. */
+.card__frame { position: relative; }
 .card__media {
   position: relative;
   display: block;
@@ -473,6 +477,8 @@ textarea { min-height: 110px; resize: vertical; }
 .card:focus-within .card__quick { opacity: 1; transform: translateY(0); }
 @media (hover: none) {
   .card__quick { opacity: 1; transform: none; }
+  /* on touch it is always visible, so keep it off the product itself */
+  .card__quick .btn { padding: .5rem .8rem; font-size: .82rem; }
 }
 
 .card__info { padding-top: .7rem; display: flex; flex-direction: column; gap: .25rem; flex: 1 1 auto; }

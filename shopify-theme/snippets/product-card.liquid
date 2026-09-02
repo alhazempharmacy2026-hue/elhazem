@@ -16,6 +16,7 @@
 -%}
 
 <div class="card">
+  <div class="card__frame">
   <div class="card__badges">
     {%- if product.available == false -%}
       <span class="badge badge--soldout">{{ 'products.product.sold_out' | t }}</span>
@@ -71,6 +72,7 @@
       {%- endif -%}
     </div>
   {%- endif -%}
+  </div>
 
   <div class="card__info">
     {%- if settings.card_show_vendor and product.vendor != blank -%}
