@@ -1413,3 +1413,56 @@ html[dir="ltr"] .routine__step::after { content: "→"; inset-inline-start: auto
   overflow: hidden;
 }
 .phero__price { margin-top: .2rem; font-size: .95rem; font-weight: 800; color: var(--color-accent); }
+
+/* ---------- Policy pages ---------- */
+.policy-page__card {
+  max-width: 780px;
+  margin-inline: auto;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.4);
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+  line-height: 1.95;
+}
+.policy-page__card h1 {
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
+  color: var(--color-brand);
+  margin: 0 0 .6rem;
+}
+.policy-page__card h2 {
+  font-size: 1.12rem;
+  margin: 1.9rem 0 .5rem;
+  padding-bottom: .35rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.policy-page__card ul,
+.policy-page__card ol { padding-inline-start: 1.3rem; }
+.policy-page__card li { margin-bottom: .4rem; }
+/* The merchant-pasted body carries these two hooks from the source documents. */
+.policy-page__card .note,
+.policy-page__card .hint {
+  padding: .85rem 1.1rem;
+  border-radius: var(--radius);
+  margin: 1.2rem 0;
+  font-size: .95rem;
+}
+.policy-page__card .note {
+  background: #fdeef1;
+  border-inline-start: 3px solid var(--color-accent);
+}
+.policy-page__card .hint {
+  background: var(--color-bg-soft);
+  border-inline-start: 3px solid var(--color-brand);
+  color: var(--color-muted);
+}
+.policy-page__help {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  max-width: 780px;
+  margin: 1.5rem auto 0;
+  color: var(--color-muted);
+  font-size: .95rem;
+}

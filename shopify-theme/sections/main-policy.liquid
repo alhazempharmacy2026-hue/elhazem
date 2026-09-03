@@ -1,0 +1,43 @@
+{% # theme-check-disable UndefinedObject %}
+{%- comment -%}
+  Policy pages (/policies/...). Shopify stores the policy body as raw HTML that
+  the merchant pastes in the admin, so it can arrive as a whole document —
+  doctype, <head>, a <style> block and a repeated <footer>. Anything left in
+  there leaks into the theme: a bare `footer { ... }` rule would restyle the
+  real site footer. Keep only what sits between <main> and the trailing
+  <footer>, and drop everything up to the last </style>.
+{%- endcomment -%}
+{%- assign body = policy.body -%}
+{%- if body contains '</style>' -%}
+  {%- assign body = body | split: '</style>' | last -%}
+{%- endif -%}
+{%- assign body = body | split: '<main>' | last -%}
+{%- assign body = body | split: '</main>' | first -%}
+{%- assign body = body | split: '<footer>' | first -%}
+
+<div class="section policy-page">
+  <div class="container">
+    <article class="policy-page__card rte">
+      {%- unless body contains '<h1' -%}
+        <h1>{{ policy.title | escape }}</h1>
+      {%- endunless -%}
+      {{ body }}
+    </article>
+
+    <p class="policy-page__help">
+      {{ 'عندك سؤال؟ كلّمنا على واتساب' }}
+      {%- if settings.whatsapp_number != blank %}
+        <a class="btn btn--outline btn--sm" href="https://wa.me/{{ settings.whatsapp_number }}" target="_blank" rel="noopener">
+          {%- render 'icon', name: 'whatsapp' -%} تواصل معنا
+        </a>
+      {%- endif %}
+    </p>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "السياسة",
+  "settings": []
+}
+{% endschema %}
