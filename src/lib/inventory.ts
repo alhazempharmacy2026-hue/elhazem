@@ -51,6 +51,12 @@ export function suggestedOrderQty(item: Item, coverageDays: number): number | nu
   return Math.max(0, Math.ceil(target - item.currentStock))
 }
 
+// الصنف "محتاج طلب فعلاً" لما يكون نفد أو منخفض بالفعل (مش بس عشان رقم تغطية الأيام
+// المطلوب أكبر من اللي عنده) — عشان قائمة الطلبية متبقاش فيها أصناف رصيدها كويس.
+export function needsOrderNow(item: Item, coverageDays: number): boolean {
+  return stockStatus(item) !== 'ok' && (suggestedOrderQty(item, coverageDays) ?? 0) > 0
+}
+
 export function isThisMonth(iso: string): boolean {
   const d = new Date(iso)
   const now = new Date()

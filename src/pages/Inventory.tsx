@@ -26,7 +26,7 @@ import { SALES_COLUMNS } from '../data/salesColumns'
 import { importItemsFromCSV } from '../lib/importItems'
 import { importSalesFromCSV } from '../lib/importSales'
 import { formatCurrency, formatDate, formatNumber } from '../lib/format'
-import { inventoryValue, STATUS_LABEL, stockStatus, suggestedOrderQty, type StockStatus } from '../lib/inventory'
+import { inventoryValue, needsOrderNow, STATUS_LABEL, stockStatus, suggestedOrderQty, type StockStatus } from '../lib/inventory'
 import StatCard from '../components/StatCard'
 import type { Item } from '../types'
 
@@ -106,7 +106,7 @@ export default function Inventory() {
   const rows = useMemo(() => {
     let list = [...data.items]
     if (statusFilter !== 'all') list = list.filter((i) => stockStatus(i) === statusFilter)
-    if (needsOrderOnly) list = list.filter((i) => !i.orderStatus && (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
+    if (needsOrderOnly) list = list.filter((i) => !i.orderStatus && needsOrderNow(i, coverageDays))
     if (search.trim()) {
       const q = search.trim().toLowerCase()
       list = list.filter((i) => i.name.toLowerCase().includes(q) || i.code?.toLowerCase().includes(q))
@@ -129,7 +129,7 @@ export default function Inventory() {
 
   function exportOrderList() {
     const list = data.items
-      .filter((i) => !i.orderStatus && (suggestedOrderQty(i, coverageDays) ?? 0) > 0)
+      .filter((i) => !i.orderStatus && needsOrderNow(i, coverageDays))
       .sort((a, b) => (suggestedOrderQty(b, coverageDays) ?? 0) - (suggestedOrderQty(a, coverageDays) ?? 0))
     downloadCSV(
       `قائمة-الطلبية-${coverageDays}-يوم.csv`,
