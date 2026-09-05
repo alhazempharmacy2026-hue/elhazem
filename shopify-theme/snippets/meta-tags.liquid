@@ -47,14 +47,32 @@
 <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": "Pharmacy",
     "name": {{ shop.name | json }},
     "url": {{ shop.url | json }}
     {%- if settings.logo %},
-      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }}
+      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},
+      "image": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }}
     {%- endif -%}
     {%- if settings.phone != blank %},
       "telephone": {{ settings.phone | json }}
     {%- endif -%}
+    {%- if settings.whatsapp_number != blank %},
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": {{ settings.phone | json }},
+        "contactType": "customer service",
+        "areaServed": "EG",
+        "availableLanguage": ["ar", "en"]
+      }
+    {%- endif -%},
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "شارع مجمع الأديان (رفعت حسن)",
+      "addressLocality": "المقطم، القاهرة",
+      "postalCode": "11512",
+      "addressCountry": "EG"
+    },
+    "priceRange": "$$"
   }
 </script>
