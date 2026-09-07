@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Table2, RefreshCcw, Package, Handshake, AlertTriangle } from 'lucide-react'
+import { LayoutDashboard, Table2, RefreshCcw, Package, Handshake, AlertTriangle, CloudOff, X } from 'lucide-react'
 import { useAppData } from '../lib/storage'
 
 const navItems = [
@@ -10,8 +10,15 @@ const navItems = [
   { to: '/emergency-purchases', label: 'الشراء الاضطراري', icon: AlertTriangle, end: false },
 ]
 
+function cloudErrorHint(message: string): string {
+  if (/relation .* does not exist/i.test(message)) {
+    return 'يبدو إن جداول قاعدة البيانات لسه متعملتش على Supabase. شغّل ملف db/schema.sql مرة واحدة من SQL Editor في مشروعك.'
+  }
+  return message
+}
+
 export default function Layout() {
-  const { resetDemoData } = useAppData()
+  const { resetDemoData, cloudStatus, cloudSyncError, dismissCloudSyncError } = useAppData()
 
   return (
     <div className="flex min-h-screen">
@@ -88,6 +95,28 @@ export default function Layout() {
         </nav>
 
         <main className="flex-1 p-4 md:p-8">
+          {cloudStatus === 'loading' && (
+            <div className="mb-4 rounded-lg border border-[var(--border)] bg-white px-4 py-2.5 text-xs text-[var(--text-muted)]">
+              جاري تحميل بيانات المخزون والموردين من السحابة...
+            </div>
+          )}
+          {cloudStatus === 'error' && cloudSyncError && (
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <CloudOff size={16} className="mt-0.5 shrink-0" />
+              <span>تعذر تحميل بيانات المخزون والموردين من السحابة: {cloudErrorHint(cloudSyncError)}</span>
+            </div>
+          )}
+          {cloudStatus === 'ready' && cloudSyncError && (
+            <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="flex items-start gap-2">
+                <CloudOff size={16} className="mt-0.5 shrink-0" />
+                <span>تعذر حفظ آخر تعديل على السحابة: {cloudErrorHint(cloudSyncError)} — تأكد من اتصالك بالإنترنت وحاول تاني.</span>
+              </div>
+              <button onClick={dismissCloudSyncError} className="shrink-0 text-red-700 hover:text-red-900">
+                <X size={16} />
+              </button>
+            </div>
+          )}
           <Outlet />
         </main>
       </div>
