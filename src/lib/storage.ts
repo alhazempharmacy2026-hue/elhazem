@@ -5,41 +5,12 @@ import type { ParsedItemRow } from './importItems'
 import type { ParsedSalesRow } from './importSales'
 import * as cloud from './cloudSync'
 
-const STORAGE_KEY = 'elhazem-pharmacy-data-v2'
-
 function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
 function uid(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-}
-
-// المبيعات اليومية (records) لسه متخزنة في المتصفح بس. المخزون والموردين والمشتريات
-// الاضطرارية بقوا متخزنين على السحابة (Supabase) عشان يفضلوا نفسهم من أي جهاز.
-function loadRecords(): DailyRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<AppData>
-      if (parsed.records) return parsed.records
-    }
-  } catch {
-    // ignore corrupt storage, fall back to seed
-  }
-  const seeded = seedDailyRecords()
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ records: seeded }))
-  return seeded
-}
-
-function saveRecords(records: DailyRecord[]) {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? (JSON.parse(raw) as Partial<AppData>) : {}
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...parsed, records }))
-  } catch {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ records }))
-  }
 }
 
 export type CloudStatus = 'loading' | 'ready' | 'error'
@@ -77,7 +48,7 @@ export interface AppStore {
 }
 
 export function useAppStore(): AppStore {
-  const [records, setRecords] = useState<DailyRecord[]>(() => loadRecords())
+  const [records, setRecords] = useState<DailyRecord[]>([])
   const [items, setItems] = useState<Item[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [supplierTransactions, setSupplierTransactions] = useState<SupplierTransaction[]>([])
@@ -86,14 +57,17 @@ export function useAppStore(): AppStore {
   const [cloudSyncError, setCloudSyncError] = useState<string | null>(null)
 
   useEffect(() => {
-    saveRecords(records)
-  }, [records])
-
-  useEffect(() => {
     let cancelled = false
-    Promise.all([cloud.fetchItems(), cloud.fetchSuppliers(), cloud.fetchSupplierTransactions(), cloud.fetchEmergencyPurchases()])
-      .then(([cloudItems, cloudSuppliers, cloudTxns, cloudEmergency]) => {
+    Promise.all([
+      cloud.fetchDailyRecords(),
+      cloud.fetchItems(),
+      cloud.fetchSuppliers(),
+      cloud.fetchSupplierTransactions(),
+      cloud.fetchEmergencyPurchases(),
+    ])
+      .then(([cloudRecords, cloudItems, cloudSuppliers, cloudTxns, cloudEmergency]) => {
         if (cancelled) return
+        setRecords(cloudRecords)
         setItems(cloudItems)
         setSuppliers(cloudSuppliers)
         setSupplierTransactions(cloudTxns)
@@ -116,33 +90,58 @@ export function useAppStore(): AppStore {
 
   const dismissCloudSyncError = () => setCloudSyncError(null)
 
-  const addRecord = (r: DailyRecord) => setRecords((prev) => [...prev, r])
+  const addRecord = (r: DailyRecord) => {
+    setRecords((prev) => [...prev, r])
+    cloud.upsertDailyRecords([r]).catch(reportSyncError)
+  }
 
-  const updateRecord = (r: DailyRecord) => setRecords((prev) => prev.map((x) => (x.id === r.id ? r : x)))
+  const updateRecord = (r: DailyRecord) => {
+    setRecords((prev) => prev.map((x) => (x.id === r.id ? r : x)))
+    cloud.upsertDailyRecords([r]).catch(reportSyncError)
+  }
 
-  const deleteRecord = (id: string) => setRecords((prev) => prev.filter((x) => x.id !== id))
+  const deleteRecord = (id: string) => {
+    setRecords((prev) => prev.filter((x) => x.id !== id))
+    cloud.deleteDailyRecordRow(id).catch(reportSyncError)
+  }
 
   const importRecords = (incoming: DailyRecord[]) => {
     const byDate = new Map(records.map((r) => [r.date, r]))
     let added = 0
     let updated = 0
+    const touched: DailyRecord[] = []
     for (const rec of incoming) {
       const existing = byDate.get(rec.date)
       if (existing) {
         updated++
-        byDate.set(rec.date, { ...existing, ...rec, id: existing.id })
+        const merged = { ...existing, ...rec, id: existing.id }
+        byDate.set(rec.date, merged)
+        touched.push(merged)
       } else {
         added++
         byDate.set(rec.date, rec)
+        touched.push(rec)
       }
     }
     const next = Array.from(byDate.values()).sort((a, b) => (a.date < b.date ? -1 : 1))
     setRecords(next)
+    cloud.upsertDailyRecords(touched).catch(reportSyncError)
     return { added, updated }
   }
 
-  const resetDemoData = () => setRecords(seedDailyRecords())
-  const clearAllData = () => setRecords([])
+  const resetDemoData = () => {
+    const seeded = seedDailyRecords()
+    setRecords(seeded)
+    cloud
+      .deleteAllDailyRecords()
+      .then(() => cloud.upsertDailyRecords(seeded))
+      .catch(reportSyncError)
+  }
+
+  const clearAllData = () => {
+    setRecords([])
+    cloud.deleteAllDailyRecords().catch(reportSyncError)
+  }
 
   const addItem = (item: Omit<Item, 'id' | 'updatedAt'>) => {
     const newItem: Item = { ...item, id: uid('item'), updatedAt: today() }

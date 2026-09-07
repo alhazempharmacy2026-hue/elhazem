@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import type { EmergencyPurchase, Item, Supplier, SupplierTransaction } from '../types'
+import type { DailyRecord, EmergencyPurchase, Item, Supplier, SupplierTransaction } from '../types'
 
 // Bulk writes are chunked so importing a large catalog (thousands of items)
 // doesn't send one oversized request.
@@ -246,5 +246,155 @@ export async function upsertEmergencyPurchase(p: EmergencyPurchase): Promise<voi
 
 export async function deleteEmergencyPurchaseRow(id: string): Promise<void> {
   const { error } = await supabase.from('emergency_purchases').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+// ---------- daily records ----------
+
+interface DailyRecordRow {
+  id: string
+  date: string
+  invoice_count: number | null
+  delivery_count: number | null
+  cash_count: number | null
+  cash_pay_count: number | null
+  cash_value: number | null
+  non_cash_count: number | null
+  non_cash_value: number | null
+  credit_count: number | null
+  credit_value: number | null
+  pending_count: number | null
+  pending_value: number | null
+  total_sales: number | null
+  avg_invoice: number | null
+  invoices_with_code: number | null
+  invoices_without_code: number | null
+  new_codes: number | null
+  invoices_over_1000: number | null
+  invoices_500_to_1000: number | null
+  invoices_300_to_500: number | null
+  invoices_200_to_300: number | null
+  invoices_100_to_200: number | null
+  invoices_under_100: number | null
+  net_profit: number | null
+  peak_hour: string | null
+  unique_customers: number | null
+  pharmacy_purchase_invoices: number | null
+  weak_discount_items: number | null
+  pharmacy_purchase_public_price: number | null
+  profit_percent: number | null
+  delivery_ratio: number | null
+  purchase_to_sale_ratio: number | null
+  avg_profit_per_invoice: number | null
+  slimming_injections: number | null
+  inbody_sessions: number | null
+  returns_count: number | null
+  returns_value: number | null
+}
+
+function dailyRecordToRow(r: DailyRecord): DailyRecordRow {
+  return {
+    id: r.id,
+    date: r.date,
+    invoice_count: r.invoiceCount ?? null,
+    delivery_count: r.deliveryCount ?? null,
+    cash_count: r.cashCount ?? null,
+    cash_pay_count: r.cashPayCount ?? null,
+    cash_value: r.cashValue ?? null,
+    non_cash_count: r.nonCashCount ?? null,
+    non_cash_value: r.nonCashValue ?? null,
+    credit_count: r.creditCount ?? null,
+    credit_value: r.creditValue ?? null,
+    pending_count: r.pendingCount ?? null,
+    pending_value: r.pendingValue ?? null,
+    total_sales: r.totalSales ?? null,
+    avg_invoice: r.avgInvoice ?? null,
+    invoices_with_code: r.invoicesWithCode ?? null,
+    invoices_without_code: r.invoicesWithoutCode ?? null,
+    new_codes: r.newCodes ?? null,
+    invoices_over_1000: r.invoicesOver1000 ?? null,
+    invoices_500_to_1000: r.invoices500to1000 ?? null,
+    invoices_300_to_500: r.invoices300to500 ?? null,
+    invoices_200_to_300: r.invoices200to300 ?? null,
+    invoices_100_to_200: r.invoices100to200 ?? null,
+    invoices_under_100: r.invoicesUnder100 ?? null,
+    net_profit: r.netProfit ?? null,
+    peak_hour: r.peakHour ?? null,
+    unique_customers: r.uniqueCustomers ?? null,
+    pharmacy_purchase_invoices: r.pharmacyPurchaseInvoices ?? null,
+    weak_discount_items: r.weakDiscountItems ?? null,
+    pharmacy_purchase_public_price: r.pharmacyPurchasePublicPrice ?? null,
+    profit_percent: r.profitPercent ?? null,
+    delivery_ratio: r.deliveryRatio ?? null,
+    purchase_to_sale_ratio: r.purchaseToSaleRatio ?? null,
+    avg_profit_per_invoice: r.avgProfitPerInvoice ?? null,
+    slimming_injections: r.slimmingInjections ?? null,
+    inbody_sessions: r.inbodySessions ?? null,
+    returns_count: r.returnsCount ?? null,
+    returns_value: r.returnsValue ?? null,
+  }
+}
+
+function rowToDailyRecord(row: DailyRecordRow): DailyRecord {
+  return {
+    id: row.id,
+    date: row.date,
+    invoiceCount: row.invoice_count ?? undefined,
+    deliveryCount: row.delivery_count ?? undefined,
+    cashCount: row.cash_count ?? undefined,
+    cashPayCount: row.cash_pay_count ?? undefined,
+    cashValue: row.cash_value ?? undefined,
+    nonCashCount: row.non_cash_count ?? undefined,
+    nonCashValue: row.non_cash_value ?? undefined,
+    creditCount: row.credit_count ?? undefined,
+    creditValue: row.credit_value ?? undefined,
+    pendingCount: row.pending_count ?? undefined,
+    pendingValue: row.pending_value ?? undefined,
+    totalSales: row.total_sales ?? undefined,
+    avgInvoice: row.avg_invoice ?? undefined,
+    invoicesWithCode: row.invoices_with_code ?? undefined,
+    invoicesWithoutCode: row.invoices_without_code ?? undefined,
+    newCodes: row.new_codes ?? undefined,
+    invoicesOver1000: row.invoices_over_1000 ?? undefined,
+    invoices500to1000: row.invoices_500_to_1000 ?? undefined,
+    invoices300to500: row.invoices_300_to_500 ?? undefined,
+    invoices200to300: row.invoices_200_to_300 ?? undefined,
+    invoices100to200: row.invoices_100_to_200 ?? undefined,
+    invoicesUnder100: row.invoices_under_100 ?? undefined,
+    netProfit: row.net_profit ?? undefined,
+    peakHour: row.peak_hour ?? undefined,
+    uniqueCustomers: row.unique_customers ?? undefined,
+    pharmacyPurchaseInvoices: row.pharmacy_purchase_invoices ?? undefined,
+    weakDiscountItems: row.weak_discount_items ?? undefined,
+    pharmacyPurchasePublicPrice: row.pharmacy_purchase_public_price ?? undefined,
+    profitPercent: row.profit_percent ?? undefined,
+    deliveryRatio: row.delivery_ratio ?? undefined,
+    purchaseToSaleRatio: row.purchase_to_sale_ratio ?? undefined,
+    avgProfitPerInvoice: row.avg_profit_per_invoice ?? undefined,
+    slimmingInjections: row.slimming_injections ?? undefined,
+    inbodySessions: row.inbody_sessions ?? undefined,
+    returnsCount: row.returns_count ?? undefined,
+    returnsValue: row.returns_value ?? undefined,
+  }
+}
+
+export async function fetchDailyRecords(): Promise<DailyRecord[]> {
+  const rows = await fetchAll<DailyRecordRow>('daily_records')
+  return rows.map(rowToDailyRecord)
+}
+
+export async function upsertDailyRecords(records: DailyRecord[]): Promise<void> {
+  if (records.length === 0) return
+  const rows = records.map(dailyRecordToRow)
+  await chunked(rows, (chunk) => supabase.from('daily_records').upsert(chunk))
+}
+
+export async function deleteDailyRecordRow(id: string): Promise<void> {
+  const { error } = await supabase.from('daily_records').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteAllDailyRecords(): Promise<void> {
+  const { error } = await supabase.from('daily_records').delete().not('id', 'is', null)
   if (error) throw new Error(error.message)
 }
