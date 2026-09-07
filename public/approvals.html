@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F6F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12181B" media="(prefers-color-scheme: dark)">
+<meta name="description" content="سجل القرارات الصعبة في الموافقات التأمينية وأرشيف نوتات الشركة.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="دفتر الموافقات">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  html{color-scheme:light dark}
+  body{margin:0; font-size:14px}
+  img{max-width:100%}
+  [hidden]{display:none !important}
+  .wrap{padding-bottom:max(72px, env(safe-area-inset-bottom))}
+</style>
+<title>دفتر الموافقات</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    direction: rtl;
+    --bg:#F4F6F7; --surface:#FFFFFF; --surface-2:#EAEFF2; --border:#D5DDE2;
+    --text:#16212A; --text-2:#53656F; --text-3:#7C8B94;
+    --accent:#1F5F8B; --accent-soft:#E3EEF5; --accent-line:#B9D3E4;
+    --ok:#17703F; --ok-soft:#E2F2E9; --ok-line:#A9D8BE;
+    --no:#A82820; --no-soft:#FAE6E4; --no-line:#EDBAB4;
+    --cond:#8A5A00; --cond-soft:#F8EEDA; --cond-line:#E3C68A;
+    --shadow:0 1px 2px rgba(22,33,42,.06), 0 6px 18px -12px rgba(22,33,42,.28);
+    --r:10px;
+    --sans:"IBM Plex Sans Arabic", "Segoe UI", system-ui, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, "Courier New", monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12181B; --surface:#1A2227; --surface-2:#222C32; --border:#2F3A41;
+      --text:#E7EDF0; --text-2:#9EAFB8; --text-3:#71838C;
+      --accent:#63A9D2; --accent-soft:#17303E; --accent-line:#2A4C60;
+      --ok:#5CC98D; --ok-soft:#14301F; --ok-line:#255F3D;
+      --no:#F0897E; --no-soft:#3A1C18; --no-line:#6B302A;
+      --cond:#E2B563; --cond-soft:#33260F; --cond-line:#5E4919;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -14px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12181B; --surface:#1A2227; --surface-2:#222C32; --border:#2F3A41;
+    --text:#E7EDF0; --text-2:#9EAFB8; --text-3:#71838C;
+    --accent:#63A9D2; --accent-soft:#17303E; --accent-line:#2A4C60;
+    --ok:#5CC98D; --ok-soft:#14301F; --ok-line:#255F3D;
+    --no:#F0897E; --no-soft:#3A1C18; --no-line:#6B302A;
+    --cond:#E2B563; --cond-soft:#33260F; --cond-line:#5E4919;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -14px rgba(0,0,0,.8);
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--bg); color:var(--text); font-family:var(--sans); font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px; margin:0 auto; padding:0 20px 72px}
+
+  /* ---------- header ---------- */
+  header.top{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 14px; padding:26px 0 18px}
+  .mark{font-size:21px; font-weight:700; letter-spacing:-.2px}
+  .sub{color:var(--text-2); font-size:13.5px; max-width:56ch; flex-basis:100%; margin:0}
+  .count{font-family:var(--mono); font-size:12.5px; color:var(--text-3); font-variant-numeric:tabular-nums}
+
+  .status{display:flex; align-items:center; flex-wrap:wrap; gap:5px 10px; padding:11px 15px;
+          border:1px solid var(--border); border-radius:var(--r); background:var(--surface-2)}
+  .status .dot{width:10px; height:10px; border-radius:50%; background:var(--text-3); flex:none}
+  .s-label{font-size:14px; font-weight:600; color:var(--text-2)}
+  .s-note{font-size:12.5px; color:var(--text-2); flex:1; min-width:200px}
+  .s-diag{font-family:var(--mono); font-size:11px; direction:ltr; color:var(--text-3);
+          background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:1px 7px}
+  .s-diag:empty{display:none}
+  .bk{flex-basis:100%; font-size:12.5px; font-weight:600; color:var(--text-2)}
+  .bk:empty{display:none}
+  .bk[data-due="yes"]{color:var(--no)}
+  .status[data-state="ok"]{background:var(--ok-soft); border-color:var(--ok-line)}
+  .status[data-state="ok"] .dot{background:var(--ok)}
+  .status[data-state="ok"] .s-label{color:var(--ok)}
+  .status[data-state="warn"]{background:var(--cond-soft); border-color:var(--cond-line)}
+  .status[data-state="warn"] .dot{background:var(--cond)}
+  .status[data-state="warn"] .s-label{color:var(--cond)}
+  .status[data-state="err"]{background:var(--no-soft); border-color:var(--no-line)}
+  .status[data-state="err"] .dot{background:var(--no)}
+  .status[data-state="err"] .s-label{color:var(--no)}
+  #restorebox{min-height:96px; font-family:var(--mono); font-size:12px; direction:ltr; text-align:left; margin-bottom:10px}
+  .drop{display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px 14px; text-align:center;
+        border:2px dashed var(--border); border-radius:var(--r); background:var(--bg); padding:22px 16px}
+  .drop.over{border-color:var(--accent); background:var(--accent-soft)}
+  .drop-or{font-size:13px; color:var(--text-2)}
+  .drop-or code{font-family:var(--mono); font-size:12px; color:var(--text-3)}
+  .fallback{margin-top:12px}
+  .fallback summary{font-size:12.5px; color:var(--text-3); cursor:pointer; padding:4px 0}
+  .fallback summary:hover{color:var(--text-2)}
+  .restore{margin-top:12px}
+  .restore[hidden]{display:none}
+
+  /* ---------- search ---------- */
+  .searchbar{position:sticky; top:0; z-index:20; background:var(--bg); padding:10px 0 14px; margin-bottom:4px; border-bottom:1px solid transparent}
+  .searchbar.stuck{border-bottom-color:var(--border)}
+  .field{position:relative; display:flex; align-items:center}
+  .field svg{position:absolute; inset-inline-start:16px; width:19px; height:19px; color:var(--text-3); pointer-events:none}
+  #q{width:100%; padding:15px 48px 15px 44px; font-family:var(--sans); font-size:17px; font-weight:500; color:var(--text);
+     background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); outline:none}
+  #q::placeholder{color:var(--text-3); font-weight:400}
+  #q:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  .clear{position:absolute; inset-inline-end:10px; border:0; background:transparent; color:var(--text-3); font-size:20px;
+         cursor:pointer; padding:4px 8px; border-radius:6px; line-height:1}
+  .clear:hover{color:var(--text); background:var(--surface-2)}
+  .hint{margin-top:7px; font-size:12px; color:var(--text-3); display:flex; gap:14px; flex-wrap:wrap}
+  kbd{font-family:var(--mono); font-size:11px; background:var(--surface-2); border:1px solid var(--border); border-bottom-width:2px;
+      border-radius:4px; padding:1px 5px; color:var(--text-2)}
+
+  /* ---------- section labels ---------- */
+  .lbl{font-size:11.5px; font-weight:600; letter-spacing:.09em; color:var(--text-3); text-transform:uppercase;
+       margin:26px 0 10px; display:flex; align-items:center; gap:10px}
+  .lbl::after{content:""; flex:1; height:1px; background:var(--border)}
+
+  /* ---------- entries ---------- */
+  .list{display:flex; flex-direction:column; gap:10px}
+  .entry{background:var(--surface); border:1px solid var(--border); border-inline-start:4px solid var(--st-line);
+         border-radius:var(--r); padding:14px 16px; display:flex; flex-direction:column; gap:8px}
+  .entry.top-hit{box-shadow:var(--shadow); border-color:var(--st-line)}
+  .entry[data-st="ok"]{--st:var(--ok); --st-soft:var(--ok-soft); --st-line:var(--ok-line)}
+  .entry[data-st="no"]{--st:var(--no); --st-soft:var(--no-soft); --st-line:var(--no-line)}
+  .entry[data-st="cond"]{--st:var(--cond); --st-soft:var(--cond-soft); --st-line:var(--cond-line)}
+  .e-head{display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap}
+  .e-name{font-size:16.5px; font-weight:600; line-height:1.4; flex:1; min-width:200px; overflow-wrap:anywhere}
+  .pill{font-family:var(--mono); font-size:12.5px; font-weight:500; letter-spacing:.01em; direction:ltr;
+        padding:3px 11px; border-radius:999px; white-space:nowrap;
+        background:var(--st-soft); color:var(--st); border:1px solid var(--st-line)}
+  .e-meta{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; font-size:12.5px; color:var(--text-2)}
+  .chip{background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:1px 8px; white-space:nowrap}
+  .chip.mono{font-family:var(--mono); font-size:11.5px; font-variant-numeric:tabular-nums; color:var(--text-3)}
+  .chip.rep{background:var(--accent-soft); border-color:var(--accent-line); color:var(--accent); font-weight:600}
+  .chip.demo{background:transparent; border-style:dashed; color:var(--text-3)}
+  .e-reason{font-size:14.5px; color:var(--text); overflow-wrap:anywhere}
+  .e-reason b{font-weight:600}
+  .e-note{font-size:13.5px; color:var(--text-2); overflow-wrap:anywhere}
+  .e-acts{display:flex; gap:6px; flex-wrap:wrap; padding-top:2px}
+
+  /* ---------- company notes ---------- */
+  .note{background:var(--surface); border:1px solid var(--border); border-inline-start:4px solid var(--accent-line);
+        border-radius:var(--r); padding:14px 16px; display:flex; flex-direction:column; gap:8px}
+  .n-head{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center}
+  .n-tag{font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.06em; direction:ltr;
+         background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line);
+         border-radius:5px; padding:1px 7px}
+  .n-text{font-size:14.5px; color:var(--text); white-space:pre-wrap; overflow-wrap:anywhere; margin:0}
+  #paste{min-height:110px}
+
+  /* ---------- buttons ---------- */
+  button{font-family:var(--sans)}
+  .btn{border:1px solid var(--border); background:var(--surface); color:var(--text-2); font-size:12.5px; font-weight:500;
+       padding:5px 11px; border-radius:7px; cursor:pointer}
+  .btn:hover{color:var(--text); border-color:var(--text-3)}
+  .btn.rep{color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft)}
+  .btn.danger:hover{color:var(--no); border-color:var(--no-line); background:var(--no-soft)}
+  .btn-primary{border:1px solid var(--accent); background:var(--accent); color:#fff; font-size:14px; font-weight:600;
+       padding:10px 20px; border-radius:8px; cursor:pointer}
+  :root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary{color:#0F1417}
+  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .btn-primary{color:#fff}}
+  .btn-primary:hover{filter:brightness(1.08)}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* ---------- empty state ---------- */
+  .empty{background:var(--surface); border:1px dashed var(--border); border-radius:var(--r); padding:22px 18px; text-align:center}
+  .empty p{margin:0 0 14px; color:var(--text-2); font-size:14.5px}
+  .empty .qtxt{color:var(--text); font-weight:600}
+
+  /* ---------- form ---------- */
+  .formwrap{background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px; box-shadow:var(--shadow)}
+  .formwrap[hidden]{display:none}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media (max-width:620px){.grid{grid-template-columns:1fr}}
+  .fl{display:flex; flex-direction:column; gap:5px}
+  .fl.wide{grid-column:1/-1}
+  .fl label{font-size:12.5px; font-weight:600; color:var(--text-2)}
+  .fl label span{font-weight:400; color:var(--text-3)}
+  .fl input, .fl textarea{font-family:var(--sans); font-size:14.5px; color:var(--text); background:var(--bg);
+    border:1px solid var(--border); border-radius:8px; padding:9px 11px; outline:none; width:100%}
+  .fl input.mono{font-family:var(--mono); font-size:13px}
+  .fl textarea{resize:vertical; min-height:62px; line-height:1.6}
+  .fl input:focus, .fl textarea:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  .states{display:flex; gap:8px; flex-wrap:wrap}
+  .st-btn{flex:1; min-width:130px; text-align:center; border:1.5px solid var(--border); background:var(--bg); color:var(--text-2);
+    font-size:14px; font-weight:600; padding:11px 8px; border-radius:8px; cursor:pointer}
+  .st-btn .en{font-family:var(--mono); font-size:15px; font-weight:500; direction:ltr; display:block}
+  .st-btn small{display:block; font-weight:400; font-size:11.5px; color:var(--text-3); margin-top:3px}
+  .st-btn[aria-pressed="true"][data-st="ok"]{background:var(--ok-soft); border-color:var(--ok); color:var(--ok)}
+  .st-btn[aria-pressed="true"][data-st="no"]{background:var(--no-soft); border-color:var(--no); color:var(--no)}
+  .st-btn[aria-pressed="true"][data-st="cond"]{background:var(--cond-soft); border-color:var(--cond); color:var(--cond)}
+  .st-btn[aria-pressed="true"] small{color:inherit; opacity:.8}
+  .form-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px}
+  .err{color:var(--no); font-size:13px; font-weight:500}
+
+  /* ---------- footer ---------- */
+  footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:12px}
+  .tools{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .fine{font-size:12.5px; color:var(--text-3); line-height:1.75; max-width:70ch}
+  .fine strong{color:var(--text-2); font-weight:600}
+  .banner{display:flex; gap:12px; align-items:center; flex-wrap:wrap; background:var(--accent-soft); border:1px solid var(--accent-line);
+    color:var(--text); border-radius:var(--r); padding:11px 14px; font-size:13.5px; margin-top:14px}
+  .banner[hidden]{display:none}
+  .banner p{margin:0; flex:1; min-width:220px}
+
+  .toast{position:fixed; inset-block-end:22px; inset-inline-start:50%; transform:translateX(50%) translateY(12px);
+    background:var(--text); color:var(--bg); font-size:13.5px; font-weight:500; padding:9px 18px; border-radius:999px;
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; z-index:60}
+  .toast.show{opacity:1; transform:translateX(50%) translateY(0)}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="mark">دفتر الموافقات</div>
+    <div class="count" id="count"></div>
+    <p class="sub">القرار الصعب اللي وقفتِ فيه مرة، متقفيش فيه تاني. اكتبي الصنف تلاقي قرارك القديم وسببه — ونوتات الشركة اللي ليها علاقة بيه.</p>
+  </header>
+
+  <div class="status" id="sync" data-state="loading">
+    <span class="dot"></span>
+    <span class="s-label" id="synclabel">بيتأكد من الحفظ…</span>
+    <span class="s-note" id="syncnote"></span>
+    <code class="s-diag" id="syncdiag"></code>
+    <button class="btn" id="sbackup" hidden>نزّلي نسخة احتياطية دلوقتي</button>
+    <button class="btn" id="sretry" hidden>جرّبي تاني</button>
+    <span class="bk" id="bkstate" data-due="no"></span>
+  </div>
+
+  <div class="searchbar" id="searchbar">
+    <div class="field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="اكتبي اسم الصنف أو الخدمة…" aria-label="ابحثي في دفتر الموافقات">
+      <button class="clear" id="clearq" hidden aria-label="مسح البحث">&times;</button>
+    </div>
+    <div class="hint">
+      <span><kbd>Esc</kbd> يمسح البحث</span>
+      <span><kbd>Enter</kbd> يسجّل قرار جديد لو مفيش نتيجة</span>
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+  <div class="lbl" id="formlbl">تسجيل قرار</div>
+  <button class="btn-primary" id="openform">+ سجّلي قرار جديد</button>
+
+  <form class="formwrap" id="form" hidden>
+    <div class="grid">
+      <div class="fl wide">
+        <label for="f-item">الصنف أو الخدمة</label>
+        <input id="f-item" required placeholder="مثال: Ozempic 1mg — أو: جلسة علاج طبيعي">
+      </div>
+      <div class="fl">
+        <label for="f-payer">شركة التأمين / الفئة <span>(اختياري)</span></label>
+        <input id="f-payer" placeholder="مثال: NextCare — فئة A">
+      </div>
+      <div class="fl">
+        <label for="f-clause">البند في العقد <span>(اختياري)</span></label>
+        <input id="f-clause" class="mono" placeholder="مثال: Exclusions 4.2" dir="ltr">
+      </div>
+      <div class="fl wide">
+        <label>القرار</label>
+        <div class="states" role="group" aria-label="القرار">
+          <button type="button" class="st-btn" data-st="ok" aria-pressed="false"><span class="en">Approved</span><small>مغطّى — تطلع الموافقة</small></button>
+          <button type="button" class="st-btn" data-st="cond" aria-pressed="false"><span class="en">Pending</span><small>بشروط — ناقصها حاجة الأول</small></button>
+          <button type="button" class="st-btn" data-st="no" aria-pressed="false"><span class="en">Rejected</span><small>مستثنى — ما تطلعش</small></button>
+        </div>
+      </div>
+      <div class="fl wide">
+        <label for="f-reason">السبب — ليه القرار ده؟</label>
+        <textarea id="f-reason" required placeholder="الجملة دي هي كل قيمة الدفتر. اكتبيها زي ما هتشرحيها لزميلة بعد شهرين."></textarea>
+      </div>
+      <div class="fl wide">
+        <label for="f-note">ملاحظة <span>(اختياري)</span></label>
+        <input id="f-note" placeholder="مثال: لو التشخيص سكري بيتغطى — راجعي الروشتة">
+      </div>
+    </div>
+    <div class="form-foot">
+      <button class="btn-primary" type="submit" id="save">احفظي القرار</button>
+      <button class="btn" type="button" id="cancel">إلغاء</button>
+      <span class="err" id="err"></span>
+    </div>
+  </form>
+
+  <div class="lbl">نوتات الشركة</div>
+  <button class="btn-primary" id="opennote">+ الصقي نوتة من الجروب</button>
+
+  <form class="formwrap" id="noteform" hidden>
+    <div class="grid">
+      <div class="fl wide">
+        <label for="paste">انسخي رسالة الواتساب والصقيها هنا زي ما هي</label>
+        <textarea id="paste" placeholder="مثال:&#10;[01/09/2026, 11:20 AM] Dr. Ahmed: تنويه — ابتداءً من النهاردة أدوية إنقاص الوزن مستثناة لكل الفئات حتى لو بتشخيص سكري."></textarea>
+      </div>
+    </div>
+    <div class="form-foot">
+      <button class="btn-primary" type="submit">احفظي النوتة</button>
+      <button class="btn" type="button" id="notecancel">إلغاء</button>
+      <span class="err" id="noteerr"></span>
+    </div>
+  </form>
+
+  <div class="banner" id="demoban" hidden>
+    <p>الحالات اللي تحت دي <strong>أمثلة توضيحية</strong> عشان تشوفي الشكل — مش قواعد تغطية معتمدة.</p>
+    <button class="btn" id="wipedemo">امسحي الأمثلة وابدئي سجلك</button>
+  </div>
+
+  <footer>
+    <div class="tools">
+      <button class="btn" id="backup" hidden>نزّلي نسخة احتياطية</button>
+      <button class="btn" id="copyjson">نسخ السجل (JSON)</button>
+      <button class="btn" id="copycsv">نسخ القرارات (CSV)</button>
+      <button class="btn" id="openrestore">رجّعي نسخة محفوظة</button>
+    </div>
+    <div class="restore formwrap" id="restore" hidden>
+      <div class="fl">
+        <label>رجّعي الدفتر من ملف النسخة الاحتياطية</label>
+        <div class="drop" id="drop">
+          <button class="btn-primary" type="button" id="pickfile">اختاري الملف من الجهاز</button>
+          <span class="drop-or">أو اسحبي ملف <code dir="ltr">.json</code> وارميه هنا</span>
+        </div>
+        <input type="file" id="fileinput" accept="application/json,.json,text/plain" hidden>
+      </div>
+      <details class="fallback">
+        <summary>الملف مش راضي يتفتح؟ افتحيه والصقي اللي جواه</summary>
+        <textarea id="restorebox" placeholder='[{"id":"e1756…","item":"…"}]'></textarea>
+        <button class="btn" type="button" id="dorestore">رجّعي من النص المُلصَق</button>
+      </details>
+      <div class="form-foot">
+        <button class="btn" type="button" id="cancelrestore">إلغاء</button>
+        <span class="err" id="restoreerr"></span>
+      </div>
+    </div>
+    <p class="fine">
+      <strong>الدفتر ده سجل قراراتك انتي، مش مصدر تغطية.</strong> العقد هو المرجع دايمًا، والقرار النهائي قرارك.<br>
+      <strong>متكتبيش هنا أسماء مرضى ولا أرقام بوالص</strong> — الصنف والقاعدة والسبب بس.<br>
+      نوتات الشركة بتتحفظ هنا عشان تدوّري فيها بعد شهر، مش تدوّري في الجروب.<br>
+      <strong>السجل متخزن في المتصفح ده.</strong> النسخة الاحتياطية هي اللي بتأمّنه: دوسي "نزّلي نسخة احتياطية" آخر كل شيفت،
+      واحتفظي بالملف. لو الجهاز اتمسح أو اتغيّر، "رجّعي نسخة محفوظة" بترجّع الدفتر كامل.<br>
+      اللينك ده خاص بيكي. لو بعتيه لحد ومديتيه صلاحية تعديل، هيقدر يشوف السجل ويغيّر فيه.
+    </p>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "elhazem-approvals-log-v1";
+  var LABEL = { ok:"Approved", cond:"Pending", no:"Rejected" };
+
+  var DEMO_NOTES = [
+    { text:"تنويه: ابتداءً من أول سبتمبر، أدوية إنقاص الوزن (Saxenda / Ozempic) مستثناة لكل الفئات إلا بتشخيص سكري نوع 2 مكتوب في الروشتة.",
+      from:"Dr. Ahmed", sent:"01/09/2026", at:"2026-09-01" },
+    { text:"فاكرين إن الصرف المزمن لأكتر من شهر لازم Pre-Cert. الباتشات اللي بتتبعت من غيره بترجع كاملة مش السطر بس.",
+      from:"Team Lead", sent:"28/08/2026", at:"2026-08-28" }
+  ];
+
+  var DEMO = [
+    { item:"مكملات غذائية وفيتامينات (Centrum, Omega 3)", payer:"NextCare — فئة B", st:"no",
+      reason:"المكملات الغذائية مستثناة من الوثيقة إلا لو مصروفة كعلاج لنقص مثبت بتحليل مرفق.",
+      clause:"Exclusions 4.2", note:"لو معاها تحليل نقص فيتامين د أو حديد، ارجعي للحالة بشروط.", hits:6 },
+    { item:"Ozempic 1mg", payer:"NextCare — فئة A", st:"cond",
+      reason:"مغطّى لمرضى السكري النوع الثاني بتشخيص مكتوب في الروشتة. مرفوض لو الاستخدام لإنقاص الوزن.",
+      clause:"Pre-Cert — Chronic", note:"لازم تشخيص E11 مكتوب. من غيره بيترفض من المراجعة الطبية.", hits:4 },
+    { item:"سن قلم إنسولين (Pen Needles)", payer:"NextCare — كل الفئات", st:"ok",
+      reason:"مستهلكات السكري مغطّاة بحد شهري. الصرف الشهري عادي من غير موافقة مسبقة.",
+      clause:"Benefits 2.7", note:"لو الكمية أكتر من الحد الشهري، الزيادة بتتحمل على المريض.", hits:3 },
+    { item:"كريمات واقي شمس ومستحضرات تجميل", payer:"كل الشركات", st:"no",
+      reason:"مستحضرات التجميل والعناية بالبشرة مستثناة، حتى لو مكتوبة في روشتة جلدية.",
+      clause:"Exclusions 4.9", note:"الاستثناء الوحيد: بعد جلسات ليزر علاجية بتقرير من الطبيب.", hits:2 },
+    { item:"صرف مزمن لأكتر من شهر (3 شهور مرة واحدة)", payer:"NextCare — فئة A", st:"cond",
+      reason:"الصرف لأكتر من شهر محتاج Pre-Certification وتقرير طبيب معتمد بالمدة.",
+      clause:"Pre-Cert — Refill", note:"من غير التقرير النظام بيرفض الباتش كله مش السطر بس.", hits:5 }
+  ];
+
+  /* ---- storage ---- */
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){ var p = JSON.parse(raw); if(Array.isArray(p)) return p; }
+    }catch(e){}
+    var seed = DEMO.map(function(d,i){
+      return Object.assign({ kind:"decision" }, d, { id:"demo-"+i, demo:true, at:"2026-08-2"+(i+1) });
+    });
+    return seed.concat(DEMO_NOTES.map(function(d,i){
+      return Object.assign({ kind:"note" }, d, { id:"demon-"+i, demo:true });
+    }));
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(entries)); }catch(e){}
+    if(!dbLive){ dirty++; try{ localStorage.setItem(KEY + ":dirty", dirty); }catch(e){} }
+    paintBackupState();
+  }
+  function markBackedUp(){
+    dirty = 0;
+    try{
+      localStorage.setItem(KEY + ":dirty", 0);
+      localStorage.setItem(KEY + ":lastbk", today());
+    }catch(e){}
+    paintBackupState();
+  }
+  function paintBackupState(){
+    var el = $("bkstate");
+    if(!el) return;
+    var last = "";
+    try{ last = localStorage.getItem(KEY + ":lastbk") || ""; }catch(e){}
+    if(dbLive){ el.textContent = ""; el.dataset.due = "no"; return; }
+    var real = entries.filter(function(e){ return !e.demo; }).length;
+    if(dirty > 0){
+      el.dataset.due = "yes";
+      el.textContent = dirty + " تعديل من غير نسخة احتياطية"
+        + (last ? " · آخر نسخة " + last : " · لسه مأخدتيش ولا نسخة");
+    } else if(!last && real > 0){
+      el.dataset.due = "yes";
+      el.textContent = "لسه مأخدتيش ولا نسخة احتياطية للدفتر ده";
+    } else {
+      el.dataset.due = "no";
+      el.textContent = last ? "آخر نسخة احتياطية: " + last : "";
+    }
+  }
+
+  /* ---- arabic-aware search normalisation ---- */
+  function norm(s){
+    return (s == null ? "" : String(s)).toLowerCase()
+      .replace(/[ً-ْٰـ]/g, "")
+      .replace(/[أإآٱ]/g, "ا")
+      .replace(/ى/g, "ي")
+      .replace(/ة/g, "ه")
+      .replace(/ؤ/g, "و")
+      .replace(/ئ/g, "ي")
+      .replace(/\s+/g, " ").trim();
+  }
+  function today(){
+    var d = new Date(), p = function(n){ return String(n).padStart(2,"0"); };
+    return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+  }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  var entries = load();
+  var editingId = null;
+  var picked    = null;
+  var db = null, gotFirst = false, dbLive = false, dirty = 0;
+  try{ dirty = Number(localStorage.getItem('elhazem-approvals-log-v1:dirty')) || 0; }catch(e){}
+
+  var $ = function(id){ return document.getElementById(id); };
+  var q = $("q"), results = $("results"), form = $("form"), openform = $("openform"), formlbl = $("formlbl");
+
+  /* ---- scoring ---- */
+  function score(e, nq){
+    if(!nq) return 0;
+    if(e.kind === "note") return norm(e.text+" "+e.from).indexOf(nq) > -1 ? 2 : 0;
+    var name = norm(e.item);
+    if(name.indexOf(nq) === 0) return 3;
+    if(name.indexOf(nq) > -1) return 2;
+    if(norm(LABEL[e.st]+" "+e.payer+" "+e.reason+" "+e.note+" "+e.clause).indexOf(nq) > -1) return 1;
+    return 0;
+  }
+
+  function entryHTML(e, isTop){
+    var bits = [];
+    if(e.payer) bits.push('<span class="chip">'+esc(e.payer)+'</span>');
+    if(e.clause) bits.push('<span class="chip mono" dir="ltr">'+esc(e.clause)+'</span>');
+    if(e.hits > 1) bits.push('<span class="chip rep">تكررت '+e.hits+' مرات</span>');
+    if(e.at) bits.push('<span class="chip mono" dir="ltr">'+esc(e.at)+'</span>');
+    if(e.demo) bits.push('<span class="chip demo">مثال</span>');
+    return '<article class="entry'+(isTop?" top-hit":"")+'" data-st="'+esc(e.st)+'">'
+      + '<div class="e-head"><h3 class="e-name">'+esc(e.item)+'</h3><span class="pill" dir="ltr">'+LABEL[e.st]+'</span></div>'
+      + (bits.length ? '<div class="e-meta">'+bits.join("")+'</div>' : "")
+      + '<p class="e-reason">'+esc(e.reason)+'</p>'
+      + (e.note ? '<p class="e-note">'+esc(e.note)+'</p>' : "")
+      + '<div class="e-acts">'
+      +   '<button class="btn rep" data-act="hit" data-id="'+esc(e.id)+'">تكررت تاني</button>'
+      +   '<button class="btn" data-act="edit" data-id="'+esc(e.id)+'">تعديل</button>'
+      +   '<button class="btn danger" data-act="del" data-id="'+esc(e.id)+'">حذف</button>'
+      + '</div></article>';
+  }
+
+  function noteHTML(n){
+    var bits = ['<span class="n-tag">NOTE</span>'];
+    if(n.sent)  bits.push('<span class="chip mono" dir="ltr">'+esc(n.sent)+'</span>');
+    if(n.from)  bits.push('<span class="chip">'+esc(n.from)+'</span>');
+    if(n.demo)  bits.push('<span class="chip demo">مثال</span>');
+    return '<article class="note">'
+      + '<div class="n-head">'+bits.join("")+'</div>'
+      + '<p class="n-text">'+esc(n.text)+'</p>'
+      + '<div class="e-acts"><button class="btn danger" data-act="del" data-id="'+esc(n.id)+'">حذف</button></div>'
+      + '</article>';
+  }
+
+  function render(){
+    var nq = norm(q.value);
+    $("clearq").hidden = !q.value;
+    var nd = entries.filter(function(e){ return e.kind !== "note"; }).length;
+    var nn = entries.length - nd;
+    $("count").textContent = [ nd ? nd + " قرار" : "", nn ? nn + " نوتة" : "" ]
+      .filter(Boolean).join(" · ");
+    $("demoban").hidden = !entries.some(function(e){ return e.demo; });
+
+    var pool = entries.slice();
+    if(nq){
+      pool = pool.map(function(e){ return { e:e, s:score(e,nq) }; })
+                 .filter(function(x){ return x.s > 0; })
+                 .sort(function(a,b){ return (b.s - a.s) || ((b.e.hits||0) - (a.e.hits||0)); })
+                 .map(function(x){ return x.e; });
+    } else {
+      pool.sort(function(a,b){ return ((b.hits||0) - (a.hits||0)) || String(b.at||"").localeCompare(String(a.at||"")); });
+    }
+    var list  = pool.filter(function(e){ return e.kind !== "note"; });
+    var notes = pool.filter(function(e){ return e.kind === "note"; });
+    if(!nq) notes.sort(function(a,b){ return String(b.at||"").localeCompare(String(a.at||"")); });
+
+    var notesHTML = notes.length
+      ? '<div class="lbl">' + (nq ? "نوتات ليها علاقة" : "آخر نوتات الشركة") + '</div>'
+        + '<div class="list">' + notes.map(noteHTML).join("") + '</div>'
+      : "";
+
+    if(!list.length){
+      results.innerHTML = '<div class="lbl">النتيجة</div><div class="empty">'
+        + (nq
+            ? '<p>مفيش قرار متسجل لـ <span class="qtxt">&laquo;'+esc(q.value.trim())+'&raquo;</span>. لو قررتي فيها النهاردة، سجّليها دلوقتي — المرة الجاية هتلاقيها في ثانية.</p>'
+                + '<button class="btn-primary" id="addfromq">سجّلي قرار لـ &laquo;'+esc(q.value.trim())+'&raquo;</button>'
+            : '<p>الدفتر فاضي. أول حالة صعبة تقابلك النهاردة، سجّليها هنا.</p>')
+        + '</div>' + notesHTML;
+      var a = $("addfromq");
+      if(a) a.addEventListener("click", function(){ showForm(null, q.value.trim()); });
+      return;
+    }
+
+    results.innerHTML = '<div class="lbl">'
+      + (nq ? list.length + " نتيجة" : "الأكتر تكرارًا")
+      + '</div><div class="list">'
+      + list.map(function(e,i){ return entryHTML(e, !!nq && i === 0); }).join("")
+      + '</div>' + notesHTML;
+  }
+
+  results.addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-act]");
+    if(!b) return;
+    var e = entries.find(function(x){ return x.id === b.dataset.id; });
+    if(!e) return;
+    if(b.dataset.act === "hit"){
+      e.hits = (e.hits || 1) + 1; e.at = today(); save(); pushDoc(e); render();
+      toast("اتسجّلت — دي المرة الـ" + e.hits);
+    } else if(b.dataset.act === "edit"){
+      showForm(e);
+    } else if(b.dataset.act === "del"){
+      if(confirm("تحذفي «" + e.item + "» من الدفتر؟")){
+        entries = entries.filter(function(x){ return x.id !== e.id; });
+        save(); dropDoc(e.id); render(); toast("اتحذف");
+      }
+    }
+  });
+
+  /* ---- form ---- */
+  function setState(st){
+    picked = st;
+    Array.prototype.forEach.call(document.querySelectorAll(".st-btn"), function(b){
+      b.setAttribute("aria-pressed", String(b.dataset.st === st));
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".st-btn"), function(b){
+    b.addEventListener("click", function(){ setState(b.dataset.st); $("err").textContent = ""; });
+  });
+
+  function showForm(e, prefill){
+    editingId = e ? e.id : null;
+    $("f-item").value   = e ? e.item   : (prefill || "");
+    $("f-payer").value  = e ? e.payer  : "";
+    $("f-clause").value = e ? e.clause : "";
+    $("f-reason").value = e ? e.reason : "";
+    $("f-note").value   = e ? e.note   : "";
+    setState(e ? e.st : null);
+    $("err").textContent = "";
+    formlbl.textContent = e ? "تعديل قرار" : "تسجيل قرار";
+    form.hidden = false;
+    openform.hidden = true;
+    ($("f-item").value ? $("f-reason") : $("f-item")).focus();
+    form.scrollIntoView({ behavior:"smooth", block:"center" });
+  }
+  function hideForm(){
+    form.hidden = true; openform.hidden = false; editingId = null; picked = null;
+    formlbl.textContent = "تسجيل قرار";
+  }
+  openform.addEventListener("click", function(){ showForm(null, q.value.trim()); });
+  $("cancel").addEventListener("click", hideForm);
+
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var item = $("f-item").value.trim(), reason = $("f-reason").value.trim();
+    if(!item){ $("err").textContent = "اكتبي اسم الصنف."; $("f-item").focus(); return; }
+    if(!picked){ $("err").textContent = "اختاري القرار."; return; }
+    if(!reason){ $("err").textContent = "السبب هو أهم حاجة في الدفتر — اكتبيه."; $("f-reason").focus(); return; }
+    var data = {
+      item:item, payer:$("f-payer").value.trim(), clause:$("f-clause").value.trim(),
+      st:picked, reason:reason, note:$("f-note").value.trim(), at:today()
+    };
+    var rec;
+    if(editingId){
+      rec = entries.filter(function(x){ return x.id === editingId; })[0];
+      if(rec){ Object.assign(rec, data); delete rec.demo; }
+      else { rec = Object.assign({ id:editingId, kind:"decision", hits:1 }, data); entries.unshift(rec); }
+      toast("اتعدّل");
+    } else {
+      rec = Object.assign({ id:"e" + Date.now(), kind:"decision", hits:1 }, data);
+      entries.unshift(rec);
+      toast("اتسجّل في الدفتر");
+    }
+    save(); pushDoc(rec); hideForm(); q.value = ""; render();
+  });
+
+  /* ---- search wiring ---- */
+  q.addEventListener("input", render);
+  q.addEventListener("keydown", function(ev){
+    if(ev.key === "Escape"){ q.value = ""; render(); }
+    if(ev.key === "Enter"){
+      ev.preventDefault();
+      if(!results.querySelector(".entry") && q.value.trim()) showForm(null, q.value.trim());
+    }
+  });
+  $("clearq").addEventListener("click", function(){ q.value = ""; render(); q.focus(); });
+
+  var sb = $("searchbar");
+  window.addEventListener("scroll", function(){ sb.classList.toggle("stuck", window.scrollY > 8); }, { passive:true });
+
+  $("wipedemo").addEventListener("click", function(){
+    entries.filter(function(e){ return e.demo; }).forEach(function(e){ dropDoc(e.id); });
+    entries = entries.filter(function(e){ return !e.demo; });
+    save(); render(); toast("الأمثلة اتمسحت");
+  });
+
+  /* ---- durable store: keeps the log outside this browser ---- */
+  var L_OK  = "محفوظ على السيرفر",
+      N_OK  = "لو مسحتي الكاش أو فتحتي من جهاز تاني بحسابك، السجل هيفضل موجود.",
+      L_LOC = "محفوظ في المتصفح ده",
+      N_LOC = "خدي نسخة احتياطية آخر كل شيفت — دي اللي بتأمّن الدفتر.",
+      L_ERR = "السيرفر مش راد",
+      N_ERR = "الشغل بيتحفظ في المتصفح لحد ما يرجع. نزّلي نسخة احتياطية.";
+  function setSync(state, label, note, diag){
+    $("sync").dataset.state = state;
+    $("synclabel").textContent = label;
+    $("syncnote").textContent = note || "";
+    $("syncdiag").textContent = diag || "";
+    var broken = (state === "warn" || state === "err");
+    $("sretry").hidden = !broken;
+    $("sbackup").hidden = !(saveFile && state !== "ok");
+    if(!broken) $("syncdiag").textContent = "";
+    paintBackupState();
+  }
+  var saveFile = null;
+  $("sretry").addEventListener("click", function(){ location.reload(); });
+  var storeResolved = false, firstSnap = false;
+  function pushDoc(e){
+    if(!db || !e) return;
+    var body = {}; Object.keys(e).forEach(function(k){ if(k !== "id") body[k] = e[k]; });
+    db.collection("log").doc(e.id).set(body).catch(function(e){
+      setSync("warn", "فيه حاجة متحفظتش على السيرفر", "اعملي refresh. لو فضلت كده، نزّلي نسخة احتياطية.", "write: " + ((e && e.code) || "unknown"));
+    });
+  }
+  function dropDoc(id){
+    if(!db) return;
+    db.collection("log").doc(id).delete().catch(function(e){
+      setSync("warn", "فيه حاجة متحفظتش على السيرفر", "اعملي refresh. لو فضلت كده، نزّلي نسخة احتياطية.", "delete: " + ((e && e.code) || "unknown"));
+    });
+  }
+
+  var t0 = Date.now();
+  function secs(){ return ((Date.now() - t0) / 1000).toFixed(1) + "s"; }
+
+  if(window.claude && window.claude.use){
+    window.claude.use("db").then(function(store){
+      if(!store){
+        setSync("local", L_LOC, N_LOC, "db: null after " + secs());
+        return;
+      }
+      storeResolved = true;
+      db = store;
+      db.collection("log").onSnapshot(function(snap){
+        firstSnap = true;
+        var docs = snap.docs.map(function(d){
+          var o = d.data() || {}; o.id = d.id; return o;
+        });
+        if(!gotFirst){
+          gotFirst = true;
+          // first run on a fresh store: carry this browser's log up
+          if(!docs.length && entries.length){
+            entries.forEach(pushDoc);
+            dbLive = true;
+            setSync("ok", L_OK, N_OK);
+            return;
+          }
+        }
+        entries = docs;
+        dbLive = true;
+        save();
+        setSync("ok", L_OK, N_OK);
+        render();
+      }, function(err){
+        firstSnap = true;
+        setSync("err", L_ERR, N_ERR, "snapshot: " + ((err && err.code) || "unknown"));
+      });
+    }, function(err){
+      setSync("local", L_LOC, N_LOC, "db: rejected after " + secs() + " — " + ((err && err.code) || "unknown"));
+    });
+  } else {
+    setSync("local", L_LOC, N_LOC, "no window.claude (opened outside the viewer)");
+  }
+
+  /* ---- real backup file ---- */
+  function enableSave(fn){
+    saveFile = fn;
+    $("backup").hidden = false;
+    $("backup").addEventListener("click", saveFile);
+    $("sbackup").addEventListener("click", saveFile);
+    if($("sync").dataset.state !== "ok") $("sbackup").hidden = false;
+  }
+  function backupName(){ return "approvals-backup-" + today() + ".json"; }
+  function backupText(){ return JSON.stringify(entries, null, 2); }
+
+  // plain-web fallback, so the page also works hosted anywhere else
+  function blobSave(){
+    try{
+      var blob = new Blob([backupText()], { type:"application/json" });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement("a");
+      a.href = url; a.download = backupName();
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      markBackedUp();
+      toast("النسخة اتنزّلت — الدفتر مأمّن لحد دلوقتي");
+    }catch(e){
+      toast("التنزيل مانفعش — استخدمي «نسخ السجل»");
+    }
+  }
+
+  if(window.claude && window.claude.use){
+    window.claude.use("downloads").then(function(dl){
+      if(!dl){ enableSave(blobSave); return; }
+      enableSave(function(){
+        dl.save({ filename:backupName(), data:backupText() })
+          .then(function(){ markBackedUp(); toast("النسخة اتنزّلت — الدفتر مأمّن لحد دلوقتي"); })
+          .catch(function(err){
+            toast(err && err.code === "declined" ? "اتلغى التنزيل" : "التنزيل مانفعش");
+          });
+      });
+    }, function(){ enableSave(blobSave); });
+  } else {
+    enableSave(blobSave);
+  }
+
+  /* ---- restore from a backup ---- */
+  $("openrestore").addEventListener("click", function(){
+    $("restore").hidden = false; $("pickfile").focus();
+  });
+  $("cancelrestore").addEventListener("click", function(){
+    $("restore").hidden = true; $("restorebox").value = ""; $("restoreerr").textContent = "";
+  });
+  function applyRestore(text){
+    var parsed;
+    try{ parsed = JSON.parse(text); }
+    catch(err){ $("restoreerr").textContent = "الملف ده مش ملف نسخة احتياطية سليم."; return; }
+    if(!Array.isArray(parsed) || !parsed.length){
+      $("restoreerr").textContent = "الملف فاضي أو مش من الدفتر ده."; return;
+    }
+    var byId = {}, added = 0;
+    entries.forEach(function(e){ byId[e.id] = e; });
+    parsed.forEach(function(r){
+      if(!r || typeof r !== "object" || !r.id) return;
+      if(!byId[r.id]){ entries.push(r); added++; }
+      else { Object.assign(byId[r.id], r); }
+      pushDoc(byId[r.id] || r);
+    });
+    save(); $("restore").hidden = true; $("restorebox").value = ""; $("restoreerr").textContent = "";
+    render(); toast("الدفتر رجع — " + added + " سطر جديد اتضاف");
+  }
+
+  function readFile(file){
+    if(!file){ return; }
+    $("restoreerr").textContent = "";
+    var r = new FileReader();
+    r.onload  = function(){ applyRestore(String(r.result)); };
+    r.onerror = function(){ $("restoreerr").textContent = "مقدرتش أقرا الملف. جرّبي الطريقة التانية تحت."; };
+    r.readAsText(file);
+  }
+
+  $("pickfile").addEventListener("click", function(){ $("fileinput").click(); });
+  $("fileinput").addEventListener("change", function(){
+    readFile(this.files && this.files[0]);
+    this.value = "";
+  });
+  $("dorestore").addEventListener("click", function(){ applyRestore($("restorebox").value); });
+
+  var drop = $("drop");
+  ["dragenter","dragover"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); });
+  });
+  drop.addEventListener("drop", function(e){
+    readFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+  });
+
+  /* ---- pasting a WhatsApp note ---- */
+  var noteform = $("noteform"), opennote = $("opennote");
+  opennote.addEventListener("click", function(){
+    noteform.hidden = false; opennote.hidden = true; $("paste").focus();
+  });
+  $("notecancel").addEventListener("click", function(){
+    noteform.hidden = true; opennote.hidden = false; $("paste").value = ""; $("noteerr").textContent = "";
+  });
+  noteform.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var raw = $("paste").value.trim();
+    if(!raw){ $("noteerr").textContent = "الصقي النوتة الأول."; return; }
+    // strip WhatsApp's own prefix: "[01/09/2026, 11:20 AM] Name:" or "01/09/2026, 11:20 - Name:"
+    var m = raw.match(/^\[?\s*(\d{1,4}[\/\-.]\d{1,2}[\/\-.]\d{1,4})[,\s]+\d{1,2}:\d{2}(?::\d{2})?\s*(?:[APap]\.?[Mm]\.?)?\s*\]?\s*[-\u2013]?\s*([^:\n]{1,40}?):\s*/);
+    var note = { id:"n" + Date.now(), kind:"note", text:raw, from:"", sent:"", at:today() };
+    if(m){ note.sent = m[1]; note.from = m[2].trim(); note.text = raw.slice(m[0].length).trim(); }
+    entries.unshift(note); pushDoc(note);
+    save(); $("paste").value = ""; noteform.hidden = true; opennote.hidden = false; render();
+    toast(m ? "النوتة اتحفظت — والتاريخ والمرسل اتقروا من الرسالة" : "النوتة اتحفظت");
+  });
+
+  /* ---- copy out ---- */
+  function copy(text, msg){
+    var done = function(){ toast(msg); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand("copy"); done(); }
+      catch(err){ toast("النسخ مانفعش — حدّدي النص يدويًا"); }
+      document.body.removeChild(ta);
+    }
+  }
+  $("copyjson").addEventListener("click", function(){
+    copy(JSON.stringify(entries, null, 2), "السجل اتنسخ — الصقيه في المحادثة");
+  });
+  $("copycsv").addEventListener("click", function(){
+    var cell = function(v){ return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; };
+    var rows = [["الصنف","الجهة","Status","السبب","البند","ملاحظة","التكرار","آخر تحديث"].map(cell).join(",")];
+    entries.filter(function(e){ return e.kind !== "note"; }).forEach(function(e){
+      rows.push([e.item, e.payer, LABEL[e.st], e.reason, e.clause, e.note, e.hits || 1, e.at].map(cell).join(","));
+    });
+    copy("﻿" + rows.join("\n"), "CSV اتنسخ — الصقيه في إكسل");
+  });
+
+  var tt;
+  function toast(msg){
+    var t = $("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(tt); tt = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+  }
+
+  setTimeout(function(){
+    if($("sync").dataset.state !== "loading") return;
+    if(storeResolved && !firstSnap)
+      setSync("warn", "بيوصل بالسيرفر…", "لسه بيحاول. الشغل محفوظ في المتصفح لحد ما يوصل.", "no first snapshot");
+    else
+      setSync("local", L_LOC, N_LOC, "db: no answer in 11s (still waiting)");
+  }, 11000);
+
+  paintBackupState();
+  render();
+  q.focus();
+})();
+</script>
+
+</html>
