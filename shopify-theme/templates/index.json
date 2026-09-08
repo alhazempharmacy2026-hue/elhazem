@@ -116,18 +116,26 @@
             "title": "واقي الشمس",
             "collection": "sunscreen"
           }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "title": "فيتامينات",
+            "collection": "vitamins"
+          }
         }
       },
       "block_order": [
         "t1",
         "t2",
         "t3",
-        "t4"
+        "t4",
+        "t5"
       ],
       "settings": {
         "heading": "تسوقي حسب القسم",
         "shape": "round",
-        "columns": 4,
+        "columns": 5,
         "soft_bg": false
       }
     },
