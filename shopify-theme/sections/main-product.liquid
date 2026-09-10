@@ -71,6 +71,11 @@
             {%- when 'title' -%}
               <h1 class="product__title" {{ block.shopify_attributes }}>{{ product.title }}</h1>
 
+            {%- when '@app' -%}
+              <div class="product__app-block" {{ block.shopify_attributes }}>
+                {%- content_for 'block', type: '@app', id: block.id -%}
+              </div>
+
             {%- when 'price' -%}
               <div class="product__price" data-price-block {{ block.shopify_attributes }}>
                 {%- render 'price', variant: variant, show_savings: true -%}
@@ -321,6 +326,7 @@
   "blocks": [
     { "type": "vendor", "name": "الماركة", "limit": 1 },
     { "type": "title", "name": "اسم المنتج", "limit": 1 },
+    { "type": "@app", "name": "تطبيق (تقييمات وغيرها)" },
     { "type": "price", "name": "السعر", "limit": 1 },
     { "type": "stock", "name": "حالة التوفر", "limit": 1 },
     { "type": "variant_picker", "name": "اختيار المواصفات", "limit": 1 },
