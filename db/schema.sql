@@ -88,9 +88,33 @@ create table if not exists emergency_purchases (
   note text
 );
 
+create table if not exists mounjaro_customers (
+  id text primary key,
+  name text not null,
+  phone text,
+  start_date date not null,
+  start_weight numeric,
+  target_weight numeric,
+  status text not null default 'active',
+  price_per_dose numeric,
+  notes text,
+  updated_at date not null default current_date
+);
+
+create table if not exists mounjaro_doses (
+  id text primary key,
+  customer_id text not null,
+  date date not null,
+  dose_mg numeric not null,
+  weight numeric,
+  price numeric,
+  note text
+);
+
 create unique index if not exists daily_records_date_idx on daily_records (date);
 create index if not exists items_code_idx on items (code);
 create index if not exists supplier_transactions_supplier_idx on supplier_transactions (supplier_id);
+create index if not exists mounjaro_doses_customer_idx on mounjaro_doses (customer_id);
 
 -- الموقع ثابت (static) ومفيهوش تسجيل دخول، فمفتاح anon هو نفسه اللي بيقرا ويكتب.
 -- الحماية هنا مش بإخفاء المفتاح (بيبقى ظاهر في كود الموقع بطبيعته) لكن بإن الجداول
@@ -100,9 +124,13 @@ alter table items enable row level security;
 alter table suppliers enable row level security;
 alter table supplier_transactions enable row level security;
 alter table emergency_purchases enable row level security;
+alter table mounjaro_customers enable row level security;
+alter table mounjaro_doses enable row level security;
 
 create policy "allow all - daily_records" on daily_records for all using (true) with check (true);
 create policy "allow all - items" on items for all using (true) with check (true);
 create policy "allow all - suppliers" on suppliers for all using (true) with check (true);
 create policy "allow all - supplier_transactions" on supplier_transactions for all using (true) with check (true);
 create policy "allow all - emergency_purchases" on emergency_purchases for all using (true) with check (true);
+create policy "allow all - mounjaro_customers" on mounjaro_customers for all using (true) with check (true);
+create policy "allow all - mounjaro_doses" on mounjaro_doses for all using (true) with check (true);
