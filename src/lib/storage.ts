@@ -67,7 +67,10 @@ export function useAppStore(): AppStore {
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([
+    // كل جدول بيتحمّل بشكل مستقل (allSettled مش all): لو جدول جديد زي جداول المونجارو
+    // لسه متعملش على Supabase، يفضل باقي التطبيق (البيانات اليومية، المخزون، الموردين)
+    // شغال عادي بدل ما يقف كله بسبب جدول واحد ناقص.
+    Promise.allSettled([
       cloud.fetchDailyRecords(),
       cloud.fetchItems(),
       cloud.fetchSuppliers(),
@@ -75,23 +78,27 @@ export function useAppStore(): AppStore {
       cloud.fetchEmergencyPurchases(),
       cloud.fetchMounjaroCustomers(),
       cloud.fetchMounjaroDoses(),
-    ])
-      .then(([cloudRecords, cloudItems, cloudSuppliers, cloudTxns, cloudEmergency, cloudMounjaroCustomers, cloudMounjaroDoses]) => {
-        if (cancelled) return
-        setRecords(cloudRecords)
-        setItems(cloudItems)
-        setSuppliers(cloudSuppliers)
-        setSupplierTransactions(cloudTxns)
-        setEmergencyPurchases(cloudEmergency)
-        setMounjaroCustomers(cloudMounjaroCustomers)
-        setMounjaroDoses(cloudMounjaroDoses)
-        setCloudStatus('ready')
-      })
-      .catch((err: Error) => {
-        if (cancelled) return
-        setCloudSyncError(err.message)
-        setCloudStatus('error')
-      })
+    ]).then((results) => {
+      if (cancelled) return
+      const [recordsRes, itemsRes, suppliersRes, txnsRes, emergencyRes, mounjaroCustomersRes, mounjaroDosesRes] = results
+      if (recordsRes.status === 'fulfilled') setRecords(recordsRes.value)
+      if (itemsRes.status === 'fulfilled') setItems(itemsRes.value)
+      if (suppliersRes.status === 'fulfilled') setSuppliers(suppliersRes.value)
+      if (txnsRes.status === 'fulfilled') setSupplierTransactions(txnsRes.value)
+      if (emergencyRes.status === 'fulfilled') setEmergencyPurchases(emergencyRes.value)
+      if (mounjaroCustomersRes.status === 'fulfilled') setMounjaroCustomers(mounjaroCustomersRes.value)
+      if (mounjaroDosesRes.status === 'fulfilled') setMounjaroDoses(mounjaroDosesRes.value)
+
+      const failed = results.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined
+      if (failed) {
+        setCloudSyncError(failed.reason instanceof Error ? failed.reason.message : String(failed.reason))
+      }
+      // لو كل الجداول الأساسية فشلت (مشكلة اتصال عامة مثلًا)، اعتبر التحميل فشل بالكامل
+      // بدل ما نوريه شاشة فاضية وكأنها بيانات حقيقية.
+      const coreResults = [recordsRes, itemsRes, suppliersRes, txnsRes, emergencyRes]
+      const allCoreFailed = coreResults.every((r) => r.status === 'rejected')
+      setCloudStatus(allCoreFailed ? 'error' : 'ready')
+    })
     return () => {
       cancelled = true
     }

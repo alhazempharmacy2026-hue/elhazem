@@ -1,5 +1,7 @@
 -- صيدلية الحازم — جداول المخزون والمشتريات (Supabase / Postgres)
--- شغّل الملف ده مرة واحدة بس من Supabase Dashboard > SQL Editor > New query > Run
+-- شغّل الملف ده من Supabase Dashboard > SQL Editor > New query > Run.
+-- الملف آمن إنك تعيد تشغيله كامل أكتر من مرة (بعد إضافة جدول جديد مثلًا) من غير ما يدّي أخطاء
+-- على الجداول أو السياسات اللي اتعملت قبل كده.
 
 create table if not exists daily_records (
   id text primary key,
@@ -127,10 +129,18 @@ alter table emergency_purchases enable row level security;
 alter table mounjaro_customers enable row level security;
 alter table mounjaro_doses enable row level security;
 
+-- drop + recreate بدل create policy if not exists (Postgres مش بيدعمها) عشان الملف يفضل قابل لإعادة التشغيل
+drop policy if exists "allow all - daily_records" on daily_records;
 create policy "allow all - daily_records" on daily_records for all using (true) with check (true);
+drop policy if exists "allow all - items" on items;
 create policy "allow all - items" on items for all using (true) with check (true);
+drop policy if exists "allow all - suppliers" on suppliers;
 create policy "allow all - suppliers" on suppliers for all using (true) with check (true);
+drop policy if exists "allow all - supplier_transactions" on supplier_transactions;
 create policy "allow all - supplier_transactions" on supplier_transactions for all using (true) with check (true);
+drop policy if exists "allow all - emergency_purchases" on emergency_purchases;
 create policy "allow all - emergency_purchases" on emergency_purchases for all using (true) with check (true);
+drop policy if exists "allow all - mounjaro_customers" on mounjaro_customers;
 create policy "allow all - mounjaro_customers" on mounjaro_customers for all using (true) with check (true);
+drop policy if exists "allow all - mounjaro_doses" on mounjaro_doses;
 create policy "allow all - mounjaro_doses" on mounjaro_doses for all using (true) with check (true);
