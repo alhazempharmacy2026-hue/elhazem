@@ -5,6 +5,7 @@ import DailyData from './pages/DailyData'
 import Inventory from './pages/Inventory'
 import Suppliers from './pages/Suppliers'
 import EmergencyPurchases from './pages/EmergencyPurchases'
+import MounjaroTracking from './pages/MounjaroTracking'
 import { AppContext, useAppStore } from './lib/storage'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="inventory" element={<Inventory />} />
             <Route path="suppliers" element={<Suppliers />} />
             <Route path="emergency-purchases" element={<EmergencyPurchases />} />
+            <Route path="mounjaro" element={<MounjaroTracking />} />
           </Route>
         </Routes>
       </HashRouter>

@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Table2, RefreshCcw, Package, Handshake, AlertTriangle, CloudOff, X } from 'lucide-react'
+import { LayoutDashboard, Table2, RefreshCcw, Package, Handshake, AlertTriangle, Syringe, CloudOff, X } from 'lucide-react'
 import { useAppData } from '../lib/storage'
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/inventory', label: 'المخزون والأصناف', icon: Package, end: false },
   { to: '/suppliers', label: 'الموردين والديون', icon: Handshake, end: false },
   { to: '/emergency-purchases', label: 'الشراء الاضطراري', icon: AlertTriangle, end: false },
+  { to: '/mounjaro', label: 'متابعة المونجارو', icon: Syringe, end: false },
 ]
 
 function cloudErrorHint(message: string): string {

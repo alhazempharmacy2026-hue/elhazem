@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import type { AppData, DailyRecord, EmergencyPurchase, Item, Supplier, SupplierTransaction } from '../types'
+import type { AppData, DailyRecord, EmergencyPurchase, Item, MounjaroCustomer, MounjaroDose, Supplier, SupplierTransaction } from '../types'
 import { seedDailyRecords } from '../data/seed'
 import type { ParsedItemRow } from './importItems'
 import type { ParsedSalesRow } from './importSales'
@@ -45,6 +45,13 @@ export interface AppStore {
   addEmergencyPurchase: (p: Omit<EmergencyPurchase, 'id'>) => void
   updateEmergencyPurchase: (p: EmergencyPurchase) => void
   deleteEmergencyPurchase: (id: string) => void
+
+  addMounjaroCustomer: (c: Omit<MounjaroCustomer, 'id' | 'updatedAt'>) => void
+  updateMounjaroCustomer: (c: Omit<MounjaroCustomer, 'updatedAt'>) => void
+  deleteMounjaroCustomer: (id: string) => void
+  addMounjaroDose: (d: Omit<MounjaroDose, 'id'>) => void
+  updateMounjaroDose: (d: MounjaroDose) => void
+  deleteMounjaroDose: (id: string) => void
 }
 
 export function useAppStore(): AppStore {
@@ -53,32 +60,45 @@ export function useAppStore(): AppStore {
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [supplierTransactions, setSupplierTransactions] = useState<SupplierTransaction[]>([])
   const [emergencyPurchases, setEmergencyPurchases] = useState<EmergencyPurchase[]>([])
+  const [mounjaroCustomers, setMounjaroCustomers] = useState<MounjaroCustomer[]>([])
+  const [mounjaroDoses, setMounjaroDoses] = useState<MounjaroDose[]>([])
   const [cloudStatus, setCloudStatus] = useState<CloudStatus>('loading')
   const [cloudSyncError, setCloudSyncError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([
+    // كل جدول بيتحمّل بشكل مستقل (allSettled مش all): لو جدول جديد زي جداول المونجارو
+    // لسه متعملش على Supabase، يفضل باقي التطبيق (البيانات اليومية، المخزون، الموردين)
+    // شغال عادي بدل ما يقف كله بسبب جدول واحد ناقص.
+    Promise.allSettled([
       cloud.fetchDailyRecords(),
       cloud.fetchItems(),
       cloud.fetchSuppliers(),
       cloud.fetchSupplierTransactions(),
       cloud.fetchEmergencyPurchases(),
-    ])
-      .then(([cloudRecords, cloudItems, cloudSuppliers, cloudTxns, cloudEmergency]) => {
-        if (cancelled) return
-        setRecords(cloudRecords)
-        setItems(cloudItems)
-        setSuppliers(cloudSuppliers)
-        setSupplierTransactions(cloudTxns)
-        setEmergencyPurchases(cloudEmergency)
-        setCloudStatus('ready')
-      })
-      .catch((err: Error) => {
-        if (cancelled) return
-        setCloudSyncError(err.message)
-        setCloudStatus('error')
-      })
+      cloud.fetchMounjaroCustomers(),
+      cloud.fetchMounjaroDoses(),
+    ]).then((results) => {
+      if (cancelled) return
+      const [recordsRes, itemsRes, suppliersRes, txnsRes, emergencyRes, mounjaroCustomersRes, mounjaroDosesRes] = results
+      if (recordsRes.status === 'fulfilled') setRecords(recordsRes.value)
+      if (itemsRes.status === 'fulfilled') setItems(itemsRes.value)
+      if (suppliersRes.status === 'fulfilled') setSuppliers(suppliersRes.value)
+      if (txnsRes.status === 'fulfilled') setSupplierTransactions(txnsRes.value)
+      if (emergencyRes.status === 'fulfilled') setEmergencyPurchases(emergencyRes.value)
+      if (mounjaroCustomersRes.status === 'fulfilled') setMounjaroCustomers(mounjaroCustomersRes.value)
+      if (mounjaroDosesRes.status === 'fulfilled') setMounjaroDoses(mounjaroDosesRes.value)
+
+      const failed = results.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined
+      if (failed) {
+        setCloudSyncError(failed.reason instanceof Error ? failed.reason.message : String(failed.reason))
+      }
+      // لو كل الجداول الأساسية فشلت (مشكلة اتصال عامة مثلًا)، اعتبر التحميل فشل بالكامل
+      // بدل ما نوريه شاشة فاضية وكأنها بيانات حقيقية.
+      const coreResults = [recordsRes, itemsRes, suppliersRes, txnsRes, emergencyRes]
+      const allCoreFailed = coreResults.every((r) => r.status === 'rejected')
+      setCloudStatus(allCoreFailed ? 'error' : 'ready')
+    })
     return () => {
       cancelled = true
     }
@@ -349,8 +369,42 @@ export function useAppStore(): AppStore {
     cloud.deleteEmergencyPurchaseRow(id).catch(reportSyncError)
   }
 
+  const addMounjaroCustomer = (c: Omit<MounjaroCustomer, 'id' | 'updatedAt'>) => {
+    const newCustomer: MounjaroCustomer = { ...c, id: uid('mjc'), updatedAt: today() }
+    setMounjaroCustomers((prev) => [...prev, newCustomer])
+    cloud.upsertMounjaroCustomers([newCustomer]).catch(reportSyncError)
+  }
+
+  const updateMounjaroCustomer = (c: Omit<MounjaroCustomer, 'updatedAt'>) => {
+    const updated: MounjaroCustomer = { ...c, updatedAt: today() }
+    setMounjaroCustomers((prev) => prev.map((x) => (x.id === c.id ? updated : x)))
+    cloud.upsertMounjaroCustomers([updated]).catch(reportSyncError)
+  }
+
+  const deleteMounjaroCustomer = (id: string) => {
+    setMounjaroCustomers((prev) => prev.filter((x) => x.id !== id))
+    setMounjaroDoses((prev) => prev.filter((x) => x.customerId !== id))
+    Promise.all([cloud.deleteMounjaroDosesForCustomer(id), cloud.deleteMounjaroCustomerRow(id)]).catch(reportSyncError)
+  }
+
+  const addMounjaroDose = (d: Omit<MounjaroDose, 'id'>) => {
+    const newDose: MounjaroDose = { ...d, id: uid('mjd') }
+    setMounjaroDoses((prev) => [...prev, newDose])
+    cloud.upsertMounjaroDoses([newDose]).catch(reportSyncError)
+  }
+
+  const updateMounjaroDose = (d: MounjaroDose) => {
+    setMounjaroDoses((prev) => prev.map((x) => (x.id === d.id ? d : x)))
+    cloud.upsertMounjaroDoses([d]).catch(reportSyncError)
+  }
+
+  const deleteMounjaroDose = (id: string) => {
+    setMounjaroDoses((prev) => prev.filter((x) => x.id !== id))
+    cloud.deleteMounjaroDoseRow(id).catch(reportSyncError)
+  }
+
   return {
-    data: { records, items, suppliers, supplierTransactions, emergencyPurchases },
+    data: { records, items, suppliers, supplierTransactions, emergencyPurchases, mounjaroCustomers, mounjaroDoses },
     cloudStatus,
     cloudSyncError,
     dismissCloudSyncError,
@@ -374,6 +428,12 @@ export function useAppStore(): AppStore {
     addEmergencyPurchase,
     updateEmergencyPurchase,
     deleteEmergencyPurchase,
+    addMounjaroCustomer,
+    updateMounjaroCustomer,
+    deleteMounjaroCustomer,
+    addMounjaroDose,
+    updateMounjaroDose,
+    deleteMounjaroDose,
   }
 }
 

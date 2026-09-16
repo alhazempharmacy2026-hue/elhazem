@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import type { DailyRecord, EmergencyPurchase, Item, Supplier, SupplierTransaction } from '../types'
+import type { DailyRecord, EmergencyPurchase, Item, MounjaroCustomer, MounjaroDose, Supplier, SupplierTransaction } from '../types'
 
 // Bulk writes are chunked so importing a large catalog (thousands of items)
 // doesn't send one oversized request.
@@ -396,5 +396,123 @@ export async function deleteDailyRecordRow(id: string): Promise<void> {
 
 export async function deleteAllDailyRecords(): Promise<void> {
   const { error } = await supabase.from('daily_records').delete().not('id', 'is', null)
+  if (error) throw new Error(error.message)
+}
+
+// ---------- mounjaro customers ----------
+
+interface MounjaroCustomerRow {
+  id: string
+  name: string
+  phone: string | null
+  start_date: string
+  start_weight: number | null
+  target_weight: number | null
+  status: string
+  price_per_dose: number | null
+  notes: string | null
+  updated_at: string
+}
+
+function mounjaroCustomerToRow(c: MounjaroCustomer): MounjaroCustomerRow {
+  return {
+    id: c.id,
+    name: c.name,
+    phone: c.phone ?? null,
+    start_date: c.startDate,
+    start_weight: c.startWeight ?? null,
+    target_weight: c.targetWeight ?? null,
+    status: c.status,
+    price_per_dose: c.pricePerDose ?? null,
+    notes: c.notes ?? null,
+    updated_at: c.updatedAt,
+  }
+}
+
+function rowToMounjaroCustomer(row: MounjaroCustomerRow): MounjaroCustomer {
+  return {
+    id: row.id,
+    name: row.name,
+    phone: row.phone ?? undefined,
+    startDate: row.start_date,
+    startWeight: row.start_weight ?? undefined,
+    targetWeight: row.target_weight ?? undefined,
+    status: row.status as MounjaroCustomer['status'],
+    pricePerDose: row.price_per_dose ?? undefined,
+    notes: row.notes ?? undefined,
+    updatedAt: row.updated_at,
+  }
+}
+
+export async function fetchMounjaroCustomers(): Promise<MounjaroCustomer[]> {
+  const rows = await fetchAll<MounjaroCustomerRow>('mounjaro_customers')
+  return rows.map(rowToMounjaroCustomer)
+}
+
+export async function upsertMounjaroCustomers(customers: MounjaroCustomer[]): Promise<void> {
+  if (customers.length === 0) return
+  const rows = customers.map(mounjaroCustomerToRow)
+  await chunked(rows, (chunk) => supabase.from('mounjaro_customers').upsert(chunk))
+}
+
+export async function deleteMounjaroCustomerRow(id: string): Promise<void> {
+  const { error } = await supabase.from('mounjaro_customers').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+// ---------- mounjaro doses ----------
+
+interface MounjaroDoseRow {
+  id: string
+  customer_id: string
+  date: string
+  dose_mg: number
+  weight: number | null
+  price: number | null
+  note: string | null
+}
+
+function mounjaroDoseToRow(d: MounjaroDose): MounjaroDoseRow {
+  return {
+    id: d.id,
+    customer_id: d.customerId,
+    date: d.date,
+    dose_mg: d.doseMg,
+    weight: d.weight ?? null,
+    price: d.price ?? null,
+    note: d.note ?? null,
+  }
+}
+
+function rowToMounjaroDose(row: MounjaroDoseRow): MounjaroDose {
+  return {
+    id: row.id,
+    customerId: row.customer_id,
+    date: row.date,
+    doseMg: row.dose_mg,
+    weight: row.weight ?? undefined,
+    price: row.price ?? undefined,
+    note: row.note ?? undefined,
+  }
+}
+
+export async function fetchMounjaroDoses(): Promise<MounjaroDose[]> {
+  const rows = await fetchAll<MounjaroDoseRow>('mounjaro_doses')
+  return rows.map(rowToMounjaroDose)
+}
+
+export async function upsertMounjaroDoses(doses: MounjaroDose[]): Promise<void> {
+  if (doses.length === 0) return
+  const rows = doses.map(mounjaroDoseToRow)
+  await chunked(rows, (chunk) => supabase.from('mounjaro_doses').upsert(chunk))
+}
+
+export async function deleteMounjaroDoseRow(id: string): Promise<void> {
+  const { error } = await supabase.from('mounjaro_doses').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteMounjaroDosesForCustomer(customerId: string): Promise<void> {
+  const { error } = await supabase.from('mounjaro_doses').delete().eq('customer_id', customerId)
   if (error) throw new Error(error.message)
 }

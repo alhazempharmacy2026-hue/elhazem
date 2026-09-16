@@ -95,10 +95,35 @@ export interface EmergencyPurchase {
   note?: string
 }
 
+export interface MounjaroCustomer {
+  id: string
+  name: string // اسم العميل
+  phone?: string // رقم الهاتف
+  startDate: string // ISO date - تاريخ بدء البرنامج
+  startWeight?: number // الوزن عند البدء (كجم)
+  targetWeight?: number // الوزن المستهدف (كجم)
+  status: 'active' | 'paused' | 'completed' // نشط / متوقف / انتهى
+  pricePerDose?: number // السعر الافتراضي للجرعة
+  notes?: string
+  updatedAt: string // ISO date
+}
+
+export interface MounjaroDose {
+  id: string
+  customerId: string
+  date: string // ISO date - تاريخ الجرعة
+  doseMg: number // الجرعة بالمليجرام
+  weight?: number // الوزن وقت الجرعة (كجم)
+  price?: number // السعر المدفوع في هذه الجرعة
+  note?: string
+}
+
 export interface AppData {
   records: DailyRecord[]
   items: Item[]
   suppliers: Supplier[]
   supplierTransactions: SupplierTransaction[]
   emergencyPurchases: EmergencyPurchase[]
+  mounjaroCustomers: MounjaroCustomer[]
+  mounjaroDoses: MounjaroDose[]
 }
